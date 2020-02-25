@@ -1,0 +1,19 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-Base",
+  "version": "1.0.0",
+  "description": "This is a BlackBerry Dynamics Base module for React Native that automatically integrates the BlackBerry Dynamics SDK for iOS and Android into a React Native application",
+  "main": "index.js",
+  "scripts": {
+    "install": "node ./scripts/bbd_rn_cli.js",
+    "uninstall": "node ./scripts/bbd_rn_cleanup.js"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "react-native-rename": "2.4.1",
+    "shelljs": "^0.7.0",
+    "fs-extra": "^2.0.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-Async-Storage",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics Async Storage module for React Native that secures AsyncStorage API.",
+  "main": "lib/index.js",
+  "keywords": [
+    "react-native"
+  ],
+  "license": "SEE LICENSE IN LICENSE"
+}

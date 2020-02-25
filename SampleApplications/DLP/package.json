@@ -1,0 +1,24 @@
+{
+  "name": "DLP",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics DLP sample",
+  "dependencies": {
+    "react": "16.8.6",
+    "react-native": "0.60.6",
+    "react-native-elements": "^1.1.0",
+    "react-native-vector-icons": "^6.6.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.0",
+    "@babel/runtime": "^7.5.0",
+    "@react-native-community/eslint-config": "^0.0.3",
+    "babel-jest": "^24.1.0",
+    "jest": "^24.1.0",
+    "metro-react-native-babel-preset": "0.54.1",
+    "react-test-renderer": "16.8.6"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "jest": {
+    "preset": "react-native"
+  }
+}
