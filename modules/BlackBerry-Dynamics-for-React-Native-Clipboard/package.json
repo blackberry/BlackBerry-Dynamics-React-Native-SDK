@@ -1,0 +1,10 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-Clipboard",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics Clipboard module for React Native secures Clipboard API",
+  "main": "index.js",
+  "keywords": [
+    "react-native"
+  ],
+  "license": "SEE LICENSE IN LICENSE"
+}

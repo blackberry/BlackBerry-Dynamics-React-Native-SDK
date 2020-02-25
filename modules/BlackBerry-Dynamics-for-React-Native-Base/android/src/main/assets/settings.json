@@ -1,0 +1,11 @@
+{
+    "GDLibraryMode": "GDEnterprise",
+    "GDApplicationID": "",
+    "GDApplicationVersion": "1.0.0.0",
+    "GDConsoleLogger": [
+        "GDFilterErrors_",
+        "GDFilterWarnings_",
+        "GDFilterInfo_",
+        "GDFilterDetailed_"
+    ]
+}

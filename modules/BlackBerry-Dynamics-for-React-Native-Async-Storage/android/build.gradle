@@ -1,0 +1,41 @@
+/**
+ * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage
+ * from https://github.com/react-native-community/async-storage/
+ */
+
+// AsyncStorage has default size of 6MB.
+// This is a sane limit to protect the user from the app storing too much data in the database.
+// This also protects the database from filling up the disk cache and becoming malformed.
+// If you really need bigger size, please keep in mind the potential consequences.
+long dbSizeInMB = 6L
+
+def newDbSize = rootProject.properties['AsyncStorage_db_size_in_MB']
+
+if( newDbSize != null && newDbSize.isLong()) {
+    dbSizeInMB = newDbSize.toLong()
+}
+
+def useDedicatedExecutor = rootProject.hasProperty('AsyncStorage_dedicatedExecutor')
+        ? rootProject.properties['AsyncStorage_dedicatedExecutor']
+        : false
+
+apply plugin: "com.android.library"
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        buildConfigField "Long", "AsyncStorage_db_size", "${dbSizeInMB}L"
+        buildConfigField("boolean", "AsyncStorage_useDedicatedExecutor", "${useDedicatedExecutor}")
+    }
+}
+
+dependencies {
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
+    implementation "com.facebook.react:react-native:+"
+}

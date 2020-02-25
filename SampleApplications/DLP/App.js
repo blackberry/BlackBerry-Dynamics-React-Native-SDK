@@ -1,0 +1,167 @@
+/**
+ * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+import React, {Component} from 'react';
+import { StyleSheet, View, SafeAreaView, KeyboardAvoidingView, ScrollView } from 'react-native';
+
+import { SearchBar, Input } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
+import TextInput from 'BlackBerry-Dynamics-for-React-Native-TextInput';
+import Text from 'BlackBerry-Dynamics-for-React-Native-Text';
+
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      singleLineInputValue: 'Singleline Editable Input',
+      multiLineInputValue: 'Multiline Editable Input: long long long text, veryyy loooooong text',
+      searchValue: ''
+    };
+  }
+
+  updateSingleLineInput = value => {
+    this.setState({ singleLineInputValue: value });
+  }
+
+  updateSearch = value => {
+    this.setState({ searchValue: value });
+  }
+
+  testMultiEditableInputOnChange = value => {
+    this.setState({ multiLineInputValue: value });
+  }
+
+  render() {
+    const { searchValue } = this.state;
+
+    return (
+      <SafeAreaView style={{flex: 1}}>
+        <KeyboardAvoidingView
+          style={{flex: 1, paddingHorizontal: 8}}
+          behavior='padding'
+          enabled>
+          <ScrollView>
+            <Text style={styles.pageTitle}>DLP</Text>
+
+            <Text style={styles.pageHeader}>Basic React Native components</Text>
+            <Text style={styles.baseText}>
+              Text > (All Text-nested elements are inline) :
+              <Text selectable={true}> | Text > Selectable Text (NOTE: to do it selectable - place {'<Text>'} inside {'<View>'} tag) | </Text>
+              <Text> | Text > Text | </Text>
+            </Text>
+
+            <View>
+              <Text selectable={true}>{'\n'}| View > Text (selectable) |</Text>
+              <Text>| View > Text |</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                height: 70,
+                padding: 20,
+              }}>
+              <View style={{backgroundColor: 'blue', flex: 0.3}} />
+              <View style={{backgroundColor: 'red', flex: 0.5}} />
+              <Text selectable={true}>View: View rectangles and Text element</Text>
+            </View>
+
+            <TextInput
+              style={styles.input}
+              placeholder='Singleline Editable Input'
+              value={this.state.singleLineInputValue}
+              onChangeText={this.updateSingleLineInput}
+            />
+
+            <TextInput
+              style={styles.input}
+              editable={false}
+              placeholder='Singleline Non Editable Input'
+              value='Singleline Non Editable Input'
+            />
+
+            <TextInput
+              style={styles.input}
+              multiline
+              placeholder='Multiline Editable Input'
+              value={this.state.multiLineInputValue}
+              onChangeText={this.testMultiEditableInputOnChange}
+            />
+
+            <TextInput
+              style={styles.input}
+              editable={false}
+              multiline
+              placeholder='Multiline Non Editable Input'
+              value='Multiline Non Editable Input: long long long text, veryyy loooooong text'
+            />
+
+            <Text style={styles.pageHeader}>react-native-elements</Text>
+
+            <SearchBar
+              placeholder="RN-Elements: Search bar"
+              onChangeText={this.updateSearch}
+              value={searchValue}
+            />
+
+            <Input
+              placeholder='RN-Elements: Basic input'
+            />
+
+            <Input
+              placeholder='RN-Elements: Input with icon'
+              leftIcon={{ type: 'font-awesome', name: 'chevron-left' }}
+            />
+
+            <Input
+              placeholder='RN-Elements: Input with custom icon'
+              leftIcon={
+                <Icon
+                  name='user'
+                  size={24}
+                  color='black'
+                />
+              }
+            />
+
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  pageTitle: {
+    paddingTop: 10,
+    paddingBottom: 5,
+    paddingHorizontal: 12,
+    color: '#4486f5',
+    fontSize: 22,
+    fontWeight: 'bold'
+  },
+  pageHeader: {
+    paddingVertical: 7,
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1
+  }
+});

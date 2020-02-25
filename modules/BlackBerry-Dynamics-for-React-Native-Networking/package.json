@@ -1,0 +1,10 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-Networking",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics Networking module for React Native that secures communication over XMLHttpRequest and fetch.",
+  "main": "index.js",
+  "keywords": [
+    "react-native"
+  ],
+  "license": "SEE LICENSE IN LICENSE"
+}
