@@ -66,7 +66,7 @@ db.transaction(tx => {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-SQLite-Storage
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-SQLite-Storage
 
 ###### iOS
     $ cd ios

@@ -75,7 +75,7 @@ export default class App extends Component {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-Text
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Text
 
 ###### iOS
     $ cd ios

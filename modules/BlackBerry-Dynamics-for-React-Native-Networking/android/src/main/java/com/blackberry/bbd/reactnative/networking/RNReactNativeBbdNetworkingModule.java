@@ -53,6 +53,7 @@ import com.good.gd.apache.http.HeaderElement;
 import com.good.gd.apache.http.HttpEntity;
 import com.good.gd.apache.http.HttpResponse;
 import com.good.gd.apache.http.HttpResponseInterceptor;
+import com.good.gd.apache.http.client.CookieStore;
 import com.good.gd.apache.http.client.methods.HttpDelete;
 import com.good.gd.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import com.good.gd.apache.http.client.methods.HttpGet;
@@ -185,6 +186,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   private final GDHttpRequestDelegate gdHttpRequestDelegate = new GDHttpRequestDelegate();
   private final Map<String, HttpUriRequest> requests = new ConcurrentHashMap<String, HttpUriRequest>();
   private final BasicCookieStore cookiestore = new BasicCookieStore();
+  private CookieStore persistentCookieStore = null;
 
   private final @Nullable String mDefaultUserAgent;
   private final List<RequestBodyHandler> mRequestBodyHandlers = new ArrayList<>();
@@ -767,8 +769,13 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
         }
       });
 
-      cookiestore.noCookies(!requestParams.withCredentials);
-      gdHttpClient.setCookieStore(cookiestore);
+      // get built-in persistent CookieStore
+      persistentCookieStore = gdHttpClient.getCookieStore();
+
+      if (!requestParams.withCredentials) {
+        cookiestore.noCookies(true);
+        gdHttpClient.setCookieStore(cookiestore);
+      }
     }
 
     final HttpUriRequest request = buildRequestFromArguments(requestParams);
@@ -829,6 +836,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
             ResponseUtil.onDataReceived(eventEmitter, requestParams.requestId, "");
             ResponseUtil.onRequestSuccess(eventEmitter, requestParams.requestId);
             requests.remove(String.valueOf(requestParams.requestId));
+            return;
           }
         }
 
@@ -1183,6 +1191,9 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   @ReactMethod
   public void clearCookies(com.facebook.react.bridge.Callback callback) { 
     cookiestore.clear();
+    if (persistentCookieStore != null) {
+      persistentCookieStore.clear();
+    }
     if (callback != null) {
       callback.invoke(true);
     }

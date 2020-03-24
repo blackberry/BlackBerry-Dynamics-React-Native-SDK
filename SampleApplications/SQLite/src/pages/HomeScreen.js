@@ -43,7 +43,7 @@ export default class HomeScreen extends Component {
         }
 
         tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20), phone INT(10), address VARCHAR(255))',
+          'CREATE TABLE IF NOT EXISTS Users (id INTEGER PRIMARY KEY AUTOINCREMENT, username VARCHAR(20), phone VARCHAR(10), address VARCHAR(255))',
           []
         );
 

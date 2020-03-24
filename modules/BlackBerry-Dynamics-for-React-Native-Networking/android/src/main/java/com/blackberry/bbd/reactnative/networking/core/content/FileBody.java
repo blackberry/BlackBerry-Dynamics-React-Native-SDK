@@ -68,7 +68,13 @@ public class FileBody extends com.blackberry.bbd.apache.http.entity.mime.content
         InputStream in = null;
 
         try {
-            in = new FileInputStream(getFile());
+            if (getFile() instanceof com.good.gd.file.File) {
+                in = new com.good.gd.file.FileInputStream(getFile());
+            }
+            else {
+                in = new FileInputStream(getFile());
+            }
+
             final byte[] tmp = new byte[4096];
             int l;
 
@@ -89,12 +95,11 @@ public class FileBody extends com.blackberry.bbd.apache.http.entity.mime.content
     }
 
     private int getProgress() {
+        writtenLength = outputStreamProgress.getWrittenLength();
         final long contentLength = getContentLength();
         if (contentLength <= 0) { // Prevent division by zero and negative values
             return 0;
         }
-        writtenLength = outputStreamProgress.getWrittenLength();
-
         return (int) (COMPLETE_PROGRESS * writtenLength / contentLength);
     }
 

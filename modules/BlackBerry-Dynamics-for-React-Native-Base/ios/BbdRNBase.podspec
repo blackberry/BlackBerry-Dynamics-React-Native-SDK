@@ -26,9 +26,10 @@ Pod::Spec.new do |spec|
 		"Nobu Ishikawa" => "nishikawa@blackberry.com"
 	}
 	spec.source        = {
-		:git => "https://github.com/blackberry/BlackBerry-Dynamics-for-ReactNative.git",
+		:git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git",
 		:tag => "#{spec.version}"
 	}
 	spec.source_files  = "BbdRNBase/**/*.{h,m}"
 	spec.platform      = :ios, '9.0'
+	spec.dependency  "React"
 end

@@ -75,12 +75,11 @@ public class ProgressStringEntity extends StringEntity {
     }
 
     private int getProgress() {
+        writtenLength = outputStreamProgress.getWrittenLength();
         final long contentLength = getContentLength();
         if (contentLength <= 0) { // Prevent division by zero and negative values
             return 0;
         }
-        writtenLength = outputStreamProgress.getWrittenLength();
-
         return (int) (COMPLETE_PROGRESS * writtenLength / contentLength);
     }
 }

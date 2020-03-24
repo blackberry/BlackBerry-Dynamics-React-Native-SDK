@@ -39,7 +39,7 @@ set_Text_Into_Clipboard = async () => {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-Clipboard
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Clipboard
 
 ##### iOS
     $ cd ios

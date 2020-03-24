@@ -94,12 +94,11 @@ public class InputStreamBody extends com.blackberry.bbd.apache.http.entity.mime.
     }
 
     private int getProgress() {
+        writtenLength = outputStreamProgress.getWrittenLength();
         final long contentLength = getContentLength();
         if (contentLength <= 0) { // Prevent division by zero and negative values
             return 0;
         }
-        writtenLength = outputStreamProgress.getWrittenLength();
-
         return (int) (COMPLETE_PROGRESS * writtenLength / contentLength);
     }
 

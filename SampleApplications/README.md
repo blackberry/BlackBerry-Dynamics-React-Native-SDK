@@ -13,16 +13,10 @@ Open the sample app directory in Terminal window:
 `$ cd <path>/SampleApplications/<sample_app_name>`
 
 Install dependencies:
-`$ npm i`
+`$ yarn`
 
 Generate ios and android directories:
-`$ react-native upgrade --legacy true`
-
-#### How to re-use samples code?
-> NOTE: neither `$ react-native eject` nor `$ react-native upgrade --legacy true` is supported by React Native 0.61.x
-There is no any command defined in 0.61 React Native CLI to generate ios and android folders for existing application.
-
-In order to run `<path>/SampleApplications/<sample_app_name>` on 0.61 version of React Native new application should be created with `$ react-native init` command, then copy `*.js` files and dependencies from `package.json`.
+`$ react-native eject`
 
 #### How to link native dependencies
 
@@ -75,7 +69,7 @@ In order to run `<path>/SampleApplications/<sample_app_name>` on 0.61 version of
 	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Clipboard
 
 #### How to secure `<Text />` UI component
-	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Text
+	$ npm i <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text
 
 #### How to secure `<TextInput />` UI component
-	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-TextInput
+	$ npm i <path>/ui-components/BlackBerry-Dynamics-for-React-Native-TextInput

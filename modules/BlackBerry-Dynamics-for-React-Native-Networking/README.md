@@ -87,7 +87,7 @@ handleFetch(requestInfo) {
 ```
 ## Uninstallation
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-Networking
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Networking
 
 ##### iOS
     $ cd ios

@@ -104,7 +104,7 @@ export default class App extends Component {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-TextInput
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-TextInput
 
 ###### iOS
     $ cd ios

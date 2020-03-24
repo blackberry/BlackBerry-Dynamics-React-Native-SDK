@@ -27,7 +27,7 @@ Pod::Spec.new do |s|
   }
   s.platform     = :ios, "9.0"
   s.source        = { 
-    :git => "https://github.com/blackberry/BlackBerry-Dynamics-for-ReactNative.git", 
+    :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git", 
     :tag => "#{s.version}" }
   s.source_files  = "BbdRNAsyncStorage/**/*.{h,m}"
   s.dependency "React"

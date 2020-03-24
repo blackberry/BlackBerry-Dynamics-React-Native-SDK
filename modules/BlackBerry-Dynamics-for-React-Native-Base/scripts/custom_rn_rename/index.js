@@ -113,7 +113,7 @@ var deletePreviousBundleDirectory = function deletePreviousBundleDirectory(_ref)
     console.log('Done removing previous bundle directory.'.green);
   } else {
     Promise.resolve();
-    console.log('Bundle directory was not changed. Keeping...'.yellow);
+    console.log('Bundle directory was not changed or parent of new directory. Keeping...'.yellow);
   }
 };
 
@@ -153,7 +153,8 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
     }
 
     var bundleID = newBundleId ? newBundleId.toLowerCase() : null;
-    var listOfFoldersAndFiles = newName ? (0, _foldersAndFiles.foldersAndFiles)(currentAppName, newName) : [];
+    var listOfSrcFoldersAndFiles = newName ? (0, _foldersAndFiles.foldersAndFiles)(currentAppName, newName) : [];
+    var listOfDestFoldersAndFiles = newName ? (0, _foldersAndFiles.foldersAndFiles)(newName, newName) : [];
     var listOfFilesToModifyContent = newName ? (0, _filesToModifyContent.filesToModifyContent)(currentAppName, newName, projectName) : [];
     var newBundlePath = void 0;
 
@@ -165,11 +166,11 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
 
     // Move files and folders from ./config/foldersAndFiles.js
     var resolveFoldersAndFiles = new Promise(function (resolve) {
-      if (listOfFoldersAndFiles.length === 0) {
+      if (listOfSrcFoldersAndFiles.length === 0) {
         resolve();
       } else {
-        listOfFoldersAndFiles.forEach(function (element, index) {
-          var dest = element.replace(new RegExp(nS_CurrentAppName, 'i'), nS_NewName);
+        listOfSrcFoldersAndFiles.forEach(function (element, index) {
+          var dest = listOfDestFoldersAndFiles[index];
           var itemsProcessed = 1;
           var successMsg = '/' + dest + ' ' + _colors2.default.green('RENAMED');
 
@@ -191,7 +192,7 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
               }
             }
 
-            if (itemsProcessed === listOfFoldersAndFiles.length) {
+            if (itemsProcessed === listOfSrcFoldersAndFiles.length) {
               resolve();
             }
           }, 200 * index);
@@ -250,9 +251,12 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
           var fullCurrentBundlePath = _path2.default.join(__dirname, currentJavaPath);
           var fullNewBundlePath = _path2.default.join(__dirname, newBundlePath);
 
-          // Create new bundle folder if doesn't exist yet
-          if (!_fs2.default.existsSync(fullNewBundlePath)) {
-            _shelljs2.default.mkdir('-p', fullNewBundlePath);
+          // Move bundle folder
+          if (fullCurrentBundlePath !== fullNewBundlePath) {
+            // Create new bundle folder if doesn't exist yet
+            if (!_fs2.default.existsSync(fullNewBundlePath)) {
+              _shelljs2.default.mkdir('-p', fullNewBundlePath);
+            }
             var move = _shelljs2.default.exec('git mv "' + fullCurrentBundlePath + '/"* "' + fullNewBundlePath + '" 2>/dev/null');
             var successMsg = newBundlePath + ' ' + _colors2.default.green('BUNDLE INDENTIFIER CHANGED');
 
@@ -306,7 +310,7 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
                 replaceContent(file.regex, file.replacement, newPaths);
                 if (itemsProcessed === filePathsCount) {
                   var oldBundleNameDir = _path2.default.join(__dirname, javaFileBase, currentBundleID);
-                  resolve({ oldBundleNameDir: oldBundleNameDir, shouldDelete: currentJavaPath !== newJavaPath });
+                  resolve({ oldBundleNameDir: oldBundleNameDir, shouldDelete: (newJavaPath+"/").indexOf(currentJavaPath+"/") != 0 });
                 }
               }, 200 * index);
             }
