@@ -40,7 +40,7 @@ To activate your new BlackBerry Dynamics application with the BlackBerry UEM man
 
 ## Uninstallation
 	$ cd <appFolder>
-	$ react-native uninstall BlackBerry-Dynamics-for-React-Native-Base
+	$ npm uninstall BlackBerry-Dynamics-for-React-Native-Base
 
 ##### iOS
     $ cd ios

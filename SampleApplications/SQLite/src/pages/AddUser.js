@@ -70,7 +70,7 @@ export default class AddUser extends Component {
           alert('ERROR: Please, fill in address');
         }
       } else {
-        alert('ERROR: Please, fill in contact mumber');
+        alert('ERROR: Please, fill in contact number');
       }
     } else {
       alert('ERROR: Please, fill in name');

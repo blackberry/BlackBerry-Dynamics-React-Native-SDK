@@ -32,8 +32,10 @@
       }
       mavenLocal()`;
 
-    projectBuildGradleContent = projectBuildGradleContent.replace('mavenLocal()', bbdMavenString);
-    fs.writeFileSync(projectBuildGradle, projectBuildGradleContent, 'utf-8');
+    if (projectBuildGradleContent.indexOf(bbdMavenString) < 0) {
+      projectBuildGradleContent = projectBuildGradleContent.replace('mavenLocal()', bbdMavenString);
+      fs.writeFileSync(projectBuildGradle, projectBuildGradleContent, 'utf-8');
+    }
 
     // Update app/build.gradle
     var projectAppBuildGradle = path.join(projectRoot, 'android', 'app', 'build.gradle'),
@@ -41,11 +43,13 @@
       bbdDependenciesString = `apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Base/android/gd.gradle"
     implementation fileTree`;
 
+    if (projectAppBuildGradleContent.indexOf(bbdDependenciesString) < 0) {
       projectAppBuildGradleContent = projectAppBuildGradleContent.replace(
         'implementation fileTree', bbdDependenciesString
       );
 
-    fs.writeFileSync(projectAppBuildGradle, projectAppBuildGradleContent, 'utf-8');
+      fs.writeFileSync(projectAppBuildGradle, projectAppBuildGradleContent, 'utf-8');
+    }
 
     // Read project name and project package name
     var bbdBaseAndroidMainPath = path.join(bbdBasePath, 'android', 'src', 'main'),
@@ -129,6 +133,9 @@
         beforeSuperOnCreateCall = fileContent.substr(0, indexOfAfterSuperOnCreateCall + 1),
         afterSuperOnCreateCall = fileContent.substr(indexOfAfterSuperOnCreateCall, fileContent.length);
 
+        if (fileContent.indexOf(bbdLifeCycleCall) >= 0) {
+          return fileContent;
+        }
         return beforeSuperOnCreateCall + bbdLifeCycleCall + afterSuperOnCreateCall;
     }
 
@@ -145,6 +152,9 @@
         beforeFirstImportPart = fileContent.substr(0, indexOfFirstImport),
         firstImportPartAndRest = fileContent.substr(beforeFirstImportPart.length, fileContent.length);
 
+      if (fileContent.indexOf(importLine) >= 0) {
+        return fileContent;
+      }
       return beforeFirstImportPart + importLine + firstImportPartAndRest;
     }
 

@@ -19,6 +19,7 @@ package com.blackberry.bbd.reactnative.networking.core.entities;
 import com.good.gd.apache.http.entity.FileEntity;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,6 +34,7 @@ public class ProgressFileEntity extends FileEntity {
 
     private final OnProgressEvent progressEvent;
 
+    private File file;
     private long writtenLength;
     private OutputStreamProgress outputStreamProgress;
 
@@ -41,9 +43,19 @@ public class ProgressFileEntity extends FileEntity {
         final String contentType, 
         final OnProgressEvent progressEvent) {
         super(file, contentType);
+        this.file = file;
         this.progressEvent = progressEvent;
     }
 
+    @Override
+    public InputStream getContent() throws IOException {
+        if (this.file instanceof com.good.gd.file.File) {
+            return new com.good.gd.file.FileInputStream(this.file);
+        }
+        return new FileInputStream(this.file);
+    }
+
+    @Override
     public void writeTo(final OutputStream outstream) throws IOException {
         if (outstream == null) {
             throw new IllegalArgumentException("Output stream may not be null");
@@ -66,12 +78,11 @@ public class ProgressFileEntity extends FileEntity {
     }
 
     private int getProgress() {
+        writtenLength = outputStreamProgress.getWrittenLength();
         final long contentLength = getContentLength();
         if (contentLength <= 0) { // Prevent division by zero and negative values
             return 0;
         }
-        writtenLength = outputStreamProgress.getWrittenLength();
-
         return (int) (COMPLETE_PROGRESS * writtenLength / contentLength);
     }
 

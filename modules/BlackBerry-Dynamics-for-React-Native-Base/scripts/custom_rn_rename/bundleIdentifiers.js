@@ -15,20 +15,14 @@ exports.bundleIdentifiers = bundleIdentifiers;
 
 function bundleIdentifiers(currentAppName, newName, projectName, currentBundleID, newBundleID, newBundlePath) {
   var nS_CurrentAppName = currentAppName.replace(/\s/g, '');
-  var lC_Ns_CurrentBundleID = currentBundleID.toLowerCase();
-  var lC_Ns_NewBundleID = newBundleID.toLowerCase();
   var listOfRegExpReplacements = [{
     regex: currentBundleID,
     replacement: newBundleID,
     paths: ['android/app/BUCK', 'android/app/build.gradle', 'android/app/src/main/AndroidManifest.xml']
   }, {
-    regex: currentBundleID,
-    replacement: newBundleID,
+    regex: new RegExp('^package[ \t]+' + currentBundleID, 'm'),
+    replacement: 'package ' + newBundleID,
     paths: [newBundlePath + '/MainActivity.java', newBundlePath + '/MainApplication.java']
-  }, {
-    regex: lC_Ns_CurrentBundleID,
-    replacement: lC_Ns_NewBundleID,
-    paths: [newBundlePath + '/MainApplication.java']
   }];
 
   if (newName) {

@@ -17,7 +17,6 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, Button, TextInput, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
-import RNFetchBlob from 'react-native-fetch-blob';
 
 import FormdataForm from './formdata-form';
 import ShowFormdata from './show-formdata';
@@ -197,18 +196,6 @@ export default class RequestForm extends Component {
       console.log('document uri:', document.uri);
       console.log('document name:', document.name);
       let documentUri = document.uri;
-
-      // DEVNOTE: quick fix for Android for using file:// despite content://
-      if (Platform.OS === 'android') {
-        // const checkIfFileExists  = await RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.DCIMDir}/${document.name}`);
-        // const checkIfFileExists  = await RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.PictureDir}/${document.name}`);
-        // const checkIfFileExists  = await RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.SDCardDir}/${document.name}`);
-        const checkIfFileExists = await RNFetchBlob.fs.exists(`${RNFetchBlob.fs.dirs.DownloadDir}/${document.name}`);
-
-        console.log('Check if file exists in documents folder:', checkIfFileExists);
-
-        documentUri = `file://${RNFetchBlob.fs.dirs.DownloadDir}/${document.name}`;
-      }
 
       this.setState({
         document: {

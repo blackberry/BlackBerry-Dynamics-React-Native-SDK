@@ -54,7 +54,7 @@ _retrieveData = async () => {
 ## Uninstallation
 
     $ cd <appFolder>
-    $ react-native uninstall BlackBerry-Dynamics-for-React-Native-Async-Storage
+    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Async-Storage
 
 ###### iOS
     $ cd ios
