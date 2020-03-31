@@ -2,6 +2,9 @@
   "name": "BasicNetworking",
   "version": "1.0.0",
   "description": "BlackBerry Dynamics BasicNetworking sample",
+  "scripts": {
+    "install": "node ./scripts/setStoragePermissions.js"
+  },
   "dependencies": {
     "js-base64": "^2.5.1",
     "react": "16.8.6",

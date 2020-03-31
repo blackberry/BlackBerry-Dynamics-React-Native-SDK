@@ -19,8 +19,7 @@ Generate ios and android directories:
 ## Dynamics modules
 #### Prerequisites
 There are some dependencies that need to installed before using `BlackBerry-Dynamics-for-React-Native-Base` module. More information can be found [here](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#Preconditions).
-> NOTE: BasicNetworking sample provides ability to send files from device's external storage as `FormData` to the server. In order to be able to do this `READ_EXTERNAL_STORAGE` permissions need to be granted on Android platform.
-Insert `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />` on line `5` at path `<project>/app/src/main/AndroidManifest.xml`.
+> NOTE: BasicNetworking sample provides ability to send files from device's external storage as `FormData` to the server. 
 
 #### How to integrate Dynamics into application
 	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
