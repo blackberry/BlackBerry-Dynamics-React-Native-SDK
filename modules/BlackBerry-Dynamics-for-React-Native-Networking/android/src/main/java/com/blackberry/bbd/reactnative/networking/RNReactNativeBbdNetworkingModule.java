@@ -44,6 +44,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
+import com.facebook.react.modules.network.ForwardingCookieHandler;
 import com.facebook.react.modules.network.ResponseUtil;
 import com.facebook.react.modules.network.ProgressiveStringDecoder;
 
@@ -88,6 +89,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
@@ -174,7 +176,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   private static final String BLOB_RESPONSE_TYPE = "blob";
   private static final String RESPONSE_TEXT_KEY = "responseText";
   private static final String RESPONSE_BASE64_KEY = "responseBase64";
-  // JSONObject response properties 
+  // JSONObject response properties
   private static final String RESPONSE_URL = "responseURL";
   private static final String HEADERS_KEY = "headers";
   private static final String STATUS_KEY = "status";
@@ -194,6 +196,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   private final List<ResponseHandler> mResponseHandlers = new ArrayList<>();
 
   private final Map<String, AuthorizeHttpClient> authorizeHttpClients = new ConcurrentHashMap<String, AuthorizeHttpClient>();
+  private ForwardingCookieHandler mCookieHandler;
 
 
   public RNReactNativeBbdNetworkingModule(
@@ -201,6 +204,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     @Nullable String defaultUserAgent) {
     super(reactContext);
     mDefaultUserAgent = defaultUserAgent;
+    mCookieHandler = new ForwardingCookieHandler(reactContext);
   }
 
   public RNReactNativeBbdNetworkingModule(@Nonnull ReactApplicationContext reactContext) {
@@ -358,18 +362,18 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
               this.httpEntity = new ProgressStringEntity(body, charsetName, progressEvent);
               ((ProgressStringEntity)this.httpEntity).setContentType(contentTypeStr);
             }
-          } 
+          }
           else if (contentTypeStr != null) {
             this.httpEntity = new ProgressStringEntity(body, HTTP.UTF_8, progressEvent);
             ((ProgressStringEntity)this.httpEntity).setContentType(contentTypeStr);
           }
           else {
-            this.httpEntity = new ProgressUrlEncodedFormEntity(body, progressEvent);            
+            this.httpEntity = new ProgressUrlEncodedFormEntity(body, progressEvent);
           }
         }
         else {
           // Nothing in data payload, at least nothing we could understand anyway.
-          this.httpEntity = null;          
+          this.httpEntity = null;
         }
       }
       else if (data.hasKey(REQUEST_BODY_KEY_BASE64)) {
@@ -601,7 +605,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     }
 
     private Map<String, String> getHeaders() {
-          return headers;  
+          return headers;
     }
 
     private HttpEntity getEntity() {
@@ -631,9 +635,9 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
         FLog.d(TAG, "sending - progress: %d loaded: %d total: %d", progress, loaded, total);
         // handle request body progress
         ResponseUtil.onDataSend(
-          eventEmitter, 
-          requestId, 
-          loaded, 
+          eventEmitter,
+          requestId,
+          loaded,
           total);
       }
     };
@@ -772,6 +776,16 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
       // get built-in persistent CookieStore
       persistentCookieStore = gdHttpClient.getCookieStore();
 
+      if(requestParams.withCredentials) {
+        Map<String, List<String>> cookieMap = null;
+        try {
+          cookieMap = mCookieHandler.get(new URI(requestParams.url), new HashMap<String, List<String>>());
+          requestParams.headers.put("Cookie", cookieMap.get("Cookie").get(0));
+        } catch (IOException | URISyntaxException e) {
+          FLog.e(TAG, "Could not attach cookie header.");
+        }
+      }
+
       if (!requestParams.withCredentials) {
         cookiestore.noCookies(true);
         gdHttpClient.setCookieStore(cookiestore);
@@ -792,9 +806,9 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
 
       if (request.isAborted()) {
         ResponseUtil.onRequestError(
-          eventEmitter, 
-          requestParams.requestId, 
-          "Aborted executing request: " + requestParams.url, 
+          eventEmitter,
+          requestParams.requestId,
+          "Aborted executing request: " + requestParams.url,
           null);
       }
       else {
@@ -861,7 +875,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
         }
         else if (requestParams.responseType.equals("blob")) {
           // blob: do not support here
-          // blob data will be handled by BlobModule using ResponseHandler 
+          // blob data will be handled by BlobModule using ResponseHandler
           responseString = "";
         }
         else {
@@ -922,8 +936,8 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   }
 
   private JSONObject handleResponse(
-    final HttpResponse response, 
-    RequestParams requestParams, 
+    final HttpResponse response,
+    RequestParams requestParams,
     HttpContext requestContext) throws JSONException {
 
     final JSONObject answer = new JSONObject();
@@ -936,15 +950,15 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     if (requestParams.responseType.equals("base64")){
       answer.put(RESPONSE_BASE64_KEY, buildBase64Response(response));
       answer.put(RESPONSE_TEXT_KEY, "");
-    } 
+    }
     else if (requestParams.responseType.equals("blob")) {
       // blob: do not support here
-      // blob data will be handled by BlobModule using ResponseHandler 
+      // blob data will be handled by BlobModule using ResponseHandler
       answer.put(RESPONSE_TEXT_KEY, "");
     }
     else {
        // default response is text
-      answer.put(RESPONSE_TEXT_KEY, buildResponseText(response).replaceAll("\\P{Print}", ""));     
+      answer.put(RESPONSE_TEXT_KEY, buildResponseText(response).replaceAll("\\P{Print}", ""));
     }
 
     answer.put(HEADERS_KEY, headersString);
@@ -1092,7 +1106,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     return request;
   }
 
-  private void addHeadersToRequest(final HttpUriRequest request, final Map<String, String> headers) {  
+  private void addHeadersToRequest(final HttpUriRequest request, final Map<String, String> headers) {
     for (Map.Entry<String, String> header : headers.entrySet()) {
       final String key = header.getKey();
       final String value = header.getValue();
@@ -1179,7 +1193,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
       return methodName;
     }
   }
- 
+
   @ReactMethod
   public void abortRequest(final int requestId) {
     final HttpUriRequest request = requests.get(String.valueOf(requestId));
@@ -1189,7 +1203,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   }
 
   @ReactMethod
-  public void clearCookies(com.facebook.react.bridge.Callback callback) { 
+  public void clearCookies(com.facebook.react.bridge.Callback callback) {
     cookiestore.clear();
     if (persistentCookieStore != null) {
       persistentCookieStore.clear();
@@ -1199,7 +1213,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     }
   }
 
-  private RCTDeviceEventEmitter getEventEmitter() { 
+  private RCTDeviceEventEmitter getEventEmitter() {
     return getReactApplicationContext().getJSModule(RCTDeviceEventEmitter.class);
   }
 
