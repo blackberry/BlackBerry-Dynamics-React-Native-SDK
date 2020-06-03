@@ -68,17 +68,17 @@ static NSString *RCTReadFile(NSString *filePath, NSString *key, NSDictionary **e
         NSError *error;
         NSData *entryData = [[GDFileManager defaultManager] contentsAtPath:filePath];
         NSDictionary *extraData = @{@"key": RCTNullIfNil(key)};
-        
+
         NSString* entryString = [[NSString alloc] initWithData:entryData encoding:NSUTF8StringEncoding];
-        
+
         if (![[GDFileManager defaultManager] isReadableFileAtPath:filePath]) {
             if (errorOut) *errorOut = RCTMakeError(@"Failed to read storage file.", error, extraData);
             return nil;
         }
-        
+
         return entryString;
     }
-    
+
     return nil;
 }
 
@@ -165,7 +165,7 @@ static NSCache *RCTGetCache()
     dispatch_once(&onceToken, ^{
         cache = [NSCache new];
         cache.totalCostLimit = 2 * 1024 * 1024; // 2MB
-        
+
         // Clear cache in the event of a memory warning
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(__unused NSNotification *note) {
             [cache removeAllObjects];
@@ -330,11 +330,11 @@ RCT_EXPORT_MODULE(RNReactNativeBbdAsyncStorage)
 - (NSDictionary *)_ensureSetup
 {
     RCTAssertThread(RCTGetMethodQueue(), @"Must be executed on storage thread");
-    
+
 #if TARGET_OS_TV
     RCTLogWarn(@"Persistent storage is not supported on tvOS, your data may be removed at any point.");
 #endif
-    
+
     NSError *error = nil;
     if (!RCTHasCreatedStorageDirectory) {
         [[GDFileManager defaultManager] createDirectoryAtPath:RCTGetStorageDirectory()
@@ -363,9 +363,9 @@ RCT_EXPORT_MODULE(RNReactNativeBbdAsyncStorage)
 {
     NSError *error;
     NSString *serialized = RCTJSONStringify(_manifest, &error);
-    
+
     [self _writeToFile:RCTGetManifestFilePath() withData:serialized error:error];
-    
+
     NSDictionary *errorOut;
     if (error) {
         errorOut = RCTMakeError(@"Failed to write manifest file.", error, nil);
@@ -380,42 +380,17 @@ RCT_EXPORT_MODULE(RNReactNativeBbdAsyncStorage)
         if ([data isKindOfClass:[NSString class]])
         {
             NSData* encData = [data dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
-            if ([[GDFileManager defaultManager] fileExistsAtPath:filePath])
-            {
-                NSData *existingData = [[GDFileManager defaultManager] contentsAtPath:filePath];
-                if (existingData) {
-                    NSMutableData *fileData = [existingData mutableCopy];
-                    [fileData appendData:encData];
-                    encData = fileData;
-                }
-            }
-            else
-            {
-                BOOL success = [[GDFileManager defaultManager] createFileAtPath:filePath contents:encData attributes:nil];
-                
-                if(!success) {
-                    RCTMakeError(@"GDFileManagerErrorDomain - GD Runtime could not create secure file from NSData", error, nil);
-                }
+            BOOL success = [[GDFileManager defaultManager] createFileAtPath:filePath contents:encData attributes:nil];
+            if(!success) {
+                RCTMakeError(@"GDFileManagerErrorDomain - GD Runtime could not create secure file from NSData", error, nil);
             }
         }
         else if ([data isKindOfClass:[NSData class]])
         {
-            if ([[GDFileManager defaultManager] fileExistsAtPath:filePath])
-            {
-                NSData *existingData = [[GDFileManager defaultManager] contentsAtPath:filePath];
-                if (existingData) {
-                    NSMutableData *fileData = [existingData mutableCopy];
-                    [fileData appendData:data];
-                    data = fileData;
-                }
-            }
-            else
-            {
-                BOOL success = [[GDFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
-                
-                if(!success) {
-                    RCTMakeError(@"GDFileManagerErrorDomain - GD Runtime could not create secure file from NSData", error, nil);
-                }
+            BOOL success = [[GDFileManager defaultManager] createFileAtPath:filePath contents:data attributes:nil];
+
+            if(!success) {
+                RCTMakeError(@"GDFileManagerErrorDomain - GD Runtime could not create secure file from NSData", error, nil);
             }
         }
     } else {
@@ -478,7 +453,7 @@ RCT_EXPORT_MODULE(RNReactNativeBbdAsyncStorage)
         _manifest[key] = value;
         return nil;
     }
-    
+
     // TODO: pass error param into _writeToFile call
     [self _writeToFile:filePath withData:value error:error];
     [RCTGetCache() setObject:value forKey:key cost:value.length];
@@ -535,12 +510,12 @@ RCT_EXPORT_METHOD(multiGet:(NSArray<NSString *> *)keys
                          }
                      }];
         }];
-        
+
         if (![self _passthroughDelegate]) {
             return;
         }
     }
-    
+
     NSDictionary *errorOut = [self _ensureSetup];
     if (errorOut) {
         callback(@[@[errorOut], (id)kCFNull]);
@@ -567,12 +542,12 @@ RCT_EXPORT_METHOD(multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs
             NSArray<NSDictionary *> *errors = RCTMakeErrors(results);
             callback(@[RCTNullIfNil(errors)]);
         }];
-        
+
         if (![self _passthroughDelegate]) {
             return;
         }
     }
-    
+
     NSDictionary *errorOut = [self _ensureSetup];
     if (errorOut) {
         callback(@[@[errorOut]]);
@@ -604,12 +579,12 @@ RCT_EXPORT_METHOD(multiMerge:(NSArray<NSArray<NSString *> *> *)kvPairs
             NSArray<NSDictionary *> *errors = RCTMakeErrors(results);
             callback(@[RCTNullIfNil(errors)]);
         }];
-        
+
         if (![self _passthroughDelegate]) {
             return;
         }
     }
-    
+
     NSDictionary *errorOut = [self _ensureSetup];
     if (errorOut) {
         callback(@[@[errorOut]]);
@@ -651,12 +626,12 @@ RCT_EXPORT_METHOD(multiRemove:(NSArray<NSString *> *)keys
             NSArray<NSDictionary *> *errors = RCTMakeErrors(results);
             callback(@[RCTNullIfNil(errors)]);
         }];
-        
+
         if (![self _passthroughDelegate]) {
             return;
         }
     }
-    
+
     NSDictionary *errorOut = [self _ensureSetup];
     if (errorOut) {
         callback(@[@[errorOut]]);
@@ -697,7 +672,7 @@ RCT_EXPORT_METHOD(clear:(RCTResponseSenderBlock)callback)
         }];
         return;
     }
-    
+
     [_manifest removeAllObjects];
     [RCTGetCache() removeAllObjects];
     NSDictionary *error = RCTDeleteStorageDirectory();
@@ -710,12 +685,12 @@ RCT_EXPORT_METHOD(getAllKeys:(RCTResponseSenderBlock)callback)
         [self.delegate allKeys:^(NSArray<id<NSObject>> *keys) {
             callback(@[(id)kCFNull, keys]);
         }];
-        
+
         if (![self _passthroughDelegate]) {
             return;
         }
     }
-    
+
     NSDictionary *errorOut = [self _ensureSetup];
     if (errorOut) {
         callback(@[errorOut, (id)kCFNull]);
