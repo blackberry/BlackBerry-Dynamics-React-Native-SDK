@@ -781,7 +781,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
         try {
           cookieMap = mCookieHandler.get(new URI(requestParams.url), new HashMap<String, List<String>>());
           requestParams.headers.put("Cookie", cookieMap.get("Cookie").get(0));
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException | NullPointerException e) {
           FLog.e(TAG, "Could not attach cookie header.");
         }
       }
