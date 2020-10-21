@@ -96,7 +96,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -198,6 +201,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
   private final Map<String, AuthorizeHttpClient> authorizeHttpClients = new ConcurrentHashMap<String, AuthorizeHttpClient>();
   private ForwardingCookieHandler mCookieHandler;
 
+  private ExecutorService executorService;
 
   public RNReactNativeBbdNetworkingModule(
     @Nonnull ReactApplicationContext reactContext,
@@ -205,6 +209,7 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
     super(reactContext);
     mDefaultUserAgent = defaultUserAgent;
     mCookieHandler = new ForwardingCookieHandler(reactContext);
+    executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   }
 
   public RNReactNativeBbdNetworkingModule(@Nonnull ReactApplicationContext reactContext) {
@@ -615,15 +620,15 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
 
   @ReactMethod
   public void sendRequest(
-    String method,
-    String url,
+    final String method,
+    final String url,
     final int requestId,
-    ReadableArray headers,
-    ReadableMap data,
+    final ReadableArray headers,
+    final ReadableMap data,
     final String responseType,
     final boolean useIncrementalUpdates,
-    int timeout,
-    boolean withCredentials) {
+    final int timeout,
+    final boolean withCredentials) {
 
     final RCTDeviceEventEmitter eventEmitter = getEventEmitter();
 
@@ -670,27 +675,32 @@ public final class RNReactNativeBbdNetworkingModule extends ReactContextBaseJava
       }
     }
 
-    try {
-      final RequestParams requestParams = new RequestParams(
-        method,
-        url,
-        requestId,
-        headers,
-        data,
-        responseType,
-        useIncrementalUpdates,
-        timeout,
-        withCredentials,
-        handler,
-        getReactApplicationContext(),
-        progressEventCallback);
+    final RequestBodyHandler finalHandler = handler;
+    executorService.submit(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          final RequestParams requestParams = new RequestParams(
+            method,
+            url,
+            requestId,
+            headers,
+            data,
+            responseType,
+            useIncrementalUpdates,
+            timeout,
+            withCredentials,
+            finalHandler,
+            getReactApplicationContext(),
+            progressEventCallback);
 
-      executeRequest(requestParams);
-
-    } catch (Throwable th) {
-      FLog.e(TAG, "Failed to send url request: " + url, th);
-      ResponseUtil.onRequestError(eventEmitter, requestId, th.getMessage(), th);
-    }
+          executeRequest(requestParams);
+        } catch (Throwable th) {
+          FLog.e(TAG, "Failed to send url request: " + url, th);
+          ResponseUtil.onRequestError(eventEmitter, requestId, th.getMessage(), th);
+        }
+      }
+    });
   }
 
   private void executeRequest(final RequestParams requestParams) throws JSONException {
