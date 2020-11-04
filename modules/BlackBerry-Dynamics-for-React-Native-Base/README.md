@@ -23,7 +23,7 @@ To download appropriate version from [BlackBerry Developers](https://developers.
 Supported versions of the BlackBerry Dynamics SDK for iOS:
 - `Dynamics SDK for iOS - 7.1`
 
-BlackBerry Dynamics SDK for iOS can be installed using installer package downloaded from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) using the instructions above.
+BlackBerry Dynamics SDK for iOS can be installed via installer package downloaded from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) using the instructions above.
 
 Steps to install BlackBerry Dynamics SDK for iOS from downloaded package:
 1. In the macOS GUI (not a shell), uncompress the SDK package.
