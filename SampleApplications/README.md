@@ -23,8 +23,8 @@ Generate ios and android directories:
 > IMPORTANT: React Native starting from 0.60 version supports auto-linking. This means that running `link` command is no longer required. No actions are needed on Android, but on iOS it is needed to run `pod install` command whilst in the ios folder of the application. 
 
 ###### 0.60+ on iOS
-`$ cd ios`
-`$ pod install`
+`$ cd ios`  
+`$ pod install`  
 `$ cd ..`
 
 #### How to run application

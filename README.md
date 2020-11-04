@@ -9,8 +9,8 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
  - 0.60.x
  - 0.61.x
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v7.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios). Version [6.2](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/6_2) is also supported.
- - BlackBerry Dynamics SDK for Android v7.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android). Version [6.1](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/6_1) is also supported.
+ - BlackBerry Dynamics SDK for iOS v7.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/7_1).
+ - BlackBerry Dynamics SDK for Android v7.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/7_1).
 
 # Features
 #### Integration with BlackBerry Dynamics
