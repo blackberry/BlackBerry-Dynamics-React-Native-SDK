@@ -29,8 +29,8 @@ There are some dependencies that need to installed before using `BlackBerry-Dyna
 > No actions are needed on Android, but on iOS it is needed to run `pod install` command whilst in the ios folder of the application. 
 
 ##### 0.60+ on iOS
-`$ cd ios`
-`$ pod install`
+`$ cd ios`  
+`$ pod install`  
 `$ cd ..`
 
 #### How to run application
@@ -39,25 +39,26 @@ There are some dependencies that need to installed before using `BlackBerry-Dyna
 
 #### Examples of usage
 ##### 0.60.6
-`$ cd <path>/SampleApplications/WKWebViewBrowser`
-`$ yarn`
-`$ react-native eject`
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`
-`$ yarn`
-For iOS:
-`$ cd ios`
-`$ pod install`
-`$ cd ..`
+`$ cd <path>/SampleApplications/WKWebViewBrowser`  
+`$ yarn`  
+`$ react-native eject`  
+`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
+`$ yarn`  
+For iOS:  
+`$ cd ios`  
+`$ pod install`  
+`$ cd ..`  
 `$ react-native run-ios`
 ##### 0.61.5
-`$ cd <path>/SampleApplications/WKWebViewBrowser`
-`$ yarn`
-`$ react-native upgrade 0.61.5`
-`$ react-native eject`
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`
-`$ yarn`
-For iOS:
-`$ cd ios`
-`$ pod install`
-`$ cd ..`
+`$ cd <path>/SampleApplications/WKWebViewBrowser`  
+`$ yarn`  
+`$ cd .. ; git init ; cd WebViewBrowser`  
+`$ react-native upgrade 0.61.5`  
+`$ react-native eject`  
+`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
+`$ yarn`  
+For iOS:  
+`$ cd ios`  
+`$ pod install`  
+`$ cd ..`  
 `$ react-native run-ios`
