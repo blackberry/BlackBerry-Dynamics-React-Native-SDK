@@ -12,23 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Sample code for React Native SQLite Storage: https://aboutreact.com/example-of-sqlite-database-in-react-native/ 
  */
- 
-import React, {Component} from 'react';
-import { FlatList, Text, View } from 'react-native';
 
-import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
-const db = openDatabase({ name: 'RNTestDatabase.db' });
+import React, { Component } from 'react';
+import { FlatList, Text, View } from 'react-native';
 
 export default class ViewUsersList extends Component {
   constructor(props) {
     super(props);
     this.state = {
       usersList: [],
+      database: this.props.navigation.state.params.db
     };
-    db.transaction(tx => {
+
+    this.viewUsers()
+
+  }
+
+  viewUsers() {
+    this.state.database.transaction(tx => {
       tx.executeSql('SELECT * FROM Users', [], (tx, results) => {
         let users = [];
         for (let i = 0; i < results.rows.length; ++i) {
@@ -44,7 +46,7 @@ export default class ViewUsersList extends Component {
 
   render() {
     return (
-      <View style={{paddingTop: 10}}>
+      <View style={{ paddingTop: 10 }}>
         <FlatList
           data={this.state.usersList}
           keyExtractor={(item, index) => index.toString()}

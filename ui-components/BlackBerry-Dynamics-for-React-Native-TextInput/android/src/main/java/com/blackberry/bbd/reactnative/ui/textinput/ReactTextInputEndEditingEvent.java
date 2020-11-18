@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native/tree/master/ReactAndroid/src/main/java/com/facebook/react/views/textinput
+ * from https://github.com/facebook/react-native/tree/v0.63.2/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -17,8 +17,8 @@ import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 /**
- * Event emitted by EditText native view when text editing ends,
- * because of the user leaving the text input.
+ * Event emitted by EditText native view when text editing ends, because of the user leaving the
+ * text input.
  */
 class ReactTextInputEndEditingEvent extends Event<ReactTextInputEndEditingEvent> {
 
@@ -26,9 +26,7 @@ class ReactTextInputEndEditingEvent extends Event<ReactTextInputEndEditingEvent>
 
   private String mText;
 
-  public ReactTextInputEndEditingEvent(
-      int viewId,
-      String text) {
+  public ReactTextInputEndEditingEvent(int viewId, String text) {
     super(viewId);
     mText = text;
   }

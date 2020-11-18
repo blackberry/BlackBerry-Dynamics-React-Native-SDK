@@ -12,19 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Sample code for React Native SQLite Storage: https://aboutreact.com/example-of-sqlite-database-in-react-native/ 
  */
- 
+
 import React, {Component} from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
 
 import FormInput from '../components/FormInput';
 import ActionButton from '../components/ActionButton';
 
-import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
-const db = openDatabase({ name: 'RNTestDatabase.db' });
- 
 export default class UpdateUser extends Component {
   constructor(props) {
     super(props);
@@ -33,14 +28,15 @@ export default class UpdateUser extends Component {
       username: '',
       phone: '',
       address: '',
-      showUpdateUserForm: false
+      showUpdateUserForm: false,
+      database: this.props.navigation.state.params.db
     };
   }
 
   searchUser = () => {
     const { inputUserId } = this.state;
 
-    db.transaction(tx => {
+    this.state.database.transaction(tx => {
       tx.executeSql('SELECT * FROM Users where id = ?', [inputUserId], (tx, results) => {
 
           if (results.rows.length > 0) {
@@ -72,7 +68,7 @@ export default class UpdateUser extends Component {
     if (username) {
       if (phone) {
         if (address) {
-          db.transaction(tx => {
+          this.state.database.transaction(tx => {
             tx.executeSql(
               'UPDATE Users set username=?, phone=?, address=? where id=?', [username, phone, address, inputUserId],
               (tx, results) => {

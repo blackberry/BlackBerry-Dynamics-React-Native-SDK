@@ -28,7 +28,6 @@ import com.facebook.react.uimanager.ReactShadowNode;
 import com.facebook.react.uimanager.ViewProps;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.text.CustomLetterSpacingSpan;
-import com.facebook.react.views.text.CustomStyleSpan;
 import com.facebook.react.views.text.ReactAbsoluteSizeSpan;
 import com.facebook.react.views.text.ReactBackgroundColorSpan;
 import com.facebook.react.views.text.ReactForegroundColorSpan;
@@ -40,6 +39,7 @@ import com.facebook.react.views.text.ShadowStyleSpan;
 import com.facebook.react.views.text.TextAttributes;
 import com.facebook.react.views.text.TextTransform;
 import com.facebook.yoga.YogaDirection;
+import com.blackberry.bbd.reactnative.ui.text.CustomStyleSpan;
 
 import java.util.ArrayList;
 import java.util.List;

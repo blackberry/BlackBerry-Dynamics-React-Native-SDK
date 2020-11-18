@@ -18,7 +18,7 @@ Pod::Spec.new do |spec|
 	spec.name          = "BbdRNBase"
 	spec.version       = "1.0.0"
 	spec.summary       = "BlackBerry Dynamics Base module for React Native for iOS"
-	spec.license       = { :type => "MIT" }
+	spec.license       = { :type => "Apache License, Version 2.0" }
 	spec.homepage      = "https://community.blackberry.com/"
 	spec.authors       = {
 		"Volodymyr Taliar" => "vtaliar@blackberry.com",

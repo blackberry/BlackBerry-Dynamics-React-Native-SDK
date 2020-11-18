@@ -5,18 +5,20 @@
 
 # Supportability
 #### React Native
- - 0.60.x
- - 0.61.x
+ - 0.63.x
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Text` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## Installation
-> Starting from `0.60` react-native supports auto-linking, so running `$ react-native link ...` command is not required.
 
-    $ npm i <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text
-    $ yarn
+> NOTE: `BlackBerry-Dynamics-for-React-Native-Text` should be the last package added to your project dependencies. Adding modules or UI components after `BlackBerry-Dynamics-for-React-Native-Text` can override some important configurations that may cause following exception during application launch: `"Text strings must be rendered within a <Text> component"`. If this is the case please run `yarn set-text-config` command to put needed configurations back. This action should be repeated when add/remove other packages.
+For more details please take a look at examples in `DLP` sample application.
+
+    $ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text
+    ...
+    $ yarn set-text-config
 
 ###### iOS
     $ cd ios
@@ -75,7 +77,7 @@ export default class App extends Component {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Text
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-Text
 
 ###### iOS
     $ cd ios

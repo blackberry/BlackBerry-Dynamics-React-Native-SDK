@@ -8,10 +8,10 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: BasicNetworking sample is based on `0.60.6` version of React Native. There is a possibility to upgrade to `0.61.x` by running following command:
-`$ react-native upgrade 0.61.x`
+> NOTE: BasicNetworking sample is based on `0.63` version of React Native. There is a possibility to upgrade to `0.63.x` versions by running following command:
+`$ react-native upgrade 0.63.x`
 for example:
-`$ react-native upgrade 0.61.5`
+`$ react-native upgrade 0.63.3`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -19,21 +19,21 @@ Generate ios and android directories:
 ## Dynamics modules
 #### Prerequisites
 There are some dependencies that need to installed before using `BlackBerry-Dynamics-for-React-Native-Base` module. More information can be found [here](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#Preconditions).
-> NOTE: BasicNetworking sample provides ability to send files from device's external storage as `FormData` to the server. 
+> NOTE: BasicNetworking sample provides ability to send files from device's external storage as `FormData` to the server.
 
 #### How to integrate Dynamics into application
-	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
-	
-> You will be asked to choose an identifier (required) and name (optional) for your application. This identifier is your iOS Bundle ID or Android Package Name. It will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
+
+> Integrates Dynamics based on your current identifiers - iOS Bundle ID and Android Package Name.
+
+	$ yarn set-bundle-id (Optional step, but required for sample applications)
+
+> Allows to update an identifier (required) and name (optional) for your application. This identifier is your iOS Bundle ID or Android Package Name. It will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
 
 #### How to secure communication
-	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
 
-#### How to link native dependencies
-> IMPORTANT: React Native starting from 0.60 version supports auto-linking. This means that running `link` command is no longer required. 
-> No actions are needed on Android, but on iOS it is needed to run `pod install` command whilst in the ios folder of the application. 
-
-##### 0.60+ on iOS
+##### iOS
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`
@@ -46,13 +46,13 @@ There are some dependencies that need to installed before using `BlackBerry-Dyna
 `$ react-native run-android`
 
 #### Examples of usage
-##### 0.60.6
+##### 0.63.2
 `$ cd <path>/SampleApplications/BasicNetworking`  
 `$ yarn`  
 `$ react-native eject`  
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
-`$ yarn`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
+`$ yarn set-bundle-id`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
 For iOS:  
 `$ cd ios`  
 `$ pod install`  
@@ -60,15 +60,15 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`
-##### 0.61.5
+##### 0.63.x
 `$ cd <path>/SampleApplications/BasicNetworking`  
 `$ yarn`  
 `$ cd .. ; git init ; cd BasicNetworking`  
-`$ react-native upgrade 0.61.5`  
+`$ react-native upgrade 0.63.3`  
 `$ react-native eject`  
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
-`$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
-`$ yarn`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
+`$ yarn set-bundle-id`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
 For iOS:  
 `$ cd ios`  
 `$ pod install`  

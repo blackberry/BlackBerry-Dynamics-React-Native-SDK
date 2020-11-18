@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native/tree/master/ReactAndroid/src/main/java/com/facebook/react/views/textinput
+ * from https://github.com/facebook/react-native/tree/v0.63.2/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -29,6 +29,7 @@ import com.facebook.react.uimanager.UIViewOperationQueue;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.text.ReactBaseTextShadowNode;
 import com.facebook.react.views.text.ReactTextUpdate;
+import com.facebook.react.views.text.ReactTextViewManagerCallback;
 import com.facebook.react.views.view.MeasureUtil;
 import com.facebook.yoga.YogaMeasureFunction;
 import com.facebook.yoga.YogaMeasureMode;
@@ -38,10 +39,10 @@ import com.facebook.yoga.YogaNode;
 @VisibleForTesting
 @TargetApi(Build.VERSION_CODES.M)
 public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
-        implements YogaMeasureFunction {
+    implements YogaMeasureFunction {
 
   private int mMostRecentEventCount = UNSET;
-  private @Nullable GDEditText mDummyEditText;
+  private @Nullable GDEditText mInternalEditText;
   private @Nullable ReactTextInputLocalData mLocalData;
 
   @VisibleForTesting public static final String PROP_TEXT = "text";
@@ -54,13 +55,19 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
   private int mSelectionStart = UNSET;
   private int mSelectionEnd = UNSET;
 
-  public ReactTextInputShadowNode() {
+  public ReactTextInputShadowNode(
+      @Nullable ReactTextViewManagerCallback reactTextViewManagerCallback) {
+    super(reactTextViewManagerCallback);
     mTextBreakStrategy =
-            (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
-                    ? Layout.BREAK_STRATEGY_SIMPLE
-                    : Layout.BREAK_STRATEGY_HIGH_QUALITY;
+        (Build.VERSION.SDK_INT < Build.VERSION_CODES.M)
+            ? Layout.BREAK_STRATEGY_SIMPLE
+            : Layout.BREAK_STRATEGY_HIGH_QUALITY;
 
     initMeasureFunction();
+  }
+
+  public ReactTextInputShadowNode() {
+    this(null);
   }
 
   private void initMeasureFunction() {
@@ -79,33 +86,33 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
     // of Android), and it cannot be changed.
     // So, we have to enforce it as a default padding.
     // TODO #7120264: Cache this stuff better.
-    GDEditText editText = new GDEditText(getThemedContext());
+    GDEditText editText = createInternalEditText();
     setDefaultPadding(Spacing.START, ViewCompat.getPaddingStart(editText));
     setDefaultPadding(Spacing.TOP, editText.getPaddingTop());
     setDefaultPadding(Spacing.END, ViewCompat.getPaddingEnd(editText));
     setDefaultPadding(Spacing.BOTTOM, editText.getPaddingBottom());
 
-    mDummyEditText = editText;
+    mInternalEditText = editText;
 
     // We must measure the EditText without paddings, so we have to reset them.
-    mDummyEditText.setPadding(0, 0, 0, 0);
+    mInternalEditText.setPadding(0, 0, 0, 0);
 
     // This is needed to fix an android bug since 4.4.3 which will throw an NPE in measure,
     // setting the layoutParams fixes it: https://code.google.com/p/android/issues/detail?id=75877
-    mDummyEditText.setLayoutParams(
-            new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+    mInternalEditText.setLayoutParams(
+        new ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
   }
 
   @Override
   public long measure(
-          YogaNode node,
-          float width,
-          YogaMeasureMode widthMode,
-          float height,
-          YogaMeasureMode heightMode) {
+      YogaNode node,
+      float width,
+      YogaMeasureMode widthMode,
+      float height,
+      YogaMeasureMode heightMode) {
     // measure() should never be called before setThemedContext()
-    GDEditText editText = Assertions.assertNotNull(mDummyEditText);
+    GDEditText editText = Assertions.assertNotNull(mInternalEditText);
 
     if (mLocalData != null) {
       mLocalData.apply(editText);
@@ -117,7 +124,7 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
       }
 
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-              && editText.getBreakStrategy() != mTextBreakStrategy) {
+          && editText.getBreakStrategy() != mTextBreakStrategy) {
         editText.setBreakStrategy(mTextBreakStrategy);
       }
     }
@@ -125,8 +132,8 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
     // make sure the placeholder content is also being measured
     editText.setHint(getPlaceholder());
     editText.measure(
-            MeasureUtil.getMeasureSpec(width, widthMode),
-            MeasureUtil.getMeasureSpec(height, heightMode));
+        MeasureUtil.getMeasureSpec(width, widthMode),
+        MeasureUtil.getMeasureSpec(height, heightMode));
 
     return YogaMeasureOutput.make(editText.getMeasuredWidth(), editText.getMeasuredHeight());
   }
@@ -216,7 +223,7 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
       mTextBreakStrategy = Layout.BREAK_STRATEGY_BALANCED;
     } else {
       throw new JSApplicationIllegalArgumentException(
-              "Invalid textBreakStrategy: " + textBreakStrategy);
+          "Invalid textBreakStrategy: " + textBreakStrategy);
     }
   }
 
@@ -226,24 +233,24 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
 
     if (mMostRecentEventCount != UNSET) {
       ReactTextUpdate reactTextUpdate =
-              new ReactTextUpdate(
-                      spannedFromShadowNode(
-                              this,
-                              getText(),
-                              /* supportsInlineViews: */ false,
-                              /* nativeViewHierarchyOptimizer: */ null // only needed to support inline views
-                      ),
-                      mMostRecentEventCount,
-                      mContainsImages,
-                      getPadding(Spacing.LEFT),
-                      getPadding(Spacing.TOP),
-                      getPadding(Spacing.RIGHT),
-                      getPadding(Spacing.BOTTOM),
-                      mTextAlign,
-                      mTextBreakStrategy,
-                      mJustificationMode,
-                      mSelectionStart,
-                      mSelectionEnd);
+          new ReactTextUpdate(
+              spannedFromShadowNode(
+                  this,
+                  getText(),
+                  /* supportsInlineViews: */ false,
+                  /* nativeViewHierarchyOptimizer: */ null // only needed to support inline views
+                  ),
+              mMostRecentEventCount,
+              mContainsImages,
+              getPadding(Spacing.LEFT),
+              getPadding(Spacing.TOP),
+              getPadding(Spacing.RIGHT),
+              getPadding(Spacing.BOTTOM),
+              mTextAlign,
+              mTextBreakStrategy,
+              mJustificationMode,
+              mSelectionStart,
+              mSelectionEnd);
       uiViewOperationQueue.enqueueUpdateExtraData(getReactTag(), reactTextUpdate);
     }
   }
@@ -252,5 +259,13 @@ public class ReactTextInputShadowNode extends ReactBaseTextShadowNode
   public void setPadding(int spacingType, float padding) {
     super.setPadding(spacingType, padding);
     markUpdated();
+  }
+
+  /**
+   * May be overriden by subclasses that would like to provide their own instance of the internal
+   * {@code EditText} this class uses to determine the expected size of the view.
+   */
+  protected GDEditText createInternalEditText() {
+    return new GDEditText(getThemedContext());
   }
 }

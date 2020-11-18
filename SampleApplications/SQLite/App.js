@@ -22,6 +22,8 @@ import UpdateUser from './src/pages/UpdateUser';
 import ViewUser from './src/pages/ViewUser';
 import ViewUsersList from './src/pages/ViewUsersList';
 import DeleteUser from './src/pages/DeleteUser';
+import ImportDB from './src/pages/ImportDB';
+import InitDB from './src/pages/InitDB';
 
 const App = createStackNavigator({
   HomeScreen: {
@@ -63,6 +65,20 @@ const App = createStackNavigator({
     screen: DeleteUser,
     navigationOptions: {
       title: 'Delete User',
+      headerTintColor: '#4486f5'
+    }
+  },
+  ImportDB: {
+    screen: ImportDB,
+    navigationOptions: {
+      title: 'Import DB',
+      headerTintColor: '#4486f5'
+    }
+  },
+  InitDB: {
+    screen: InitDB,
+    navigationOptions: {
+      title: 'Initialize DB',
       headerTintColor: '#4486f5'
     }
   }

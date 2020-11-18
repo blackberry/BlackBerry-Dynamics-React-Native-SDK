@@ -8,18 +8,15 @@ For more details please refer to [com.good.gd.database](https://developer.blackb
 
 ## Supportability
 #### React Native
- - 0.60.x
- - 0.61.x
+ - 0.63.x
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-SQLite-Storage` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## Installation
-> Starting from `0.60` react-native supports auto-linking, so running `$ react-native link ...` command is not required.
 
-    $ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-SQLite-Storage
-    $ yarn
+    $ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-SQLite-Storage
 
 ###### iOS
     $ cd ios
@@ -64,16 +61,45 @@ db.transaction(tx => {
 // ...
 ```
 
+## Importing pre-populated DB
+> Importing pre-populated DB as described [here](https://github.com/andpor/react-native-sqlite-storage#importing-a-pre-populated-database) is now supported.
+
+You can import an existing - pre-populated database file into your application. Depending on your instructions in openDatabase call, the module will look at different places to locate your pre-populated database file.
+
+> NOTE: all the cases below are covered in `SampleApplications/SQLite` sample app.
+Also, there are useful scripts that allow to copy and link DB files.
+
+#### createFromLocation : 1
+If your folder is called `www` and data file is named the same as the `dbName` - `testDB` in this example:
+```javascript
+import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
+
+const db = openDatabase({name : "testDB", createFromLocation : 1}, okCallback,errorCallback);
+```
+
+#### createFromLocation : "~data/<db_path>"
+In case if your folder is called `data` rather than `www` or your file name does not match the name of the DB, for example, DB is named `testDB` but the file is `mydbfile.sqlite` which is located in a `data` subdirectory of `www`.
+```javascript
+import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
+
+const db = openDatabase({name : "testDB", createFromLocation : "~data/mydbfile.sqlite"}, okCallback,errorCallback);
+```
+
+#### createFromLocation : "/data/<db_path>" (Android only)
+> This option in supported on Android only and is not supported on iOS for now
+
+If your folder is not in application bundle but in app sandbox i.e. downloaded from some remote location. In this case the source file is located in `data` subdirectory of `Documents` location (iOS) or `FilesDir` (Android).
+```javascript
+import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
+
+const db = openDatabase({name : "testDB", createFromLocation : "/data/mydbfile.sqlite"}, okCallback,errorCallback);
+```
+
 ## Uninstallation
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-SQLite-Storage
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-SQLite-Storage
 
 ###### iOS
     $ cd ios
     $ pod install
     $ cd ..
-
-## Known limitations
-#### Importing pre-populated DB is not supported
-Importing pre-populated DB as described [here](https://github.com/andpor/react-native-sqlite-storage#importing-a-pre-populated-database) is not supported as for now.
-As a workaround some query can be executed against newly created DB to fill-in the data.

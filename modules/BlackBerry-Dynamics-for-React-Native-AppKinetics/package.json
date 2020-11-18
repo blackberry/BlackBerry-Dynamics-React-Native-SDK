@@ -1,0 +1,17 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-AppKinetics",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics AppKinetics module provides the functionality to securely communicate between Dynamics applications.",
+  "main": "index.js",
+  "scripts": {
+    "install": "node ./scripts/install_hook.js",
+    "flow": "flow"
+  },
+  "keywords": [
+    "react-native"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "devDependencies": {
+    "flow-bin": "^0.98.0"
+  }
+}

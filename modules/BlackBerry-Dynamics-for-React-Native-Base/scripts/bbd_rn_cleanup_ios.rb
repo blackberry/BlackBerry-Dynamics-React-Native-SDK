@@ -18,6 +18,7 @@
 require 'xcodeproj'
 require 'plist'
 require 'json'
+require 'fileutils'
 
 class BbdRNProject
   def self.get_product_bundle_id
@@ -26,11 +27,14 @@ class BbdRNProject
 
   PRODUCT_ID = BbdRNProject.get_product_bundle_id
 
-  GD_ASSETS_BUNDLE = File.expand_path('~/Library/Application Support/BlackBerry/Good.platform/iOS/Frameworks/GD.framework/Versions/A/Resources/GDAssets')
   GD_FIPS_LD = File.expand_path('~/Library/Application Support/BlackBerry/Good.platform/iOS/FIPS_module/$FIPS_PACKAGE/bin/gd_fipsld')
+  LIBRARY_SEARCH_PATHS = '$(SDK_DIR)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(inherited)'
+  LD_RUNPATH_SEARCH_PATHS = '@executable_path/Frameworks'
 
   BUILD_FILES_TO_REMOVE = [
     'GD.framework',
+    'BlackBerryCerticom.framework',
+    'BlackBerryCerticomSBGSE.framework',
     'WebKit.framework',
     'LocalAuthentication.framework',
     'DeviceCheck.framework',
@@ -45,19 +49,27 @@ class BbdRNProject
     'CoreGraphics.framework',
     'AssetsLibrary.framework',
     'SafariServices.framework',
-    'libz.tbd'
+    'libz.tbd',
+    'libnetwork.tbd'
   ]
 
-  BUILD_CONFIGS = {
-    'FIPS_PACKAGE'    => '$(CURRENT_ARCH).sdk',
-    'LDPLUSPLUS'      => GD_FIPS_LD,
-    'LD'              => GD_FIPS_LD
+  BUILD_CONFIGS_TO_BE_DELETED = {
+    'FIPS_PACKAGE'         => '$(CURRENT_ARCH).sdk',
+    'LDPLUSPLUS'           => GD_FIPS_LD,
+    'LD'                   => GD_FIPS_LD,
+    'LIBRARY_SEARCH_PATHS' => LIBRARY_SEARCH_PATHS
+  }
+
+  BUILD_CONFIGS_TO_BE_RESTORED = {
+    'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES' => 'NO',
+    'LD_RUNPATH_SEARCH_PATHS'               => LD_RUNPATH_SEARCH_PATHS
   }
 
   PLIST_CONFIG = {
     "GDApplicationID"          => PRODUCT_ID,
     "GDApplicationVersion"     => '1.0.0.0',
     "NSFaceIDUsageDescription" => 'Enable authentication without a password.',
+    "NSCameraUsageDescription" => 'Allow camera usage to scan a QR code',
     "CFBundleURLTypes"         => [{
       "CFBundleURLName"        => PRODUCT_ID,
       "CFBundleURLSchemes"     => [
@@ -77,11 +89,13 @@ class BbdRNProject
   attr_reader :product_id
 
   def initialize
-    rn_project_path = ENV['INIT_CWD'] || Dir.pwd
-    rn_project_json = JSON.load File.open "#{rn_project_path}/package.json"
+    @rn_project_path = ENV['INIT_CWD'] || Dir.pwd
+    rn_project_json = JSON.load File.open "#{@rn_project_path}/package.json"
     @product_name = rn_project_json['name']
-    @xcodeproj = Xcodeproj::Project.open("#{rn_project_path}/ios/#{@product_name}.xcodeproj")
-    @plist_path = "#{rn_project_path}/ios/#{@product_name}/Info.plist"
+    @rn_version = rn_project_json['dependencies']['react-native']
+    @xcodeproj = Xcodeproj::Project.open("#{@rn_project_path}/ios/#{@product_name}.xcodeproj")
+    @development_tools_json_path = "#{@rn_project_path}/ios/#{@product_name}/Resources/development-tools-info.json"
+    @plist_path = "#{@rn_project_path}/ios/#{@product_name}/Info.plist"
     @plist = Plist.parse_xml @plist_path
     @native_target = get_native_target
 
@@ -93,6 +107,7 @@ class BbdRNProject
   def prepare_project
     restore_plist
     restore_xcodeproj
+    remove_react_native_info
   end
 
   private
@@ -115,6 +130,46 @@ class BbdRNProject
     @native_target.build_configurations.first.build_settings['PRODUCT_BUNDLE_IDENTIFIER']
   end
 
+  def remove_react_native_info
+    File.delete(@development_tools_json_path) if File.exist?(@development_tools_json_path)
+  end
+
+  def restore_storyboard
+    root = "#{@rn_project_path}/ios/#{@product_name}"
+    path_to_backup = File.expand_path("#{root}/LaunchScreen-backup.storyboard")
+    path_to_storyboard = File.expand_path("#{root}/LaunchScreen.storyboard")
+    xcassets = File.expand_path("#{root}/Images.xcassets")
+    xcassets_backup = File.expand_path("#{root}/Images-backup.xcassets")
+
+    if File.exist?(path_to_backup)
+      File.open(path_to_backup) do |backup_file|
+        content = backup_file.read
+        File.open(path_to_storyboard, "w") do |origin_file|
+          origin_file.write(content)
+        end
+      end
+
+      File.delete(path_to_backup)
+    end
+
+    # Images.xcassets
+    if File.exists?(xcassets_backup)
+      FileUtils.rm_rf xcassets if File.exists? xcassets
+      File.rename xcassets_backup, xcassets
+    end
+  end
+
+  def remove_localization(group)
+    localization_group_name = "InfoPlist.strings"
+
+    group.children.objects.each do |item|
+      if item.display_name == localization_group_name
+        item.clear
+        item.remove_from_project
+      end
+    end
+  end
+
   def restore_xcodeproj
 
     # remove frameworks
@@ -127,31 +182,56 @@ class BbdRNProject
       group.name == 'Frameworks'
     end.first
     frameworks_group.children.objects.each do |el|
-      if el.display_name == 'iOS'
+      if el.display_name == 'iOS' ||
+        el.display_name == 'BlackBerryCerticom.framework' ||
+        el.display_name == 'BlackBerryCerticomSBGSE.framework'
         el.remove_from_project
       end
     end
 
-    # remove group and reference to GDAssets.bundle
+    # remove group and reference to GDAssets.bundle, development-tools-info.json
     app_group = @xcodeproj.groups.select do |group|
       group.name == @product_name
     end.first
     app_group.children.objects.each do |el|
-      if el.display_name == 'GDAssets.bundle'
+      if el.display_name == 'GDAssets.bundle' || el.display_name == 'development-tools-info.json'
         el.remove_from_project
       end
     end
     @native_target.resources_build_phase.files.objects.each do |res|
-      if res.display_name == 'GDAssets.bundle' 
+      if res.display_name == 'GDAssets.bundle' || res.display_name == 'development-tools-info.json'
         @native_target.resources_build_phase.remove_build_file(res)
       end
     end
 
-    # remove build configuration
+    # remove some build configuration
     @native_target.build_configurations.each do |configuration|
-      configuration.build_settings.delete_if {|key, value| BUILD_CONFIGS.has_key?(key)}
+      configuration.build_settings.delete_if {|key, value| BUILD_CONFIGS_TO_BE_DELETED.has_key?(key)}
     end
-    
+
+    # for 0.62 and higher versions of RN we do not add 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES' option to xcconfig
+    # so we do not need to undo it
+    BUILD_CONFIGS_TO_BE_RESTORED.delete('ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES')
+    BUILD_CONFIGS_TO_BE_RESTORED.delete('LD_RUNPATH_SEARCH_PATHS')
+
+    # restore some build configuration to default value
+    @native_target.build_configurations.each do |configuration|
+      configuration.build_settings.merge! BUILD_CONFIGS_TO_BE_RESTORED
+    end
+
+    # remove "Embed Frameworks" Copy Files Phase from Build Phases in order to
+    # remove BlackBerryCerticom.framework and BlackBerryCerticomSBGSE.framework frameworks
+    phases = @native_target.copy_files_build_phases().each do |phase|
+      if phase.name == 'Embed Frameworks'
+        phase.remove_from_project
+      end
+    end
+
+    # restore origin storyboard
+    restore_storyboard
+
+    remove_localization app_group
+
     @xcodeproj.save
   end
 end

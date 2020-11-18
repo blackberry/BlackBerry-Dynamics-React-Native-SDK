@@ -5,6 +5,10 @@
 ## Setup environment
 Please setup your environment as described in the [React Native documentation](https://facebook.github.io/react-native/docs/getting-started). 
 
+## Supportability
+#### React Native
+ - 0.63.x
+
 ## Preconditions
 
 #### Install required dependencies using RubyGems
@@ -21,7 +25,8 @@ To download appropriate version from [BlackBerry Developers](https://developers.
 
 ##### BlackBerry Dynamics SDK for iOS
 Supported versions of the BlackBerry Dynamics SDK for iOS:
-- `Dynamics SDK for iOS - 7.1`
+- `Static Framework v8.1`
+> IMPORTANT: static framework is the only framework, that is supported by the BlackBerry Dynamics SDK for React Native right now.
 
 BlackBerry Dynamics SDK for iOS can be installed via installer package downloaded from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) using the instructions above.
 
@@ -32,7 +37,7 @@ Steps to install BlackBerry Dynamics SDK for iOS from downloaded package:
 
 ##### BlackBerry Dynamics SDK for Android
 Supported versions of the BlackBerry Dynamics SDK for Android:
-- `Dynamics SDK for Android - 7.1`
+- `BlackBerry Dynamics SDK for Android - v8.1`
 
 There are 2 supported ways to install the BlackBerry Dynamics SDK for Android:
 - Installation via the Android SDK manager: start the Android SDK Manager and follow the steps detailed in [Getting Started with the BlackBerry Dynamics SDK for Android](https://developers.blackberry.com/us/en/resources/get-started/blackberry-dynamics-getting-started.html?platform=android#step-2) from "Install the SDK using the Android SDK Manager" section on the BlackBerry Developers website.
@@ -42,14 +47,15 @@ Please note, it will be installed the latest available version of BlackBerry Dyn
 > It is recommended to install the BlackBerry Dynamics SDK for Android via the Android SDK Manager. If you are unable to use the Android SDK Manager, you can install the SDK manually.
 
 ## Installation
-#### react-native@0.60.5
-> Starting from `0.60` react-native supports auto-linking, so running `$ react-native link ...` command is not required.
-> Additionally, from `0.60` react-native supports `Cocoa Pods` for dependency management on iOS platform. So it is required to do `pod install` to install some native dependencies.
+#### react-native
 
-	$ react-native init <appFolder> --version 0.60.5
+	$ react-native init <appFolder> --version 0.63.0
 	$ cd <appFolder>
-	$ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
-> You will be asked to choose an identifier (required) and name (optional) for your application. This identifier is your iOS Bundle ID or Android Package Name. It will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
+> Integrates Dynamics based on your current identifiers - iOS Bundle ID and Android Package Name.
+
+	$ yarn set-bundle-id (OPTIONAL)
+> Allows to update an identifier (required) and name (optional) for your application. This identifier is your iOS Bundle ID or Android Package Name. It will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
 
 ##### iOS
  	$ cd ios
@@ -67,9 +73,9 @@ To activate your new BlackBerry Dynamics application with the BlackBerry UEM man
 
 ## Uninstallation
 	$ cd <appFolder>
-	$ npm uninstall BlackBerry-Dynamics-for-React-Native-Base
+	$ yarn remove BlackBerry-Dynamics-for-React-Native-Base
 
 ##### iOS
-    $ cd ios
-    $ pod install
-    $ cd ..
+	$ cd ios
+	$ pod install
+	$ cd ..

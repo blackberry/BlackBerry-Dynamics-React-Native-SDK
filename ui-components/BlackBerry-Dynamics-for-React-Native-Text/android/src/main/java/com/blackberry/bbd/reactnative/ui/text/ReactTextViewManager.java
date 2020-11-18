@@ -23,7 +23,7 @@ import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.views.text.ReactTextUpdate;
-import com.facebook.react.views.text.TextAttributeProps;
+import com.blackberry.bbd.reactnative.ui.text.TextAttributeProps;
 import com.facebook.yoga.YogaMeasureMode;
 import java.util.Map;
 import javax.annotation.Nullable;

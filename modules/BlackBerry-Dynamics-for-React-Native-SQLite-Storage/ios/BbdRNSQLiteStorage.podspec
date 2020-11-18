@@ -19,7 +19,7 @@ Pod::Spec.new do |s|
   s.version       = "1.0.0"
   s.summary       = "BlackBerry Dynamics SQLite Storage module for React Native for iOS"
   s.homepage      = "https://community.blackberry.com/"
-  s.license       = { :type => "MIT" }
+  s.license       = { :type => "Apache License, Version 2.0" }
   s.authors       = {
     "Volodymyr Taliar" => "vtaliar@blackberry.com",
     "Taras Omelchuk" => "tomelchuk@blackberry.com",
@@ -28,7 +28,8 @@ Pod::Spec.new do |s|
   s.platform      = :ios, "9.0"
   s.source        = { 
     :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git", 
-    :tag => "#{s.version}" }
+    :tag => "#{s.version}"
+  }
   s.source_files  = "BbdRNSQLiteStorage/**/*.{h,m}"
   s.dependency "React"
 end

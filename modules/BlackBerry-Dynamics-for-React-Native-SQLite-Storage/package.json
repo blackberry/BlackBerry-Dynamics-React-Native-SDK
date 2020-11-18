@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "BlackBerry Dynamics SQLite Storage module for React Native that secures SQLite DB.",
   "main": "js/sqlite.js",
+  "scripts": {
+    "install": "node ./scripts/install_hook.js"
+  },
   "keywords": [
     "react-native"
   ],

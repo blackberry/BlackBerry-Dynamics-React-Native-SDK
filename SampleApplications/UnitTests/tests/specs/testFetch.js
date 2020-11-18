@@ -170,7 +170,7 @@ export default function() {
         expect(response.ok).toBe(true);
       });
 
-      it('Fetch: DELETE, should redirect to the redirection url, code 301: Moved Permanently', async function() {
+      xit('Fetch: DELETE, should redirect to the redirection url, code 301: Moved Permanently', async function() {
         const redirectionUrl = 'https://httpbin.org/get';
 
         const response = await fetch(url + '/status/301', {

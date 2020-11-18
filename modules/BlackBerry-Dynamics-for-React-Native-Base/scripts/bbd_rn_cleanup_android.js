@@ -15,12 +15,9 @@
  */
 
 (function() {
-  var execSync = require('child_process').execSync,
-    fs = require('fs'),
+  var fs = require('fs'),
     path = require('path'),
-    fse = require('fs-extra'),
-    projectRoot = process.env.INIT_CWD,
-    bbdBasePath = process.cwd();
+    projectRoot = process.env.INIT_CWD;
 
   if (fs.existsSync(path.join(projectRoot, 'android'))) {
     // Cleanup root build.gradle
@@ -83,6 +80,15 @@
     
     if (fs.existsSync(dynamicsSettingsJsonPath)) {
       fs.unlinkSync(dynamicsSettingsJsonPath);
+    }
+
+    // Remove development-tools-info.json
+    var androidReactNativeInfoJsonPath = path.join(
+      projectAndroidMainPath, 'assets', 'development-tools-info.json'
+    );
+
+    if (fs.existsSync(androidReactNativeInfoJsonPath)) {
+      fs.unlinkSync(androidReactNativeInfoJsonPath);
     }
 
     function updateExtendsClassInMainActivity(fileContent) {

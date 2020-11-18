@@ -28,5 +28,6 @@ android {
 dependencies {
     implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
     implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
+    implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Base')
     implementation "com.facebook.react:react-native:+"
 }

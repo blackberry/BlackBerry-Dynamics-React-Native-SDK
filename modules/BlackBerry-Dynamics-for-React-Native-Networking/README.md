@@ -4,14 +4,17 @@ Overrides the `XMLHttpRequest` and `fetch` APIs from React Native [Networking mo
 
 > IMPORTANT: `XMLHttpRequest` and `fetch` APIs work securely on iOS by default when `BlackBerry-Dynamics-for-React-Native-Base` module is added and linked to the application.
 
+## Supportability
+#### React Native
+ - 0.63.x
+
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Networking` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 
 ## Installation
-    $ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
-    $ yarn
+    $ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
 
 ##### iOS
     $ cd ios
@@ -87,7 +90,7 @@ handleFetch(requestInfo) {
 ```
 ## Uninstallation
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Networking
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-Networking
 
 ##### iOS
     $ cd ios

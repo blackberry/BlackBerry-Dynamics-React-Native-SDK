@@ -12,18 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Sample code for React Native SQLite Storage: https://aboutreact.com/example-of-sqlite-database-in-react-native/ 
  */
- 
-import React, {Component} from 'react';
+
+import React, { Component } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Alert } from 'react-native';
 
 import FormInput from '../components/FormInput';
 import ActionButton from '../components/ActionButton';
-
-import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
-const db = openDatabase({ name: 'RNTestDatabase.db' });
 
 export default class AddUser extends Component {
   constructor(props) {
@@ -32,6 +27,7 @@ export default class AddUser extends Component {
       username: '',
       phone: '',
       address: '',
+      database: this.props.navigation.state.params.db
     };
   }
 
@@ -42,7 +38,7 @@ export default class AddUser extends Component {
     if (username) {
       if (phone) {
         if (address) {
-          db.transaction(function(tx) {
+          this.state.database.transaction(function(tx) {
             tx.executeSql('INSERT INTO Users (username, phone, address) VALUES (?,?,?)', [username, phone, address],
               (tx, results) => {
                 console.log('Results', results.rowsAffected);
@@ -78,6 +74,7 @@ export default class AddUser extends Component {
   };
 
   render() {
+
     return (
       <View style={{ backgroundColor: 'white', flex: 1, paddingTop: 10 }}>
         <ScrollView keyboardShouldPersistTaps="handled">
@@ -102,7 +99,7 @@ export default class AddUser extends Component {
               maxLength={225}
               numberOfLines={5}
               multiline={true}
-              style={{ padding:10 }}
+              style={{ padding: 10 }}
             />
             <ActionButton
               title="Submit"
@@ -114,3 +111,4 @@ export default class AddUser extends Component {
     );
   }
 }
+

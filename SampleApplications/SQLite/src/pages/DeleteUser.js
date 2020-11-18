@@ -12,24 +12,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Sample code for React Native SQLite Storage: https://aboutreact.com/example-of-sqlite-database-in-react-native/ 
  */
- 
+
 import React, {Component} from 'react';
 import { View, Alert } from 'react-native';
 
 import FormInput from '../components/FormInput';
 import ActionButton from '../components/ActionButton';
 
-import {openDatabase} from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
-const db = openDatabase({ name: 'RNTestDatabase.db' });
-
 export default class DeleteUser extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      inputUserId: ''
+      inputUserId: '',
+      database: this.props.navigation.state.params.db
     };
   }
 
@@ -37,7 +33,7 @@ export default class DeleteUser extends Component {
     var that = this;
     const { inputUserId } = this.state;
 
-    db.transaction(tx => {
+    this.state.database.transaction(tx => {
       tx.executeSql('DELETE FROM Users where id=?', [inputUserId], (tx, results) => {
           console.log('Results', results.rowsAffected);
 

@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.blackberry.bbd.reactnative.helpers.RNBbdServiceHelper;
 import com.good.gd.GDAndroid;
 import com.good.gd.GDStateAction;
 
@@ -89,6 +90,8 @@ public class BBDLifeCycle implements Application.ActivityLifecycleCallbacks {
         application.registerActivityLifecycleCallbacks(s_instance);
 
         registerBroadcastReceiver();
+
+        RNBbdServiceHelper.getInstance().init();
     }
 
     /**

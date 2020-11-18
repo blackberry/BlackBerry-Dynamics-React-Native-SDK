@@ -19,16 +19,17 @@ Pod::Spec.new do |s|
   s.version      = "1.0.0"
   s.summary      = "BbdRNAsyncStorage"
   s.homepage     = "https://community.blackberry.com/"
-  s.license      = { :type => "MIT" }
-  s.authors       = {
+  s.license      = { :type => "Apache License, Version 2.0" }
+  s.authors      = {
     "Volodymyr Taliar" => "vtaliar@blackberry.com",
     "Taras Omelchuk" => "tomelchuk@blackberry.com",
     "Nobu Ishikawa" => "nishikawa@blackberry.com"
   }
   s.platform     = :ios, "9.0"
-  s.source        = { 
+  s.source       = { 
     :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git", 
-    :tag => "#{s.version}" }
-  s.source_files  = "BbdRNAsyncStorage/**/*.{h,m}"
+    :tag => "#{s.version}"
+  }
+  s.source_files = "BbdRNAsyncStorage/**/*.{h,m}"
   s.dependency "React"
 end

@@ -3,16 +3,18 @@
 `BlackBerry-Dynamics-for-React-Native-Async-Storage` secures built-in [AsyncStorage](https://facebook.github.io/react-native/docs/asyncstorage#docsNav) API.
 The JavaScript API of this module remains the same but file(s) that contain AsyncStorage key-value pairs are stored and managed within Dynamics secure container.
 
+## Supportability
+#### React Native
+ - 0.63.x
+
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Async-Storage` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 
 ## Installation
-> Starting from `0.60` react-native supports auto-linking, so running `$ react-native link ...` command is not required.
 
-    $ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Async-Storage
-    $ yarn
+    $ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Async-Storage
 
 ###### iOS
     $ cd ios
@@ -54,7 +56,7 @@ _retrieveData = async () => {
 ## Uninstallation
 
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Async-Storage
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-Async-Storage
 
 ###### iOS
     $ cd ios

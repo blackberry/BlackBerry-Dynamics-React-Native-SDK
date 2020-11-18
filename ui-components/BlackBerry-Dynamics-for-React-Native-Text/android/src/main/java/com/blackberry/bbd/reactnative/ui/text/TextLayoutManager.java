@@ -30,7 +30,6 @@ import com.facebook.react.bridge.ReadableNativeMap;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.ReactStylesDiffMap;
 import com.facebook.react.views.text.CustomLetterSpacingSpan;
-import com.facebook.react.views.text.CustomStyleSpan;
 import com.facebook.react.views.text.ReactAbsoluteSizeSpan;
 import com.facebook.react.views.text.ReactBackgroundColorSpan;
 import com.facebook.react.views.text.ReactForegroundColorSpan;
@@ -45,6 +44,7 @@ import com.facebook.yoga.YogaMeasureMode;
 import com.facebook.yoga.YogaMeasureOutput;
 import java.util.ArrayList;
 import java.util.List;
+import com.blackberry.bbd.reactnative.ui.text.CustomStyleSpan;
 
 /**
  * Class responsible of creating {@link Spanned} object for the JS representation of Text

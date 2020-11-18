@@ -17,7 +17,8 @@
 (function() {
   var shell = require('shelljs'),
     path = require('path'),
-	  cleanupScriptIos = path.join('.', 'scripts', 'bbd_rn_cleanup_ios.rb'),
+    fs = require('fs'),
+    cleanupScriptIos = path.join('.', 'scripts', 'bbd_rn_cleanup_ios.rb'),
     cleanupScriptAndroid = path.join('.', 'scripts', 'bbd_rn_cleanup_android.js'),
     isWindows = process.platform === "win32",
     cmd = 'node ' + cleanupScriptAndroid.replace(' ', '\\ ');
@@ -30,6 +31,8 @@
   
   shell.exec(cmd);
 
+  removeUpdatePodsFromPodfile();
+
   function checkAndExitOrContinue() {
     // example of process.env.npm_config_argv
     // {"remain":["../../modules/BlackBerry-Dynamics-for-React-Native-Base/"],
@@ -41,11 +44,20 @@
         return !['--save', '--verbose', '--d'].includes(val);
       });
 
-    if (!filteredOriginal[1] || 
-        ((filteredOriginal[1] && filteredOriginal[1].indexOf('BlackBerry-Dynamics-for-React-Native-Base') < 0) ||
-          !filteredOriginal.includes('uninstall'))) {
+    if (!(filteredOriginal[1] && filteredOriginal[1].indexOf('BlackBerry-Dynamics-for-React-Native-Base') > -1 &&
+        (filteredOriginal.includes('uninstall') || filteredOriginal.includes('remove')))) {
       process.exit(0);
-    } 
+    }
+  }
+
+  function removeUpdatePodsFromPodfile() {
+    var command = '\t\tsystem("node ../node_modules/BlackBerry-Dynamics-for-React-Native-Base/scripts/updatePods.js")\n',
+      projectRoot = process.env.INIT_CWD,
+      podfilePath = path.join(projectRoot, 'ios', 'Podfile'),
+      podfileContent = fs.readFileSync(podfilePath, 'utf-8'),
+      newPodfileContent = podfileContent.replace(command, '');
+      
+    fs.writeFileSync(podfilePath, newPodfileContent, 'utf-8');
   }
 
 })();

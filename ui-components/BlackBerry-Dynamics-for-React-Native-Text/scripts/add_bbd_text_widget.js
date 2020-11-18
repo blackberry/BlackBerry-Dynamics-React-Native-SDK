@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
  *
@@ -20,17 +22,6 @@
     projectRoot = process.env.INIT_CWD,
     bbdTextWidgetName = 'AndroidTextBbd',
     bbdVirtualTextWidgetName = 'AndroidVirtualTextBbd',
-    rn60RendererOssPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'oss'),
-    rn60RendererDevArr = [
-      path.join(rn60RendererOssPath, 'ReactFabric-dev.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-dev.js')
-    ],
-    rn60RendererOtherArr = [
-      path.join(rn60RendererOssPath, 'ReactFabric-prod.js'),
-      path.join(rn60RendererOssPath, 'ReactFabric-profiling.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-prod.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-profiling.js')
-    ],
     rn61RendererImplementationsPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'implementations'),
     rn61RendererDevArr = [
       path.join(rn61RendererImplementationsPath, 'ReactFabric-dev.fb.js'),
@@ -52,32 +43,7 @@
 
   // To enable DLP within <Text \> UI component we need to extend default list of native views
   // with following views: AndroidTextBbd, AndroidVirtualTextBbd.
-  // node_modules/react-native/Libraries/Renderer/oss/* manages default native views for RN 0.60.x
-  // node_modules/react-native/Libraries/Renderer/implementations/* manages default native views for RN 0.61.x
-
-  if (fs.existsSync(rn60RendererOssPath)) {
-    rn60RendererDevArr.forEach(function(filePath) {
-      var bbdTextWidgetCode = 'type === "' + bbdTextWidgetName + '" || // Android\n\t\t',
-        bbdVirtualTextWidgetCode = 'type === "' + bbdVirtualTextWidgetName + '" || // Android\n\t\t';
-
-      addBbdTextWidget(
-        filePath,
-        bbdTextWidgetCode + bbdVirtualTextWidgetCode,
-        'type === "AndroidTextInput" || // Android'
-      );
-    });
-
-    rn60RendererOtherArr.forEach(function(filePath) {
-      var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === nextContext ||\n\t\t',
-        bbdVirtualTextWidgetCode = '"' + bbdVirtualTextWidgetName + '" === nextContext ||\n\t\t';
-
-      addBbdTextWidget(
-        filePath,
-        bbdTextWidgetCode + bbdVirtualTextWidgetCode,
-        '"AndroidTextInput" === nextContext ||'
-      );
-    });
-  }
+  // node_modules/react-native/Libraries/Renderer/implementations/* manages default native views for RN 0.61.x and higher
 
   if (fs.existsSync(rn61RendererImplementationsPath)) {
     rn61RendererDevArr.forEach(function(filePath) {

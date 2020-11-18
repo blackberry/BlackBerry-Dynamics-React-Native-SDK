@@ -47,11 +47,13 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.good.gd.file.GDFileSystem;
 
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+
 
 
 public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
@@ -348,6 +350,8 @@ public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
   private SQLiteDatabase openDatabase(String dbname, String assetFilePath, int openFlags, CallbackContext cbc) throws Exception {
     InputStream in = null;
     File dbfile = null;
+    File gdfile = null;
+
     try {
       SQLiteDatabase database = this.getDatabase(dbname);
       if (database != null && database.isOpen()) {
@@ -369,7 +373,7 @@ public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
             FLog.e(TAG, "pre-populated DB asset NOT FOUND in app bundle www subdirectory: " + assetFilePath);
           }
         } else if (assetFilePath.charAt(0) == '~') {
-          assetFilePath = assetFilePath.startsWith("~/") ? assetFilePath.substring(2) : assetFilePath.substring(1);
+          assetFilePath = "www/" + (assetFilePath.startsWith("~/") ? assetFilePath.substring(2) : assetFilePath.substring(1));
           try {
             in = this.getContext().getAssets().open(assetFilePath);
             FLog.v(TAG, "Pre-populated DB asset FOUND in app bundle subdirectory: " + assetFilePath);
@@ -382,11 +386,20 @@ public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
           assetFilePath = assetFilePath.startsWith("/") ? assetFilePath.substring(1) : assetFilePath;
           try {
             File assetFile = new File(filesDir, assetFilePath);
-            in = new FileInputStream(assetFile);
-            FLog.v(TAG, "Pre-populated DB asset FOUND in Files subdirectory: " + assetFile.getCanonicalPath());
-            if (openFlags == SQLiteDatabase.OPEN_READONLY) {
-              dbfile = assetFile;
-              FLog.v(TAG, "Detected read-only mode request for external asset.");
+            if (assetFile.exists()) {
+              in = new FileInputStream(assetFile);
+              FLog.v(TAG, "Pre-populated DB asset FOUND in Files subdirectory: " + assetFile.getCanonicalPath());
+              if (openFlags == SQLiteDatabase.OPEN_READONLY) {
+                FLog.v(TAG, "Detected read-only mode request for external asset.");
+                // Do not directly open database in public storage with SQLiteDatabase even read-only mode request.
+                // SQLiteDatabase targets secure database in app container only and need to import into app container before.
+              }
+            }
+            else {
+              // for compatibility with iOS native module behavior
+              // expect assets db in secure storage in App Document Directory
+              File assetsGDFile = gdFileSystem.createFile(assetFilePath);
+              in = gdFileSystem.openFileInput(assetsGDFile.getAbsolutePath());
             }
           } catch (Exception ex){
             assetImportError = true;
@@ -399,26 +412,24 @@ public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
         openFlags = SQLiteDatabase.OPEN_READWRITE | SQLiteDatabase.CREATE_IF_NECESSARY;
         dbfile = this.getContext().getDatabasePath(dbname);
 
-        // importing  pre-populated db from assets is not supported for now
-        
-        // if (!dbfile.exists() && assetImportRequested) {
-        //   if (assetImportError || in == null) {
-        //     FLog.e(TAG, "Unable to import pre-populated db asset");
-        //     throw new Exception("Unable to import pre-populated db asset");
-        //   } else {
-        //     FLog.v(TAG, "Copying pre-populated db asset to destination");
-        //     try {
-        //      this.createFromAssets(dbname, dbfile, in);
-        //     } catch (Exception ex){
-        //       FLog.e(TAG, "Error importing pre-populated DB asset", ex);
-        //       throw new Exception("Error importing pre-populated DB asset");
-        //     }
-        //   }
-        // }
+        gdfile = gdFileSystem.createFile(dbfile.getAbsolutePath());
+        if (!gdfile.exists()) {
+          gdfile.getParentFile().mkdirs();
 
-        if (!dbfile.exists()) {
-          dbfile = gdFileSystem.createFile(dbfile.getAbsolutePath());
-          dbfile.getParentFile().mkdirs();
+          if (assetImportRequested) {
+            if (assetImportError || in == null) {
+              FLog.e(TAG, "Unable to import pre-populated db asset");
+              throw new Exception("Unable to import pre-populated DB asset");
+            } else {
+              FLog.v(TAG, "Copying pre-populated db asset to destination");
+              try {
+                this.createFromAssets(dbname, dbfile, in);
+              } catch (Exception ex) {
+                FLog.e(TAG, "Error importing pre-populated DB asset", ex);
+                throw new Exception("Error importing pre-populated DB asset");
+              }
+            }
+          }
         }
       }
 
@@ -445,29 +456,45 @@ public class RNReactNativeBbdStorageModule extends ReactContextBaseJavaModule {
    */
   private void createFromAssets(String dbName, File dbfile, InputStream assetFileInputStream) throws Exception {
     OutputStream out = null;
+    File tempDbFile = null;
 
     try {
       FLog.v(TAG, "Copying pre-populated DB content");
+
       String dbPath = dbfile.getAbsolutePath();
       dbPath = dbPath.substring(0, dbPath.lastIndexOf("/") + 1);
+      tempDbFile = gdFileSystem.createFile(dbPath + "tempdata.db");
+      tempDbFile.getParentFile().mkdirs();
 
-      File dbPathFile = new File(dbPath);
-      if (!dbPathFile.exists())
-        dbPathFile.mkdirs();
-
-      File newDbFile = new File(dbPath + dbName);
-      out = new FileOutputStream(newDbFile);
+      tempDbFile.createNewFile();
+      out = gdFileSystem.openFileOutput(tempDbFile.getAbsolutePath(), GDFileSystem.MODE_PRIVATE);
 
       // XXX TODO: this is very primitive, other alternatives at:
       // http://www.journaldev.com/861/4-ways-to-copy-file-in-java
       byte[] buf = new byte[1024];
       int len;
-      while ((len = assetFileInputStream.read(buf)) > 0)
+      while ((len = assetFileInputStream.read(buf)) > 0) {
         out.write(buf, 0, len);
+        out.flush();
+      }
+      out.close();
+      out = null;
 
-      FLog.v(TAG, "Copied pre-populated DB asset to: " + newDbFile.getAbsolutePath());
+      FLog.v(TAG, "Copied pre-populated DB asset to temporary plain DB: " + tempDbFile.getAbsolutePath());
+
+      // create an encrypted database from a plain SQLite database file in the secure file system
+      if (SQLiteDatabase.importDatabase(tempDbFile.getAbsolutePath(), dbfile.getAbsolutePath())) {
+        FLog.v(TAG, "Imported temporary plain DB to encrypted DB: " + dbfile.getAbsolutePath());
+      }
+      else {
+        throw new Exception("Error importing pre-populated DB asset");
+      }
+
     } finally {
-      closeQuietly(out);
+      if (out != null)
+        out.close();
+      if (tempDbFile != null)
+        tempDbFile.delete();
     }
   }
 

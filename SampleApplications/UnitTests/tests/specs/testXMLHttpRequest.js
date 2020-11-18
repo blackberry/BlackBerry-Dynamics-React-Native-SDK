@@ -1080,7 +1080,7 @@ export default function() {
         xhr.send();
       });
 
-      it('Should be equal to the redirection url', function(done) {
+      xit('Should be equal to the redirection url', function(done) {
         const method = "GET";
         const url = "https://www.httpbin.org/redirect-to?url=";
         const redirectionUrl = "https://www.example.com/";
@@ -1106,7 +1106,7 @@ export default function() {
         xhr.send();
       });
 
-      it('Should be equal to the last server URL in the redirection chain', function(done) {
+      xit('Should be equal to the last server URL in the redirection chain', function(done) {
         const method = "GET";
         const url = "https://www.httpbin.org/redirect/4";
         const redirectionUrl = "https://www.httpbin.org/get";

@@ -163,7 +163,7 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
                             RCTLog(@"Built path to pre-populated DB asset from app bundle www subdirectory: %@",assetFilePath);
                         } else if ([assetFilePath hasPrefix:@"~"]) {
                             assetFilePath = [assetFilePath substringFromIndex:1];
-                            NSString *targetBundleDirPath = [[NSBundle mainBundle] resourcePath];
+                            NSString *targetBundleDirPath = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent: @"www"];
                             assetFilePath = [targetBundleDirPath stringByAppendingPathComponent: assetFilePath];
                             RCTLog(@"Built path to pre-populated DB asset from app bundle subdirectory: %@",assetFilePath);
                         } else {
@@ -250,12 +250,33 @@ RCT_EXPORT_METHOD(open: (NSDictionary *) options success:(RCTResponseSenderBlock
     if ([[GDFileManager defaultManager] fileExistsAtPath:prepopulatedDb]) {
         RCTLog(@"Found prepopulated DB: %@", prepopulatedDb);
         NSError *error;
-        BOOL success = [[GDFileManager defaultManager] copyItemAtPath:prepopulatedDb toPath:dbname error:&error];
+        NSString *dbtemp = [self getDBPath:[NSString stringWithUTF8String:"tempdata.db"] at:@"nosync"];
+
+        if ([[GDFileManager defaultManager] fileExistsAtPath:dbtemp]) {
+            RCTLog(@"Found temp file to remove: %@", dbtemp);
+            BOOL success = [[GDFileManager defaultManager]removeItemAtPath:dbtemp error:&error];
+            if (!success) {
+                RCTLog(@"Failed to delete temp file: %@", [error localizedDescription]);
+                // Continue to try overwrite anyways
+            }
+        }
+
+        NSData *dbData = [NSData dataWithContentsOfFile:prepopulatedDb];
+        if (dbData == nil) {
+            RCTLog(@"failed to read from prepopulated DB");
+            return;
+        }
+        BOOL success = [[GDFileManager defaultManager] createFileAtPath:dbtemp contents:dbData attributes:nil];
         
         if(success) {
-            RCTLog(@"Copied prepopulated DB content to: %@", dbname);
+            if (sqlite3enc_import([dbtemp UTF8String], [dbname UTF8String]) == SQLITE_OK) {
+                RCTLog(@"Copied prepopulated DB content to: %@", dbname);
+            } else {
+                RCTLog(@"Unable to import DB file");
+            }
+            [[GDFileManager defaultManager]removeItemAtPath:dbtemp error:&error];
         } else {
-            RCTLog(@"Unable to copy DB file: %@", [error localizedDescription]);
+            RCTLog(@"Unable to create DB file");
         }
     }
 }

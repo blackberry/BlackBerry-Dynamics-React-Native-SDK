@@ -4,18 +4,15 @@
 
 # Supportability
 #### React Native
- - 0.60.x
- - 0.61.x
+ - 0.63.x
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-TextInput` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## Installation
-> Starting from `0.60` react-native supports auto-linking, so running `$ react-native link ...` command is not required.
 
-    $ npm i <path>/ui-components/BlackBerry-Dynamics-for-React-Native-TextInput
-    $ yarn
+    $ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-TextInput
 
 ###### iOS
     $ cd ios
@@ -104,7 +101,7 @@ export default class App extends Component {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-TextInput
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-TextInput
 
 ###### iOS
     $ cd ios

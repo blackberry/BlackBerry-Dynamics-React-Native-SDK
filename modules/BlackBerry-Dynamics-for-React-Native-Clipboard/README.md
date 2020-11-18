@@ -4,13 +4,16 @@
 Clipboard API works in combination with Data Leakage Prevention (DLP). More details about DLP on Android can be found [here](https://developer.blackberry.com/devzone/files/blackberry-dynamics/android/namespacecom_1_1good_1_1gd_1_1widget.html).
 > NOTE: on iOS Clipboard API is secured by default by Dynamics runtime after `BlackBerry-Dynamics-for-React-Native-Base` module is installed and linked. More details about DLP on iOS can be found [here](https://developer.blackberry.com/devzone/files/blackberry-dynamics/ios/interface_g_di_o_s.html).
 
+## Supportability
+#### React Native
+ - 0.63.x
+
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Clipboard` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
 
 Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## Installation
-    $ npm i <path>/modules/BlackBerry-Dynamics-for-React-Native-Clipboard
-    $ yarn
+    $ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Clipboard
 
 ##### iOS
     $ cd ios
@@ -39,7 +42,7 @@ set_Text_Into_Clipboard = async () => {
 
 ## Uninstallation
     $ cd <appFolder>
-    $ npm uninstall BlackBerry-Dynamics-for-React-Native-Clipboard
+    $ yarn remove BlackBerry-Dynamics-for-React-Native-Clipboard
 
 ##### iOS
     $ cd ios

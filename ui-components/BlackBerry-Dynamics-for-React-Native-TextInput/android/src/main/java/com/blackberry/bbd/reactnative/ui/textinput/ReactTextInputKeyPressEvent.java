@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native/tree/master/ReactAndroid/src/main/java/com/facebook/react/views/textinput
+ * from https://github.com/facebook/react-native/tree/v0.63.2/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -16,9 +16,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
-/**
- * Event emitted by EditText native view when key pressed
- */
+/** Event emitted by EditText native view when key pressed */
 public class ReactTextInputKeyPressEvent extends Event<ReactTextInputEvent> {
 
   public static final String EVENT_NAME = "topKeyPress";

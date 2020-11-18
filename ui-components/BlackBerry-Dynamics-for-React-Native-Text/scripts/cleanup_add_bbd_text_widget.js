@@ -20,17 +20,6 @@
     projectRoot = process.env.INIT_CWD,
     bbdTextWidgetName = 'AndroidTextBbd',
     bbdVirtualTextWidgetName = 'AndroidVirtualTextBbd',
-    rn60RendererOssPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'oss'),
-    rn60RendererDevArr = [
-      path.join(rn60RendererOssPath, 'ReactFabric-dev.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-dev.js')
-    ],
-    rn60RendererOtherArr = [
-      path.join(rn60RendererOssPath, 'ReactFabric-prod.js'),
-      path.join(rn60RendererOssPath, 'ReactFabric-profiling.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-prod.js'),
-      path.join(rn60RendererOssPath, 'ReactNativeRenderer-profiling.js')
-    ],
     rn61RendererImplementationsPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'implementations'),
     rn61RendererDevArr = [
       path.join(rn61RendererImplementationsPath, 'ReactFabric-dev.fb.js'),
@@ -50,22 +39,6 @@
     ];
 
   checkAndExitOrContinue();
-
-  if (fs.existsSync(rn60RendererOssPath)) {
-    rn60RendererDevArr.forEach(function(filePath) {
-      var bbdTextWidgetCode = 'type === "' + bbdTextWidgetName + '" || // Android\n\t\t',
-        bbdVirtualTextWidgetCode = 'type === "' + bbdVirtualTextWidgetName + '" || // Android\n\t\t';
-
-      cleanupBbdTextWidget(filePath, bbdTextWidgetCode + bbdVirtualTextWidgetCode);
-    });
-
-    rn60RendererOtherArr.forEach(function(filePath) {
-      var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === nextContext ||\n\t\t',
-        bbdVirtualTextWidgetCode = '"' + bbdVirtualTextWidgetName + '" === nextContext ||\n\t\t';
-      
-      cleanupBbdTextWidget(filePath, bbdTextWidgetCode + bbdVirtualTextWidgetCode);
-    });
-  }
 
   if (fs.existsSync(rn61RendererImplementationsPath)) {
     rn61RendererDevArr.forEach(function(filePath) {

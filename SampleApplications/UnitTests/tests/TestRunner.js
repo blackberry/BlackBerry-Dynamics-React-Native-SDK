@@ -20,8 +20,10 @@ import { testRunnerService } from './testResultsService';
 import runSpecsForFetch from './specs/testFetch';
 import runSpecsForXMLHttpRequest from './specs/testXMLHttpRequest';
 import runSpecsForSQLite from './specs/testSQLite';
+import runSpecsForSQLiteImport from './specs/testSQLite_import';
 import runSpecsForClipboard from './specs/testClipboard';
 import runSpecsForAsyncStorage from './specs/testAsyncStorage';
+import runSpecsForAppKinetics from './specs/testAppKinetics';
 
 export default {
   execute: function() {
@@ -170,8 +172,10 @@ export default {
     runSpecsForXMLHttpRequest();
     runSpecsForFetch();
     runSpecsForSQLite();
+    runSpecsForSQLiteImport();
     runSpecsForClipboard();
     runSpecsForAsyncStorage();
+    runSpecsForAppKinetics();
 
     // Run tests
     env.execute();

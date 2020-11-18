@@ -4,8 +4,11 @@
   "version": "1.0.0",
   "description": "BlackBerry Dynamics Text UI component for React Native enables Data Leakage Prevention (DLP) within <Text /> UI component.",
   "main": "index.js",
+  "bin": {
+    "set-text-config": "./scripts/add_bbd_text_widget.js"
+  },
   "scripts": {
-    "install": "node ./scripts/add_bbd_text_widget.js",
+    "install": "node ./scripts/add_bbd_text_widget.js && node ./scripts/install_hook.js",
     "uninstall": "node ./scripts/cleanup_add_bbd_text_widget.js"
   },
   "keywords": [
