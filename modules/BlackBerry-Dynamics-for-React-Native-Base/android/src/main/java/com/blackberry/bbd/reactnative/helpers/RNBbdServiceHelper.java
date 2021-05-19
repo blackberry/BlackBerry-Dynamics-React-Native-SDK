@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,6 +82,8 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
         } catch (final GDServiceException exception) {
             throw new Error("couldn't initialize GDService");
         }
+
+        RNBbdServiceSpoolHelper.getInstance().init();
     }
 
     /**
@@ -100,6 +102,7 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
      */
     public void setRNContext(final ReactApplicationContext reactContext) {
         this.reactContext = reactContext;
+        RNBbdServiceSpoolHelper.getInstance().setRNContext(reactContext);
     }
 
     /**
@@ -109,6 +112,7 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
      */
     public void setServiceId(final String serviceId) {
         this.serviceId = serviceId;
+        RNBbdServiceSpoolHelper.getInstance().setServiceId(serviceId);
     }
 
     /**
@@ -118,6 +122,7 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
      */
     public void setServiceVersion(final String serviceVersion) {
         this.serviceVersion = serviceVersion;
+        RNBbdServiceSpoolHelper.getInstance().setServiceVersion(serviceVersion);
     }
 
     /**
@@ -176,14 +181,13 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
                                  final String requestID) {
 
         try {
+            if (FILE_TRANSFER_SERVICE_NAME.equals(service) &&
+                    FILE_TRANSFER_SERVICE_VERSION.equals(version) &&
+                    FILE_TRANSFER_METHOD.equals(method)) {
+                RNBbdServiceSpoolHelper.getInstance().proceedSimpleReceive(service, version, attachments);
+                return;
+            }
             if (serviceId.equals(service) && serviceVersion.equals(version)) {
-
-                if (FILE_TRANSFER_SERVICE_NAME.equals(service) &&
-                        FILE_TRANSFER_SERVICE_VERSION.equals(version) &&
-                        FILE_TRANSFER_METHOD.equals(method)) {
-                    proceedSimpleReceive(attachments);
-                    return;
-                }
 
                 final JSONObject resultObject = new JSONObject();
 

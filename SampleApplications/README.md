@@ -3,6 +3,7 @@
 ## Supportability
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 ## General tips
 
@@ -66,6 +67,20 @@ Generate ios and android directories:
 
 #### How to secure AppKinetics communication
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-AppKinetics
+###### iOS
+	$ cd ios
+	$ pod install
+	$ cd ..
+
+#### How to secure FileSystem
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-FileSystem
+###### iOS
+	$ cd ios
+	$ pod install
+	$ cd ..
+
+#### How to integrate Launcher
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Launcher
 ###### iOS
 	$ cd ios
 	$ pod install

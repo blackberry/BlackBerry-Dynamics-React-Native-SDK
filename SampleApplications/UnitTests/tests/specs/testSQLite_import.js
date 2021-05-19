@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 
 import SQLite from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
+import RNFS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 
 import asyncJS from 'async';
 
 import { Platform } from 'react-native';
-
-import RNFS from 'react-native-fs';
 
 export default function() {
   describe('SQLite import test', function() {
@@ -243,7 +242,7 @@ export default function() {
         },
         function(moveToNextFunction) {
           let db;
-          db = SQLite.openDatabase({ name: databaseName, createFromLocation: importPath }, function() {
+          db = SQLite.openDatabase({ name: databaseName, createFromLocation: copyDestPath }, function() {
             expect(true).toBe(true);
             moveToNextFunction(null, db);
           }, defaultFail);
@@ -299,4 +298,3 @@ export default function() {
 
   });
 }
-

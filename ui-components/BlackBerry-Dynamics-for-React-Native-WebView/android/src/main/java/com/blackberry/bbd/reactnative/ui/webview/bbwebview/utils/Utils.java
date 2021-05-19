@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,19 @@
  */
 package com.blackberry.bbd.reactnative.ui.webview.bbwebview.utils;
 
+import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.good.gd.apache.http.Header;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
@@ -36,13 +43,6 @@ public class Utils {
             if (url.endsWith(extension)){
                 return true;
             }
-        }
-        return false;
-    }
-
-    public static boolean isSSOUrl(String url) {
-        if (url != null) {
-            return url.endsWith("startSSO.ping");
         }
         return false;
     }
@@ -63,6 +63,10 @@ public class Utils {
             Log.i(TAG, "debugLogHeaders - header[" + i++ + "] " + header.getKey() + ":" + header.getValue());
         }
         Log.i(TAG, "debugLogHeaders >>");
+    }
+
+    public static String logUrl(String url) {
+        return url.contains("javascript:") ? "[javascript]" : url;
     }
 
     public static String encodeUrl(String urlDecoded) {
@@ -156,4 +160,21 @@ public class Utils {
         Log.e(TAG, "ERROR encodeUrl couldn't decode: " + urlDecoded);
         return urlDecoded;
     }
+
+    public static String getFileContent(int resId, Context context) throws IOException {
+
+        InputStream is = context.getResources().openRawResource(resId);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line = reader.readLine();
+        StringBuilder script = new StringBuilder(line);
+        while ((line = reader.readLine()) != null) {
+            script.append(line).append("\n");
+        }
+
+        reader.close();
+        is.close();
+
+        return script.toString();
+    }
+
 }

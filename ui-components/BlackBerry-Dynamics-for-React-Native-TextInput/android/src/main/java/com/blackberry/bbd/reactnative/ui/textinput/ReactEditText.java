@@ -103,7 +103,6 @@ public class ReactEditText extends GDEditText {
 
   private ReactViewBackgroundManager mReactBackgroundManager;
 
-  protected @Nullable JavaOnlyMap mAttributedString = null;
   protected @Nullable StateWrapper mStateWrapper = null;
   protected boolean mDisableTextDiffing = false;
 
@@ -482,10 +481,6 @@ public class ReactEditText extends GDEditText {
     // Only set the text if it is up to date.
     if (!canUpdateWithEventCount(reactTextUpdate.getJsEventCounter())) {
       return;
-    }
-
-    if (reactTextUpdate.mAttributedString != null) {
-      mAttributedString = JavaOnlyMap.deepClone(reactTextUpdate.mAttributedString);
     }
 
     // The current text gets replaced with the text received from JS. However, the spans on the

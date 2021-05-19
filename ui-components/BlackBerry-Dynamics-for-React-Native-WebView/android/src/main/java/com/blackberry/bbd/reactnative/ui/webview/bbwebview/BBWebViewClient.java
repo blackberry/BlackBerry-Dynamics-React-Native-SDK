@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import android.net.http.SslError;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.view.KeyEvent;
 import android.webkit.ClientCertRequest;
-import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.HttpAuthHandler;
 import android.webkit.RenderProcessGoneDetail;
@@ -37,17 +37,22 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import com.good.gd.apache.http.HttpResponse;
+import com.good.gd.apache.http.protocol.HttpContext;
 import com.blackberry.bbd.reactnative.ui.webview.R;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.jsInterfaces.SamlListener;
+import com.blackberry.bbd.reactnative.ui.webview.bbwebview.jsInterfaces.ClipboardEventListener;
+import com.blackberry.bbd.reactnative.ui.webview.bbwebview.jsInterfaces.DocumentCookieStore;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.jsInterfaces.RequestBodyProvider;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http.GDHttpClientProvider;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http.RequestTask;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.Future;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BBWebViewClient extends WebViewClient {
 
@@ -56,25 +61,22 @@ public class BBWebViewClient extends WebViewClient {
     public static final String PIXEL_2XL_UA = "Mozilla/5.0 (Linux; Android 10; Pixel 2 XL) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.119 Mobile Safari/537.36";
 
     private static final DownloadListener DOWNLOAD_LISTENER = new BBDownloadListener();
-    public static final String X_REDIRECT_REPONSE_ID = "x-redirect-response-id";
+    public static final String SHOULD_NOT_UPDATE_LAST_LOADED_URL = "should-update-last-loaded-url";
 
     private static RequestBodyProvider requestBodyProvider;
-    public final static SamlListener samlListener = new SamlListener();
+    private static ClipboardEventListener clipboardEventListener;
+    private static DocumentCookieStore documentCookieStore = new DocumentCookieStore();
 
-    private WebClientObserver webClientObserver = new WebClientObserver();
-
-    public BBWebViewClient() {
-        super();
-
-        getObserver().addOnPageFinishedListener(GDHttpClientProvider.getInstance());
-        getObserver().addLoadUrlListener(GDHttpClientProvider.getInstance());
-    }
+    private final WebClientObserver webClientObserver = new WebClientObserver();
+    private final RequestInterceptor requestInterceptor = new RequestInterceptor();
 
     public static void init(WebView webView, BBWebViewClient wvClient){
 
         WebView.setWebContentsDebuggingEnabled(true);
 
-        webView.setWebChromeClient(new BBChromeClient());
+        BBChromeClient webChromeClient = new BBChromeClient();
+        webChromeClient.setClientObserver(wvClient.getObserver());
+        webView.setWebChromeClient(webChromeClient);
 
         // service worker setup
         BBDServiceWorkerClient client = new BBDServiceWorkerClient(webView);
@@ -91,8 +93,13 @@ public class BBWebViewClient extends WebViewClient {
         webView.removeJavascriptInterface("RequestInterceptor");
         webView.addJavascriptInterface(requestBodyProvider, "RequestInterceptor");
 
-        webView.removeJavascriptInterface("SamlListener");
-        webView.addJavascriptInterface(samlListener,"SamlListener");
+        clipboardEventListener = new ClipboardEventListener(webView.getContext());
+
+        webView.removeJavascriptInterface("AndroidClipboardListener");
+        webView.addJavascriptInterface(clipboardEventListener,"AndroidClipboardListener");
+
+        webView.removeJavascriptInterface("DocumentCookiesBridge");
+        webView.addJavascriptInterface(documentCookieStore, "DocumentCookiesBridge");
 
         //disable webview networking, all the requests should go via GDHttpClient calls
         webView.getSettings().setBlockNetworkLoads(true);
@@ -100,12 +107,8 @@ public class BBWebViewClient extends WebViewClient {
 
         webView.setDownloadListener(DOWNLOAD_LISTENER);
 
-        CookieManager.getInstance().setAcceptCookie(true);
-        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
-        CookieManager.getInstance().removeSessionCookies(null);
-        //CookieManager.getInstance().removeAllCookies(null);
-
         GDHttpClientProvider.getInstance().setWebViewReference(webView);
+
     }
 
     public final void addRequestBody(String requestId, String body, String url, String browserContext) {
@@ -114,10 +117,41 @@ public class BBWebViewClient extends WebViewClient {
             Log.i(TAG, "addRequestBody ID: " + requestId + ", URL:" + url);
             Log.i(TAG, "addRequestBody ID: " + requestId + ", browserContext:" + browserContext);
 
-            if(!TextUtils.isEmpty(body)) {
-                RequestTask.REQUESTS_BODIES.put(requestId, new RequestTask.BrowserContext(body, url, browserContext));
+            // Remove old value
+            if (RequestTask.REQUESTS_BODIES.containsKey(requestId)) {
+                Log.i(TAG, "addRequestBody ID: remove old value with key " + requestId + ", browserContext:" + browserContext);
+                RequestTask.REQUESTS_BODIES.remove(requestId);
+            }
+            RequestTask.REQUESTS_BODIES.put(requestId, new RequestTask.BrowserContext(body, url, browserContext));
+        }
+    }
+
+    public final void addRequestFormData(String requestId, String name, String type, String value) {
+        synchronized (RequestTask.REQUEST_FORMDATAS) {
+            Log.i(TAG, "addRequestFormData ID: " + requestId + ", name:" + name + ", type:" + type);
+
+            RequestTask.BrowserFormData formdata = new RequestTask.BrowserFormData(name, type, value);
+            List<RequestTask.BrowserFormData> formdataList = RequestTask.REQUEST_FORMDATAS.get(requestId);
+            if (formdataList != null) {
+                formdataList.add(formdata);
+            }
+            else {
+                formdataList = new ArrayList<>();
+                formdataList.add(formdata);
+                RequestTask.REQUEST_FORMDATAS.put(requestId, formdataList);
+            }
+        }
+    }
+
+    public final void addRequestFileData(String filename, String mimetype, String dataurl) {
+        synchronized (RequestTask.REQUEST_FILEDATAS) {
+            Log.i(TAG, "addRequestFileData filename: " + filename + ", mimetype:" + mimetype);
+
+            if(!TextUtils.isEmpty(dataurl)) {
+                RequestTask.BrowserFile browserfile = new RequestTask.BrowserFile(mimetype, dataurl);
+                RequestTask.REQUEST_FILEDATAS.put(filename, browserfile);
             }else{
-                Log.w(TAG, "addRequestBody ID: " + requestId + ", BODY is empty");
+                Log.w(TAG, "addRequestFileData filename: " + filename + ", Data URL is empty");
             }
         }
     }
@@ -128,7 +162,6 @@ public class BBWebViewClient extends WebViewClient {
         super.onPageCommitVisible(view, url);
 
         webClientObserver.notifyPageContentVisible(view, url);
-        
     }
 
     private void injectJsFromResources(WebView view, String url, int resId) throws IOException {
@@ -150,30 +183,54 @@ public class BBWebViewClient extends WebViewClient {
         Log.i(TAG_LC,"injectJsFromResources << " + url);
     }
 
-    private final RequestInterceptor requestInterceptor = new RequestInterceptor();
-
     @Override
-    public WebResourceResponse shouldInterceptRequest(final WebView view, final WebResourceRequest request) {
-        {
-            if (request.getUrl().toString().startsWith("data")) {
-                return super.shouldInterceptRequest(view, request);
-            }
-            return requestInterceptor.invoke(request, view);
+    public WebResourceResponse shouldInterceptRequest(final WebView webView, final WebResourceRequest request) {
+
+        Log.i(TAG_LC,"shouldInterceptRequest, url - " + request.getUrl().toString() + ", isRedirect " + request.isRedirect());
+
+        if (request.getUrl().toString().startsWith("data")) {
+            return super.shouldInterceptRequest(webView, request);
         }
+
+        if (GDHttpClientProvider.getInstance().hasCachedResponse(request.getUrl().toString())) {
+            return getResponseFromCache(request.getUrl().toString());
+        }
+
+        // Otherwise intercept the request and load it using GDHttpClient
+        return requestInterceptor.invoke(webView, request);
     }
 
     @Override
-    public void onReceivedError( WebView view,  WebResourceRequest request,  WebResourceError error) {
-        Log.i(TAG_LC, "onReceivedError "+ request.getUrl() +"code:" + error.getErrorCode() + " desc:" + error.getDescription());
-        super.onReceivedError(view, request, error);
+    public void onReceivedError(WebView webView,  WebResourceRequest request,  WebResourceError error) {
+
+        Log.i(TAG_LC, "onReceivedError " + request.getUrl() + " code: " + error.getErrorCode() + " desc: " + error.getDescription());
+
+        // Clear WebView content
+        webView.loadUrl("about:blank");
     }
 
+    private WebResourceResponse getResponseFromCache(String url) {
+        Log.e(TAG, "getResponseFromCache, url - " + url);
+
+        Future<Pair<HttpResponse, HttpContext>> futureResponse = GDHttpClientProvider.getInstance().fetchCachedWebResponse(url);
+
+        String mimeTypeFromExtension = RequestInterceptor.getMimeType(url);
+        String connectionId = null;
+
+        try {
+            connectionId = (String) futureResponse.get().second.getAttribute("webview.connectionId");
+        } catch (Exception e) {
+            Log.e(TAG, "getResponseFromCache, failed to get connectionId");
+        }
+
+        return new BBWebResourceResponse(mimeTypeFromExtension, null,
+                new BBResponseInputStream(futureResponse, connectionId), futureResponse, connectionId);
+    }
 
     @Override
     public void onReceivedHttpError( WebView view,  WebResourceRequest request,  WebResourceResponse errorResponse) {
         Log.i(TAG_LC, "onReceivedHttpError " + request.getUrl() +" => " + errorResponse);
         super.onReceivedHttpError(view, request, errorResponse);
-
     }
 
     /**
@@ -189,7 +246,6 @@ public class BBWebViewClient extends WebViewClient {
     public void onFormResubmission(WebView view, Message dontResend, Message resend) {
         Log.i(TAG_LC,"onFormResubmission");
         super.onFormResubmission(view, dontResend, resend);
-
     }
 
     /**
@@ -207,7 +263,7 @@ public class BBWebViewClient extends WebViewClient {
 
     @Override
     public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
-        Log.i(TAG_LC,"onReceivedSslError");
+        Log.i(TAG_LC,"onReceivedSslError: " + error.toString() + ", priary error " + error.getPrimaryError());
         super.onReceivedSslError(view, handler, error);
     }
 
@@ -269,23 +325,23 @@ public class BBWebViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading( WebView view,  WebResourceRequest request) {
-        Log.i(TAG_LC,"shouldOverrideUrlLoading " + request.getUrl());
-        return super.shouldOverrideUrlLoading(view,request);
+        Log.i(TAG_LC,"shouldOverrideUrlLoading, url - " + request.getUrl());
+
+        // Continue loading
+        return false;
     }
 
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
         Log.i(TAG_LC,"onPageStarted >> " + url);
 
-        getObserver().removeLoadUrlListener(GDHttpClientProvider.getInstance());
-
         try {
-            injectJsFromResources(view, url , R.raw.request_interceptor);
+            injectJsFromResources(view, url, R.raw.request_interceptor);
+            injectJsFromResources(view, url, R.raw.clipboard_interceptor);
+            injectJsFromResources(view, url, R.raw.document_cookie_storage);
         } catch (IOException e) {
             Log.i(TAG_LC,"onPageStarted exception: " + e);
         }
-
-        getObserver().addLoadUrlListener(GDHttpClientProvider.getInstance());
 
         webClientObserver.notifyPageStarted(view, url);
 

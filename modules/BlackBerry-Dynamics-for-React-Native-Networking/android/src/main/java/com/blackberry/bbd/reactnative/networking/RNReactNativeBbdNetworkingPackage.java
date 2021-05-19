@@ -32,7 +32,8 @@ public class RNReactNativeBbdNetworkingPackage implements ReactPackage {
       return Arrays.<NativeModule>asList(
               new RNReactNativeBbdNetworkingModule(reactContext),
               new RNReactNativeBbdBlobModule(reactContext),
-              new RNReactNativeBbdFileReaderModule(reactContext));
+              new RNReactNativeBbdFileReaderModule(reactContext),
+              new RNReactNativeBbdWebSocketModule(reactContext));
     }
 
     // Deprecated from RN 0.47

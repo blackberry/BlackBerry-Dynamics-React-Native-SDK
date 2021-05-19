@@ -11,10 +11,12 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: WebViewBrowser sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` by running following command:
+> NOTE: WebViewBrowser sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` or `0.64.0` versions by running following command:
 `$ react-native upgrade 0.63.x`
 for example:
 `$ react-native upgrade 0.63.3`
+or
+`$ react-native upgrade 0.64.0`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -24,12 +26,14 @@ Generate ios and android directories:
 There are some dependencies that need to installed before using `BlackBerry-Dynamics-for-React-Native-Base` module. More information can be found [here](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#Preconditions).
 #### How to integrate Dynamics into application
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
-
 > Integrates Dynamics based on your current identifiers - iOS Bundle ID and Android Package Name.
 
 	$ yarn set-bundle-id (Optional step, but required for sample applications)
 
 > Allows to update an identifier (required) and name (optional) for your application. This identifier is your iOS Bundle ID or Android Package Name. It will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
+
+#### How to secure networking
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
 
 #### How to secure `<WebView />` UI component
 	$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView
@@ -45,27 +49,47 @@ There are some dependencies that need to installed before using `BlackBerry-Dyna
 
 #### Examples of usage
 ##### 0.63.2
+For Android:  
+`$ cd <path>/SampleApplications/WebViewBrowser`  
+`$ yarn`  
+`$ react-native eject`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
+`$ yarn set-bundle-id`
+`$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView`  
+`$ react-native run-android`  
+For iOS:  
 `$ cd <path>/SampleApplications/WebViewBrowser`  
 `$ yarn`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
 `$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView`  
-For iOS:  
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`  
 `$ react-native run-ios`  
-##### 0.63.x
+##### 0.64.0
+For Android:  
 `$ cd <path>/SampleApplications/WebViewBrowser`  
 `$ yarn`  
 `$ cd .. ; git init ; cd WebViewBrowser`  
-`$ react-native upgrade 0.63.3`  
+`$ react-native upgrade 0.64.0`  
+`$ react-native eject`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking`  
+`$ yarn set-bundle-id`  
+`$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView`  
+`$ react-native run-android`  
+For iOS:  
+`$ cd <path>/SampleApplications/WebViewBrowser`  
+`$ yarn`  
+`$ cd .. ; git init ; cd WebViewBrowser`  
+`$ react-native upgrade 0.64.0`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
 `$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView`  
-For iOS:  
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`  

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,14 +27,10 @@ class BbdRNProject
 
   PRODUCT_ID = BbdRNProject.get_product_bundle_id
 
-  GD_FIPS_LD = File.expand_path('~/Library/Application Support/BlackBerry/Good.platform/iOS/FIPS_module/$FIPS_PACKAGE/bin/gd_fipsld')
   LIBRARY_SEARCH_PATHS = '$(SDK_DIR)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(inherited)'
   LD_RUNPATH_SEARCH_PATHS = '@executable_path/Frameworks'
 
   BUILD_FILES_TO_REMOVE = [
-    'GD.framework',
-    'BlackBerryCerticom.framework',
-    'BlackBerryCerticomSBGSE.framework',
     'WebKit.framework',
     'LocalAuthentication.framework',
     'DeviceCheck.framework',
@@ -49,20 +45,19 @@ class BbdRNProject
     'CoreGraphics.framework',
     'AssetsLibrary.framework',
     'SafariServices.framework',
+    'AuthenticationServices.framework',
     'libz.tbd',
     'libnetwork.tbd'
   ]
 
   BUILD_CONFIGS_TO_BE_DELETED = {
-    'FIPS_PACKAGE'         => '$(CURRENT_ARCH).sdk',
-    'LDPLUSPLUS'           => GD_FIPS_LD,
-    'LD'                   => GD_FIPS_LD,
     'LIBRARY_SEARCH_PATHS' => LIBRARY_SEARCH_PATHS
   }
 
   BUILD_CONFIGS_TO_BE_RESTORED = {
     'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES' => 'NO',
-    'LD_RUNPATH_SEARCH_PATHS'               => LD_RUNPATH_SEARCH_PATHS
+    'LD_RUNPATH_SEARCH_PATHS'               => LD_RUNPATH_SEARCH_PATHS,
+    'VALIDATE_WORKSPACE'                    => 'NO'
   }
 
   PLIST_CONFIG = {
@@ -121,9 +116,15 @@ class BbdRNProject
   end
 
   def get_native_target
-    @xcodeproj.targets.select do |target|
+    target = @xcodeproj.targets.select do |target|
       target.name == @product_name
     end.first
+    if target.nil? then
+      target = @xcodeproj.targets.select.first
+      @product_name = target.name
+    end
+
+    target
   end
 
   def get_product_bundle_id
@@ -174,7 +175,7 @@ class BbdRNProject
 
     # remove frameworks
     @native_target.frameworks_build_phase.files.objects.each do |bf|
-      if BUILD_FILES_TO_REMOVE.include? bf.display_name 
+      if BUILD_FILES_TO_REMOVE.include? bf.display_name
         @native_target.frameworks_build_phase.remove_build_file(bf)
       end
     end
@@ -189,17 +190,17 @@ class BbdRNProject
       end
     end
 
-    # remove group and reference to GDAssets.bundle, development-tools-info.json
+    # remove group and reference to development-tools-info.json
     app_group = @xcodeproj.groups.select do |group|
       group.name == @product_name
     end.first
     app_group.children.objects.each do |el|
-      if el.display_name == 'GDAssets.bundle' || el.display_name == 'development-tools-info.json'
+      if el.display_name == 'development-tools-info.json'
         el.remove_from_project
       end
     end
     @native_target.resources_build_phase.files.objects.each do |res|
-      if res.display_name == 'GDAssets.bundle' || res.display_name == 'development-tools-info.json'
+      if res.display_name == 'development-tools-info.json'
         @native_target.resources_build_phase.remove_build_file(res)
       end
     end
@@ -217,14 +218,6 @@ class BbdRNProject
     # restore some build configuration to default value
     @native_target.build_configurations.each do |configuration|
       configuration.build_settings.merge! BUILD_CONFIGS_TO_BE_RESTORED
-    end
-
-    # remove "Embed Frameworks" Copy Files Phase from Build Phases in order to
-    # remove BlackBerryCerticom.framework and BlackBerryCerticomSBGSE.framework frameworks
-    phases = @native_target.copy_files_build_phases().each do |phase|
-      if phase.name == 'Embed Frameworks'
-        phase.remove_from_project
-      end
     end
 
     # restore origin storyboard

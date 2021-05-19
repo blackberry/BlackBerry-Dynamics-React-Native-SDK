@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 import jasmineRequire from './jasmine';
 import { testRunnerService } from './testResultsService';
 
 import runSpecsForFetch from './specs/testFetch';
 import runSpecsForXMLHttpRequest from './specs/testXMLHttpRequest';
+import runSpecsForWebSockets from './specs/testWebSockets';
 import runSpecsForSQLite from './specs/testSQLite';
 import runSpecsForSQLiteImport from './specs/testSQLite_import';
 import runSpecsForClipboard from './specs/testClipboard';
 import runSpecsForAsyncStorage from './specs/testAsyncStorage';
 import runSpecsForAppKinetics from './specs/testAppKinetics';
+import runSpecsForFileSystem from './specs/testFileSystem';
+import runSpecsForLauncher from './specs/testLauncher';
 
 export default {
   execute: function() {
@@ -171,11 +174,14 @@ export default {
 
     runSpecsForXMLHttpRequest();
     runSpecsForFetch();
+    runSpecsForWebSockets();
     runSpecsForSQLite();
     runSpecsForSQLiteImport();
     runSpecsForClipboard();
     runSpecsForAsyncStorage();
     runSpecsForAppKinetics();
+    runSpecsForFileSystem();
+    runSpecsForLauncher();
 
     // Run tests
     env.execute();

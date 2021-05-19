@@ -5,30 +5,43 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
 #### Development environment
  - Mac OS X
  - Windows 10 (Android only)
-#### React Native
- - 0.63.x
+#### Node.js
+ - 12.x
 #### Package manager
  - yarn
+#### React Native
+ - 0.63.x
+ - 0.64.0
+#### iOS
+ - Xcode 12+
+ - iOS 13, 14
+ - cocoapods 1.10.1+
+#### Android
+ - Android 8+, API 26+
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v8.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/8_1).
- - BlackBerry Dynamics SDK for Android v8.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/8_1).
- - BlackBerry Dynamics SDK for iOS v9.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/9_0).
- - BlackBerry Dynamics SDK for Android v9.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/9_0).
+ - BlackBerry Dynamics SDK for iOS v9.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
+ - BlackBerry Dynamics SDK for Android v9.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
+#### BlackBerry Dynamics Launcher
+ - BlackBerry Dynamics Launcher library for iOS v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
+ - BlackBerry Dynamics Launcher library for Android v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
 
 # Features
 #### Integration with BlackBerry Dynamics
 Integration of BlackBerry Dynamics SDK for iOS and Android into React Native application is supported by addition of the `BlackBerry-Dynamics-for-React-Native-Base` module.
+###### "Dynamic Framework" integration on iOS
+Dynamics SDK for React Native v9.0 and above integrates with the iOS "Dynamic Framework" version of BlackBerry Dynamics. The static library integration is no longer supported.
 #### Secure connectivity
 - Both `XMLHttpRequest` and `fetch` are secured in scope of `BlackBerry-Dynamics-for-React-Native-Networking` module.
 - `<WebView />` is secured in scope of `BlackBerry-Dynamics-for-React-Native-WebView` UI component.
     - On iOS `UIWebView` has been DEPRECATED by Apple for a long time and removed from [react-native-webview](https://github.com/react-native-community/react-native-webview) since version 7.0.1.
     - `UIWebView` support was removed from BlackBerry Dynamics SDK for iOS since v8.0.
-- Secure communication via [WebSockets](https://facebook.github.io/react-native/docs/network#websocket-support) is not supported.
+- Secure communication via [WebSockets](https://facebook.github.io/react-native/docs/network#websocket-support) is secured in scope of `BlackBerry-Dynamics-for-React-Native-Networking` module.
 #### Secure storage
  - `AsyncStorage` is secured in scope of `BlackBerry-Dynamics-for-React-Native-Async-Storage` module
  - `SQLite` is secured in scope of `BlackBerry-Dynamics-for-React-Native-SQLite-Storage` module
+ - `FileSystem` is secured in scope of `BlackBerry-Dynamics-for-React-Native-FileSystem` module
 #### Data Leakage Prevention (DLP)
-On iOS `<Text />` component, `<TextInput />` component and `Clipboard` API are secured simply by integrating BlackBerry Dynamics. 
+On iOS `<Text />` component, `<TextInput />` component and `Clipboard` API are secured simply by integrating BlackBerry Dynamics.
 
 On Android the following items are required:
 
@@ -40,14 +53,19 @@ ICC provides service discovery, service consumption and service providing abilit
 
 To implement some ICC capabilities in a Dynamics React Native application `BlackBerry-Dynamics-for-React-Native-AppKinetics` should be used.
 
+#### Launcher integration
+`BlackBerry-Dynamics-for-React-Native-Launcher` provides Launcher integration in Dynamics React Native application.
+
 # Package contents
 #### Modules
 - `BlackBerry-Dynamics-for-React-Native-Base` - automatically integrates BlackBerry Dynamics SDK for iOS and Android into React Native application
-- `BlackBerry-Dynamics-for-React-Native-Networking` - secures `XMLHttpRequest` and `fetch` APIs on Android. For more details please refer to [networking](https://facebook.github.io/react-native/docs/network) topic in React Native.
+- `BlackBerry-Dynamics-for-React-Native-Networking` - secures `XMLHttpRequest`, `fetch` and `WebSocket` APIs. For more details please refer to [networking](https://facebook.github.io/react-native/docs/network) topic in React Native.
 - `BlackBerry-Dynamics-for-React-Native-SQLite-Storage` - secures SQLite DB usage. It is based on [react-native-sqlite-storage](https://github.com/andpor/react-native-sqlite-storage) 3rd party module.
 - `BlackBerry-Dynamics-for-React-Native-Async-Storage` - secures built-in [AsyncStorage](https://facebook.github.io/react-native/docs/asyncstorage#docsNav).
 - `BlackBerry-Dynamics-for-React-Native-Clipboard` - secures built-in [Clipboard](https://facebook.github.io/react-native/docs/clipboard) API.
 - `BlackBerry-Dynamics-for-React-Native-AppKinetics` - provides Inter-Container Communication capabilities.
+- `BlackBerry-Dynamics-for-React-Native-FileSystem` - secures FileSystem usage. It is based on [react-native-fs](https://github.com/itinance/react-native-fs) 3rd party module.
+- `BlackBerry-Dynamics-for-React-Native-Launcher` provides Launcher integration.
 
 #### UI components
 - `BlackBerry-Dynamics-for-React-Native-Text` - enables DLP within [<Text />](https://facebook.github.io/react-native/docs/text#docsNav) UI component on Android
@@ -61,6 +79,9 @@ To implement some ICC capabilities in a Dynamics React Native application `Black
 - `SQLite` - shows example of using secure SQLite DB instance in React Native application.
 - `UnitTests` - runs Jasmine unit tests for `fetch`, `XMLHttpRequest`, `Clipboard`, `AsyncStorage`, `AppKinetics` and `SQLite` in React Native application.
 - `WebViewBrowser` - demonstrates usage of `<WebView />` UI component in React Native application.
+- `FileSystem` - shows example of using secure FileSystem instance in React Native application. It demonstrates how to manage files/directories and how to upload/download files.
+- `AppKinetics` - shows example of using AppKinetics functionality.
+- `WebSockets` - contains `WebSocketClient` and `WebSocketServer` sample apps. It demonstrates usage of secure `WebSocket` API - how to establish connection to WebSocket server using `ws://` or `wss://` protocols, how to send or receive text or binary data over WebSocket connection, how to close WebSocket connection. 
 
 ## Preconditions
 Make sure you first setup your environment and install BlackBerry Dynamics.
@@ -71,7 +92,7 @@ Make sure you first setup your environment and install BlackBerry Dynamics.
 
 ### Sample applications
 
-To setup, build and run the sample applications please refer to the README for each sample. 
+To setup, build and run the sample applications please refer to the README for each sample.
 
 - [BasicNetworking](./SampleApplications/BasicNetworking/README.md)
 - [ClipboardTestApp](./SampleApplications/ClipboardTestApp/README.md)
@@ -79,6 +100,9 @@ To setup, build and run the sample applications please refer to the README for e
 - [SQLite](./SampleApplications/SQLite/README.md)
 - [UnitTests](./SampleApplications/UnitTests/README.md)
 - [WebViewBrowser](./SampleApplications/WebViewBrowser/README.md)
+- [FileSystem](./SampleApplications/FileSystem/README.md)
+- [AppKinetics](./SampleApplications/AppKinetics/README.md)
+- [WebSockets](./SampleApplications/WebSockets/README.md)
 
 ### Integrate into new React Native application
 To integrate BlackBerry Dynamics into a new React Native application please follow these [steps](./modules/BlackBerry-Dynamics-for-React-Native-Base/README.md#installation).
@@ -90,21 +114,21 @@ To integrate BlackBerry Dynamics into existing React Native application:
       - [React Native Upgrade Helper](https://react-native-community.github.io/upgrade-helper/) may be used to upgrade your application prior to integrating BlackBerry Dynamics. Confirm the application builds and works correctly after upgrade.
 
  - Integrate BlackBerry Dynamics by adding `BlackBerry-Dynamics-for-React-Native-Base` module
-    `$ cd <appFolder>`  
+    `$ cd <appFolder>`
     `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`
-    
+
     > Integrates Dynamics based on your current identifiers - iOS Bundle ID and Android Package Name.
-    
+
     `$ yarn set-bundle-id (OPTIONAL)`
-    
+
     > Allows an identifier (required) and name (optional) to be updated within your application. This identifier is your iOS Bundle ID or Android Package Name and will also be used as the Entitlement ID for entitling and activating your application with the BlackBerry UEM management console.
  - Analyze your application functionality and decide what parts should be secured:
-     - If `fetch` API or `XMLHttpRequest` is used in your code to do communication between your app and backend server this communication can be secured by adding `BlackBerry-Dynamics-for-React-Native-Networking` module. See [Networking Module](./modules/BlackBerry-Dynamics-for-React-Native-Networking/README.md).
+     - If `fetch` API, `XMLHttpRequest` or `WebSocket` is used in your code to do communication between your app and backend server this communication can be secured by adding `BlackBerry-Dynamics-for-React-Native-Networking` module. See [Networking Module](./modules/BlackBerry-Dynamics-for-React-Native-Networking/README.md).
      - If you use `AsyncStorage` capabilities it can be secured by adding `BlackBerry-Dynamics-for-React-Native-Async-Storage` module. See [Async-Storage Module](./modules/BlackBerry-Dynamics-for-React-Native-Async-Storage/README.md).
      - If SQLite DB is used in the application it can be secured by adding `BlackBerry-Dynamics-for-React-Native-SQLite-Storage` module. See [SQLite-Storage Module](./modules/BlackBerry-Dynamics-for-React-Native-SQLite-Storage/README.md).
      - If in your application `Clipboard` API is used it can be secured by adding `BlackBerry-Dynamics-for-React-Native-Clipboard` module. See [Clipboard module](./modules/BlackBerry-Dynamics-for-React-Native-Clipboard/README.md).
      - If `<Text />` UI component is used you can secure cut/copy/paste operations by adding `BlackBerry-Dynamics-for-React-Native-Text` UI component. See [Text UI component](./ui-components/BlackBerry-Dynamics-for-React-Native-Text/README.md).
      - If `<TextInput />` UI component is used you can secure cut/copy/paste operations by adding `BlackBerry-Dynamics-for-React-Native-TextInput` UI component. See [TextInput UI component](./ui-components/BlackBerry-Dynamics-for-React-Native-TextInput/README.md).
      - If `<WebView />` UI component is used you can secure resource loading within WebView by adding `BlackBerry-Dynamics-for-React-Native-WebView` UI component. See [WebView UI component](./ui-components/BlackBerry-Dynamics-for-React-Native-WebView/README.md).
-     
+
  - Lastly, do not forget to update the imports in your code.

@@ -1,0 +1,31 @@
+{
+  "name": "BlackBerry-Dynamics-for-React-Native-FileSystem",
+  "version": "1.0.0",
+  "description": "Secured FileSystem access for react-native",
+  "main": "FS.common.js",
+  "scripts": {
+    "flow": "flow",
+    "install": "node ./scripts/install_hook.js"
+  },
+  "keywords": [
+    "react-component",
+    "react-native",
+    "ios",
+    "android",
+    "fs",
+    "filesystem",
+    "download",
+    "upload",
+    "file-transfer"
+  ],
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "base-64": "^0.1.0",
+    "utf8": "^3.0.0"
+  },
+  "devDependencies": {
+    "create-react-class": "15.6.3",
+    "flow-bin": "^0.109.0",
+    "prop-types": "^15.7.2"
+  }
+}

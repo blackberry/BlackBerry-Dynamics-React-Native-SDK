@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original fetch API from Networking of react-native
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/fetch.js
  *
@@ -11,7 +11,7 @@
  * @format
  */
 
-/* globals Headers, Request, Response */
+/* globals Headers, Request, Response, fetch */
 
 'use strict';
 
@@ -536,5 +536,3 @@ if (!self.fetch) {
   self.Request = Request
   self.Response = Response
 }
-
-module.exports = fetch;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
  * from https://github.com/facebook/react-native/tree/v0.63.2/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
@@ -926,92 +926,6 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
         return;
       }
 
-      // Fabric: update representation of AttributedString
-      JavaOnlyMap attributedString = mEditText.mAttributedString;
-      if (attributedString != null && attributedString.hasKey("fragments")) {
-        String changedText = s.subSequence(start, start + count).toString();
-
-        String completeStr = attributedString.getString("string");
-        String newCompleteStr =
-            completeStr.substring(0, start)
-                + changedText
-                + (completeStr.length() > start + before
-                    ? completeStr.substring(start + before)
-                    : "");
-        attributedString.putString("string", newCompleteStr);
-
-        // Loop through all fragments and change them in-place
-        JavaOnlyArray fragments = (JavaOnlyArray) attributedString.getArray("fragments");
-        int positionInAttributedString = 0;
-        boolean found = false;
-        for (int i = 0; i < fragments.size() && !found; i++) {
-          JavaOnlyMap fragment = (JavaOnlyMap) fragments.getMap(i);
-          String fragmentStr = fragment.getString("string");
-          int positionBefore = positionInAttributedString;
-          positionInAttributedString += fragmentStr.length();
-          if (positionInAttributedString < start) {
-            continue;
-          }
-
-          int relativePosition = start - positionBefore;
-          found = true;
-
-          // Does the change span multiple Fragments?
-          // If so, we put any new text entirely in the first
-          // Fragment that we edit. For example, if you select two words
-          // across Fragment boundaries, "one | two", and replace them with a
-          // character "x", the first Fragment will replace "one " with "x", and the
-          // second Fragment will replace "two" with an empty string.
-          int remaining = fragmentStr.length() - relativePosition;
-
-          String newString =
-              fragmentStr.substring(0, relativePosition)
-                  + changedText
-                  + (fragmentStr.substring(relativePosition + Math.min(before, remaining)));
-          fragment.putString("string", newString);
-
-          // If we're changing 10 characters (before=10) and remaining=3,
-          // we want to remove 3 characters from this fragment (`Math.min(before, remaining)`)
-          // and 7 from the next Fragment (`before = 10 - 3`)
-          if (remaining < before) {
-            changedText = "";
-            start += remaining;
-            before = before - remaining;
-            found = false;
-          }
-        }
-      }
-
-      // Fabric: communicate to C++ layer that text has changed
-      // We need to call `incrementAndGetEventCounter` here explicitly because this
-      // update may race with other updates.
-      // TODO: currently WritableNativeMaps/WritableNativeArrays cannot be reused so
-      // we must recreate these data structures every time. It would be nice to have a
-      // reusable data-structure to use for TextInput because constructing these and copying
-      // on every keystroke is very expensive.
-      if (mEditText.mStateWrapper != null && attributedString != null) {
-        WritableMap map = new WritableNativeMap();
-        WritableMap newAttributedString = new WritableNativeMap();
-
-        WritableArray fragments = new WritableNativeArray();
-
-        for (int i = 0; i < attributedString.getArray("fragments").size(); i++) {
-          ReadableMap readableFragment = attributedString.getArray("fragments").getMap(i);
-          WritableMap fragment = new WritableNativeMap();
-          fragment.putDouble("reactTag", readableFragment.getInt("reactTag"));
-          fragment.putString("string", readableFragment.getString("string"));
-          fragments.pushMap(fragment);
-        }
-
-        newAttributedString.putString("string", attributedString.getString("string"));
-        newAttributedString.putArray("fragments", fragments);
-
-        map.putInt("mostRecentEventCount", mEditText.incrementAndGetEventCounter());
-        map.putMap("textChanged", newAttributedString);
-
-        mEditText.mStateWrapper.updateState(map);
-      }
-
       // The event that contains the event counter and updates it must be sent first.
       // TODO: t7936714 merge these events
       mEventDispatcher.dispatchEvent(
@@ -1236,64 +1150,4 @@ public class ReactTextInputManager extends BaseViewManager<ReactEditText, Layout
     return new EditText(themedReactContext);
   }
 
-  @Override
-  public Object updateState(
-      ReactEditText view, ReactStylesDiffMap props, @Nullable StateWrapper stateWrapper) {
-    ReadableNativeMap state = stateWrapper.getState();
-
-    // Do we need to communicate theme back to C++?
-    // If so, this should only need to be done once per surface.
-    if (!state.getBoolean("hasThemeData")) {
-      WritableNativeMap update = new WritableNativeMap();
-
-      ReactContext reactContext = UIManagerHelper.getReactContext(view);
-      if (reactContext instanceof ThemedReactContext) {
-        ThemedReactContext themedReactContext = (ThemedReactContext) reactContext;
-        EditText editText = createInternalEditText(themedReactContext);
-
-        // Even though we check `data["textChanged"].empty()` before using the value in C++,
-        // state updates crash without this value on key exception. It's unintuitive why
-        // folly::dynamic is crashing there and if there's any way to fix on the native side,
-        // so leave this here until we can figure out a better way of key-existence-checking in C++.
-        update.putNull("textChanged");
-
-        update.putDouble(
-            "themePaddingStart", PixelUtil.toDIPFromPixel(ViewCompat.getPaddingStart(editText)));
-        update.putDouble(
-            "themePaddingEnd", PixelUtil.toDIPFromPixel(ViewCompat.getPaddingEnd(editText)));
-        update.putDouble("themePaddingTop", PixelUtil.toDIPFromPixel(editText.getPaddingTop()));
-        update.putDouble(
-            "themePaddingBottom", PixelUtil.toDIPFromPixel(editText.getPaddingBottom()));
-
-        stateWrapper.updateState(update);
-      } else {
-        ReactSoftException.logSoftException(
-            TAG,
-            new IllegalStateException(
-                "ReactContext is not a ThemedReactContent: "
-                    + (reactContext != null ? reactContext.getClass().getName() : "null")));
-      }
-    }
-
-    ReadableMap attributedString = state.getMap("attributedString");
-    ReadableMap paragraphAttributes = state.getMap("paragraphAttributes");
-
-    Spannable spanned =
-        TextLayoutManager.getOrCreateSpannableForText(
-            view.getContext(), attributedString, mReactTextViewManagerCallback);
-
-    int textBreakStrategy =
-        TextAttributeProps.getTextBreakStrategy(paragraphAttributes.getString("textBreakStrategy"));
-
-    view.mStateWrapper = stateWrapper;
-
-    return ReactTextUpdate.buildReactTextUpdateFromState(
-        spanned,
-        state.getInt("mostRecentEventCount"),
-        false, // TODO add this into local Data
-        TextAttributeProps.getTextAlignment(props),
-        textBreakStrategy,
-        TextAttributeProps.getJustificationMode(props),
-        attributedString);
-  }
 }

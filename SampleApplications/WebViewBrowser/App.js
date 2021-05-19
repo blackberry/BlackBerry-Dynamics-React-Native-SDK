@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
         <View style={styles.container}>
           <Button
             onPress={() => {this.onBackPress()}}
@@ -211,7 +211,8 @@ const styles = StyleSheet.create({
     borderColor: '#4486f5',
     borderStyle: 'solid',
     borderWidth: 1,
-    width: '75%'
+    width: '75%',
+    color: '#000'
   },
   button: {
     color: '#4486f5',

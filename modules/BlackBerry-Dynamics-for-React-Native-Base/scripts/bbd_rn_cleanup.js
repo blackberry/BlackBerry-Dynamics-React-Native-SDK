@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,15 @@
     cleanupScriptIos = path.join('.', 'scripts', 'bbd_rn_cleanup_ios.rb'),
     cleanupScriptAndroid = path.join('.', 'scripts', 'bbd_rn_cleanup_android.js'),
     isWindows = process.platform === "win32",
-    cmd = 'node ' + cleanupScriptAndroid.replace(' ', '\\ ');
+    cmd = 'node ' + cleanupScriptAndroid.replace(' ', '\\ '),
+    constants = require('./constants');
 
   checkAndExitOrContinue();
 
   if (!isWindows) {
     cmd += ' && ruby ' + cleanupScriptIos.replace(' ', '\\ ');
   }
-  
+
   shell.exec(cmd);
 
   removeUpdatePodsFromPodfile();
@@ -38,7 +39,7 @@
     // {"remain":["../../modules/BlackBerry-Dynamics-for-React-Native-Base/"],
     // "cooked":["--save","i","../../modules/BlackBerry-Dynamics-for-React-Native-Base/"],
     // "original":["--save","i","../../modules/BlackBerry-Dynamics-for-React-Native-Base/"]}
-    
+
     var originalNpmConfigArgv = JSON.parse(process.env.npm_config_argv).original,
       filteredOriginal = originalNpmConfigArgv.filter(function(val, i) {
         return !['--save', '--verbose', '--d'].includes(val);
@@ -51,12 +52,12 @@
   }
 
   function removeUpdatePodsFromPodfile() {
-    var command = '\t\tsystem("node ../node_modules/BlackBerry-Dynamics-for-React-Native-Base/scripts/updatePods.js")\n',
-      projectRoot = process.env.INIT_CWD,
+    var projectRoot = process.env.INIT_CWD,
       podfilePath = path.join(projectRoot, 'ios', 'Podfile'),
       podfileContent = fs.readFileSync(podfilePath, 'utf-8'),
-      newPodfileContent = podfileContent.replace(command, '');
-      
+      newPodfileContent = podfileContent.replace(constants.updatePodsCommand, ''),
+      newPodfileContent = newPodfileContent.replace(constants.bbdPodCommand, '');
+
     fs.writeFileSync(podfilePath, newPodfileContent, 'utf-8');
   }
 

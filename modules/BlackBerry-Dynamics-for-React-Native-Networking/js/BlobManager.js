@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Blob API of react-native
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Blob/BlobManager.js
  *
@@ -15,13 +15,13 @@
 'use strict';
 
 const Blob = require('./Blob');
-const BlobRegistry = require('react-native/Libraries/Blob/BlobRegistry');
+const BlobRegistry = require('./BlobRegistry');
 
 import { NativeModules } from 'react-native';
 
 const BlobModule = NativeModules.RNReactNativeBbdBlob;
 
-import type {BlobData, BlobOptions, BlobCollector} from 'react-native/Libraries/Blob/BlobTypes';
+import type {BlobData, BlobOptions, BlobCollector} from './BlobTypes';
 
 /*eslint-disable no-bitwise */
 /*eslint-disable eqeqeq */
@@ -147,6 +147,29 @@ class BlobManager {
    */
   static addNetworkingHandler(): void {
     BlobModule.addNetworkingHandler();
+  }
+
+  /**
+   * Indicate the websocket should return a blob for incoming binary
+   * messages.
+   */
+  static addWebSocketHandler(socketId: number): void {
+    BlobModule.addWebSocketHandler(socketId);
+  }
+
+  /**
+   * Indicate the websocket should no longer return a blob for incoming
+   * binary messages.
+   */
+  static removeWebSocketHandler(socketId: number): void {
+    BlobModule.removeWebSocketHandler(socketId);
+  }
+
+  /**
+   * Send a blob message to a websocket.
+   */
+  static sendOverSocket(blob: Blob, socketId: number): void {
+    BlobModule.sendOverSocket(blob.data, socketId);
   }
 }
 

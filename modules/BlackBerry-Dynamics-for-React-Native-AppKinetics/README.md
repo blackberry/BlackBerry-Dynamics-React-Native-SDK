@@ -7,6 +7,7 @@ For more details please refer to [com.good.gd.icc](https://developer.blackberry.
 ## Supportability
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-AppKinetics` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

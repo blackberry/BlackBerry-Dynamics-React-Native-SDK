@@ -6,6 +6,7 @@
 # Supportability
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Text` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

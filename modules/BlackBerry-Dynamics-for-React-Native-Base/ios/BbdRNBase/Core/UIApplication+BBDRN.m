@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 #import "UIApplication+BBDRN.h"
 
 #import "BBDRNLog.h"
-#import <GD/GDState.h>
-#import <GD/GDiOS.h>
+#import <BlackBerryDynamics/GD/GDState.h>
+#import <BlackBerryDynamics/GD/GDiOS.h>
 #import "BBDRNRuntime.h"
 
 #import <objc/runtime.h>

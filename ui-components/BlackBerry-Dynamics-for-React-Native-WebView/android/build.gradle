@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,8 @@ def kotlin_version = getExtOrDefault('kotlinVersion')
 dependencies {
     implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
     implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
+    implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Base')
+    implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Networking')
     implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'org.brotli:dec:0.1.2'// 'br' content-encoding
