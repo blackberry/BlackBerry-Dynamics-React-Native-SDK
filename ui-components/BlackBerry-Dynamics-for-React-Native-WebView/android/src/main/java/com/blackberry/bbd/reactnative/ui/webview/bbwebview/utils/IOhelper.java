@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.InflaterInputStream;
 
 public class IOhelper {
-    public IOhelper() {
-    }
 
-    public InputStream inputStreamDecorator(InputStream is, String contentEncoding) throws IOException {
+    private static final String TAG = "GDWebView-" + IOhelper.class.getSimpleName();
 
-        Log.i("IOhelper", "inputStreamDecorator() " + contentEncoding);
+    public static InputStream inputStreamDecorator(InputStream is, String contentEncoding, boolean isChunked) throws IOException {
+
+        Log.i(TAG, "inputStreamDecorator() " + contentEncoding);
 
         if ("gzip".equalsIgnoreCase(contentEncoding)) {
             return new GZIPInputStream(is);
@@ -40,7 +40,7 @@ public class IOhelper {
         } else if ("br".equalsIgnoreCase(contentEncoding)) {
             return new BrotliInputStream(is);
         } else {
-            Log.w("IOhelper", "inputStreamDecorator() no decor for " + contentEncoding);
+            Log.w(TAG, "inputStreamDecorator() no decor for " + contentEncoding);
             return is;
         }
     }

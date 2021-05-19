@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,21 @@ Pod::Spec.new do |s|
   s.name         = "BbdRNAppKinetics"
   s.version      = "1.0.0"
   s.summary      = "BbdRNAppKinetics"
-  s.homepage     = "https://community.blackberry.com/"
+  s.homepage     = "https://developers.blackberry.com/"
   s.license      = { :type => "Apache License, Version 2.0" }
-  s.author       = { 
+  s.author       = {
     "Volodymyr Taliar" => "vtaliar@blackberry.com",
     "Taras Omelchuk" => "tomelchuk@blackberry.com",
     "Yaroslav Koberskyy" => "ykoberskyy@blackberry.com",
     "Bohdan Pidluzhnyy" => "bpidluzhnyy@blackberry.com"
   }
   s.platform     = :ios, "9.0"
-  s.source       = { 
-    :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git", 
+  s.source       = {
+    :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git",
     :tag => "#{s.version}"
   }
   s.source_files = "BbdRNAppKinetics/**/*.{h,m}"
   s.requires_arc = true
   s.dependency "React"
-end  
+  s.dependency "BlackBerryDynamics"
+end

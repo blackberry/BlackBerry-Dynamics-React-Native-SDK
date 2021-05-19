@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http;
 
 import android.util.Log;
+import android.webkit.URLUtil;
 
 import com.good.gd.apache.http.HttpRequest;
 import com.good.gd.apache.http.HttpResponse;
+import com.good.gd.apache.http.HttpStatus;
 import com.good.gd.apache.http.ProtocolException;
 import com.good.gd.apache.http.client.RedirectHandler;
 import com.good.gd.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -44,12 +46,19 @@ public class BBRedirectHandler implements RedirectHandler {
             Log.i(TAG, "isRedirectRequested, status line: " + httpResponse.getStatusLine() + " result: " + isRedirectRequested);
             Log.i(TAG, "isRedirectRequested, requestUri: " + requestWrapper.getURI());
 
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_MOVED_TEMPORARILY) {
+                httpContext.setAttribute("webview.redirect.moved.temprorary", "");
+            }
+
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_MOVED_PERMANENTLY) {
+                httpContext.setAttribute("webview.redirect.moved.permanently", "");
+            }
+
             return isRedirectRequested;
         }
 
         @Override
-        public URI getLocationURI(HttpResponse httpResponse, HttpContext httpContext) throws
-        ProtocolException {
+        public URI getLocationURI(HttpResponse httpResponse, HttpContext httpContext) throws ProtocolException {
 
             URI locationURI = defaultRedirect.getLocationURI(httpResponse, httpContext);
 
@@ -57,12 +66,14 @@ public class BBRedirectHandler implements RedirectHandler {
 
                 Log.i(TAG, "getLocationURI, redirect locationURI: " + locationURI);
 
-                String locationWithoutFragmentPart = locationURI.toString().replaceAll("#.*$", "");
+                // Save original location url
+                httpContext.setAttribute("webview.redirect.url", locationURI.toString());
+
+                String locationWithoutFragmentPart = URLUtil.stripAnchor(locationURI.toString());
 
                 Log.i(TAG, "getLocationURI, redirect locationURI without fragment " + locationWithoutFragmentPart);
 
                 locationURI = URI.create(locationWithoutFragmentPart);
-                httpContext.setAttribute("webview.redirect.url",locationURI);
 
             } catch (Exception e) {
                 Log.e(TAG,"getLocationURI, ", e);

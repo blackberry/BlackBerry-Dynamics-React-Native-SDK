@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.blackberry.bbd.reactnative.core.launcher.BBDLauncherInterfaceProvider;
+import com.blackberry.bbd.reactnative.core.launcher.BBDLauncherManager;
 import com.blackberry.bbd.reactnative.helpers.RNBbdServiceHelper;
 import com.good.gd.GDAndroid;
 import com.good.gd.GDStateAction;
@@ -154,6 +156,14 @@ public class BBDLifeCycle implements Application.ActivityLifecycleCallbacks {
         Log.d(TAG, "Activity destroyed: " + activity.getClass().getCanonicalName());
     }
 
+    public static void setLauncherProvider(BBDLauncherInterfaceProvider provider) {
+        BBDLauncherManager.initWithProvider(provider);
+    }
+
+    public void initLauncher() {
+        BBDLauncherManager.getInstance().initForApplication(s_application, activities);
+    }
+
     /**
      * method is used to register BroadcastReceiver which updates singleton instance state
      * after GDStateAction.GD_STATE_AUTHORIZED_ACTION action received
@@ -166,21 +176,26 @@ public class BBDLifeCycle implements Application.ActivityLifecycleCallbacks {
             @Override
             public void onReceive(Context context, Intent intent) {
 
+                BBDLauncherManager launcherManager = BBDLauncherManager.getInstance();
                 switch (intent.getAction()) {
                     case GDStateAction.GD_STATE_AUTHORIZED_ACTION:
                         isAuthorized = true;
 
+                        launcherManager.setAppAuthorized();
                         break;
 
                     case GDStateAction.GD_STATE_LOCKED_ACTION:
+                        launcherManager.setAppUnauthorized();
 
                         break;
 
                     case GDStateAction.GD_STATE_UPDATE_CONFIG_ACTION:
+                        launcherManager.onUpdateConfig();
 
                         break;
 
                     case GDStateAction.GD_STATE_UPDATE_POLICY_ACTION:
+                        launcherManager.onUpdatePolicy();
 
                         break;
 

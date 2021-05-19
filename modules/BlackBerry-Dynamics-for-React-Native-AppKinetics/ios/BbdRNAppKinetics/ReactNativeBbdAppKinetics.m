@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
   * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@
 #import "ReactNativeBbdAppKinetics.h"
 #import "React/RCTBridgeModule.h"
 #import <React/RCTLog.h>
-#import <GD/GDFileManager.h>
-#import <GD/GDiOS.h>
-#import <GD/GDServices.h>
-#import <GD/GDServiceProvider.h>
+#import <BlackBerryDynamics/GD/GDFileManager.h>
+#import <BlackBerryDynamics/GD/GDiOS.h>
+#import <BlackBerryDynamics/GD/GDServices.h>
+#import <BlackBerryDynamics/GD/GDServiceProvider.h>
 
 #define kFileTransferServiceName            @"com.good.gdservice.transfer-file"
 #define kFileTransferServiceVersion         @"1.0.0.0"
@@ -53,10 +53,16 @@
 static AppKineticsContainer *s_appKineticsContainer = nil;
 static RCTPromiseResolveBlock callAppKineticsServiceResolve = nil;
 static RCTPromiseRejectBlock callAppKineticsServiceReject = nil;
+static NSMutableArray *initialReceivedFiles = nil;
 
 @implementation ReactNativeBbdAppKinetics
 {
     bool hasListeners;
+}
+
++ (BOOL)requiresMainQueueSetup
+{
+  return NO;
 }
 
 - (void) dealloc
@@ -116,6 +122,13 @@ RCT_EXPORT_MODULE();
 -(void)startObserving
 {
     hasListeners = YES;
+
+    if (initialReceivedFiles) {
+        for (NSString *file in initialReceivedFiles) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"EmitterReceiveFile" object:file];
+        }
+        initialReceivedFiles = nil;
+    }
 }
 
 // Will be called when this module's last listener is removed, or on dealloc.
@@ -208,8 +221,6 @@ RCT_REMAP_METHOD(callAppKineticsService,
                                                        userInfo:nil];
         @throw(exception);
     }
-
-    attachments = [self convertAttachmentsToFullPath:attachments];
 
     NSArray* result = [self getGDAppDetails:appServices];
     if (result.count == 0) {
@@ -482,6 +493,10 @@ RCT_REMAP_METHOD(readyToProvideService,
 
 +(void)load
 {
+    if (!initialReceivedFiles)
+    {
+        initialReceivedFiles = [[NSMutableArray alloc] init];
+    }
     if (!s_appKineticsContainer)
     {
         s_appKineticsContainer = [[AppKineticsContainer alloc] init];
@@ -542,7 +557,12 @@ RCT_REMAP_METHOD(readyToProvideService,
         [version isEqualToString:kFileTransferServiceVersion] &&
         [method isEqualToString:kFileTransferMethod])
     {
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"EmitterReceiveFile" object:[attachments objectAtIndex:0]];
+        if (initialReceivedFiles) {
+            // no module's listener yet, so spool this
+            [initialReceivedFiles addObject:[attachments objectAtIndex:0]];
+        } else {
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"EmitterReceiveFile" object:[attachments objectAtIndex:0]];
+        }
     }
     else
     {

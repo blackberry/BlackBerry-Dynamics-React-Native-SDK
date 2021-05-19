@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,21 @@
 package com.blackberry.bbd.reactnative.ui.webview.bbwebview;
 
 import android.util.Log;
+import android.webkit.JsPromptResult;
 import android.webkit.WebChromeClient;
+import android.webkit.WebView;
 
-class BBChromeClient extends WebChromeClient {
+import com.blackberry.bbd.reactnative.ui.webview.bbwebview.utils.JsDialogHelper;
+
+public class BBChromeClient extends WebChromeClient {
 
     private static final String TAG = "GDWebView-" + BBChromeClient.class.getSimpleName();
+
+    private WebClientObserver clientObserver;
+
+    public void setClientObserver(WebClientObserver clientObserver) {
+        this.clientObserver = clientObserver;
+    }
 
     @Override
     public boolean onConsoleMessage(android.webkit.ConsoleMessage consoleMessage) {
@@ -31,4 +41,22 @@ class BBChromeClient extends WebChromeClient {
         return super.onConsoleMessage(consoleMessage);
     }
 
+    @Override
+    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+
+        Log.i(TAG, "onJsPrompt");
+
+        JsDialogHelper dialogHelper = new JsDialogHelper(message, result, defaultValue);
+        dialogHelper.showDialog(view.getContext());
+
+        return true;
+    }
+
+    @Override
+    public void onProgressChanged(WebView view, int newProgress) {
+
+        Log.i(TAG, "onProgressChanged: url " + view.getUrl() + " progress " + newProgress);
+
+        clientObserver.notifyProgressChanged(newProgress);
+    }
 }

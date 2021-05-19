@@ -6,6 +6,7 @@ The JavaScript API of this module remains the same but file(s) that contain Asyn
 ## Supportability
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Async-Storage` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

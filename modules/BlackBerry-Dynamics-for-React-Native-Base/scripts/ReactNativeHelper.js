@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-var shell = require('shelljs'),
+const shell = require('shelljs'),
   fs = require('fs'),
   path = require('path'),
-  isWindows = process.platform === 'win32';
+  isWindows = process.platform === 'win32',
+  constants = require('./constants');
 
 class ReactNativeHelper {
   constructor(projectRoot) {
@@ -34,7 +35,30 @@ class ReactNativeHelper {
     if (isWindows) { return; }
 
     console.log('Setting BBD configurations for iOS...');
-    var cmdiOSCommand = path.join('.', 'scripts', 'bbd_rn_install_ios.rb');
+
+    const notFoundFrameworks = [
+      'BlackBerryDynamics.xcframework',
+      'BlackBerryCerticom.xcframework',
+      'BlackBerryCerticomSBGSE.xcframework'
+    ].filter(framework => {
+      if (!fs.existsSync(path.join('.', 'ios', 'BlackBerryDynamics', 'frameworks', framework))) {
+        return framework;
+      }
+    });
+
+    if (notFoundFrameworks.length) {
+      const message = notFoundFrameworks.join(', ') +
+        ' not found in ' + path.resolve('..', '..', '..', '..',
+        'modules', 'BlackBerry-Dynamics-for-React-Native-Base',
+        'ios', 'BlackBerryDynamics', 'frameworks') + '.' +
+        '\nPlease follow instruction provided in ' +
+        'README.md for BlackBerry-Dynamics-for-React-Native-Base module and re-install it.';
+
+      console.log(`\x1b[31m${message}\x1b[0m`);
+      process.exit(1);
+    }
+
+    let cmdiOSCommand = path.join('.', 'scripts', 'bbd_rn_install_ios.rb');
 
     if (bundleId) {
       cmdiOSCommand += ` --bundle_id ${bundleId}`;
@@ -49,27 +73,46 @@ class ReactNativeHelper {
   }
 
   addUpdatePodsToPodfile() {
-    var rnVersionInt = parseInt(this.packageJson.dependencies['react-native'].split('.')[1], 10);
+    const rnVersionInt = parseInt(this.packageJson.dependencies['react-native'].split('.')[1], 10);
 
     if (rnVersionInt < 62) {
       return;
     }
 
-    var cmd = '\t\tsystem("node ../node_modules/BlackBerry-Dynamics-for-React-Native-Base/scripts/updatePods.js")\n',
-      podfilePath = path.join(this.projectRoot, 'ios', 'Podfile'),
-      podfileContent = fs.readFileSync(podfilePath, 'utf-8'),
+    const podfilePath = path.join(this.projectRoot, 'ios', 'Podfile'),
       postInstall = 'post_install do |installer|';
+    let podfileContent = fs.readFileSync(podfilePath, 'utf-8');
 
-    if (podfileContent.indexOf(postInstall) < 0 || podfileContent.indexOf(cmd) >= 0) {
+    if (!podfileContent.includes(postInstall) || podfileContent.includes(constants.updatePodsCommand)) {
       return;
     }
 
-    var postInstallIndex = podfileContent.indexOf(postInstall) + 1,
-      beforePostInstall = podfileContent.substring(0, postInstallIndex + postInstall.length),
-      afterPostInstall = podfileContent.substring(postInstallIndex + postInstall.length + 1, podfileContent.length),
-      newPodfileContent = beforePostInstall + cmd + afterPostInstall;
+    const addContentToPodFile = function({afterWhere, content, fileContent}) {
+      if (afterWhere === undefined) {
+        return content + fileContent;
+      }
 
-    fs.writeFileSync(podfilePath, newPodfileContent, 'utf-8');
+      const postInstallIndex = fileContent.indexOf(afterWhere) + 1,
+        beforePostInstall = fileContent.substring(0, postInstallIndex + afterWhere.length),
+        afterPostInstall = fileContent.substring(postInstallIndex + afterWhere.length + 1, fileContent.length);
+
+      return beforePostInstall + content + afterPostInstall;
+    };
+
+    podfileContent = podfileContent.replace(constants.podPlatformPatternVersion, constants.podPlatformV13);
+
+    podfileContent = addContentToPodFile({
+      afterWhere: postInstall,
+      content: constants.updatePodsCommand,
+      fileContent: podfileContent
+    });
+
+    podfileContent = addContentToPodFile({
+      content: constants.bbdPodCommand,
+      fileContent: podfileContent
+    });
+
+    fs.writeFileSync(podfilePath, podfileContent, 'utf-8');
   }
 }
 

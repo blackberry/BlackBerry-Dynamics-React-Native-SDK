@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
     projectRoot = process.env.INIT_CWD,
     bbdTextWidgetName = 'AndroidTextBbd',
     bbdVirtualTextWidgetName = 'AndroidVirtualTextBbd',
+    rnV64Pattern = /(^0\.64\.[0-9]+)/,
+    rnVersion = require(path.join(projectRoot, 'package.json'))['dependencies']['react-native'],
     rn61RendererImplementationsPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'implementations'),
     rn61RendererDevArr = [
       path.join(rn61RendererImplementationsPath, 'ReactFabric-dev.fb.js'),
@@ -48,10 +50,21 @@
       cleanupBbdTextWidget(filePath, bbdTextWidgetCode + bbdVirtualTextWidgetCode);
     });
 
+    if (rnV64Pattern.test(rnVersion)) {
+      rn61RendererOtherArr.forEach(function(filePath) {
+        var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === JSCompiler_inline_result ||\n\t\t',
+          bbdVirtualTextWidgetCode = '"' + bbdVirtualTextWidgetName + '" === JSCompiler_inline_result ||\n\t\t';
+
+        cleanupBbdTextWidget(filePath, bbdTextWidgetCode + bbdVirtualTextWidgetCode);
+      });
+
+      return;
+    }
+
     rn61RendererOtherArr.forEach(function(filePath) {
       var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === nextContext ||\n\t\t',
         bbdVirtualTextWidgetCode = '"' + bbdVirtualTextWidgetName + '" === nextContext ||\n\t\t';
-      
+
       cleanupBbdTextWidget(filePath, bbdTextWidgetCode + bbdVirtualTextWidgetCode);
     });
   }
@@ -70,17 +83,17 @@
     // {"remain":["../../modules/BlackBerry-Dynamics-for-React-Native-Base/"],
     // "cooked":["--save","i","../../modules/BlackBerry-Dynamics-for-React-Native-Base/"],
     // "original":["--save","i","../../modules/BlackBerry-Dynamics-for-React-Native-Base/"]}
-    
+
     var originalNpmConfigArgv = JSON.parse(process.env.npm_config_argv).original,
       filteredOriginal = originalNpmConfigArgv.filter(function(val, i) {
         return !['--save', '--verbose', '--d'].includes(val);
       });
 
-    if (!filteredOriginal[1] || 
+    if (!filteredOriginal[1] ||
         ((filteredOriginal[1] && filteredOriginal[1].indexOf('BlackBerry-Dynamics-for-React-Native-Text') < 0) ||
           !filteredOriginal.includes('uninstall'))) {
       process.exit(0);
-    } 
+    }
   }
 
 })();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ export default class App extends Component {
     const { searchValue } = this.state;
 
     return (
-      <SafeAreaView style={{flex: 1}}>
+      <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
         <KeyboardAvoidingView
           style={{flex: 1, paddingHorizontal: 8}}
           behavior={Platform.OS === 'ios' ? 'padding' : null}
@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: 'gray',
-    borderWidth: 1
+    borderWidth: 1,
+    color: '#000'
   }
 });

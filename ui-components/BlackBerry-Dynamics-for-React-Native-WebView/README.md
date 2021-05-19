@@ -13,15 +13,17 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
 
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 #### Supported on iOS and Android
  - HTTP redirection
+ - File upload
+ - Secured cookies storage
  - Page resource and content loading
  - MTD Safe browsing
  - DLP (secure cut/copy/paste) within WebView
 
  #### Supported on iOS and not supported on Android
- - File upload
  - Browsing history - `GoBack`, `GoForward`, `Reload` and `StopLoading` API
  - AutoZSO
 
@@ -29,16 +31,14 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
  - HTTP authentication (Basic, Digest, NTLM, Kerberos, Client Cert)
  - File download
  - URL schemes `mailto:`, `geo:`, `tel:`
- - Secured cookies storage
  - Secured HTTP cache
  - WebSocket
  - WebWorker
  - SSO
 
 ## Preconditions
-`BlackBerry-Dynamics-for-React-Native-WebView` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
+`BlackBerry-Dynamics-for-React-Native-WebView` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` and `BlackBerry-Dynamics-for-React-Native-Networking` modules, so please install required modules first.
 
-Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## Installation
 
     $ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-WebView

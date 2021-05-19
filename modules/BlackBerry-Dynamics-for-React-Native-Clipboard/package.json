@@ -4,10 +4,14 @@
   "description": "BlackBerry Dynamics Clipboard module for React Native secures Clipboard API",
   "main": "index.js",
   "scripts": {
-    "install": "node ./scripts/install_hook.js"
+    "install": "node ./scripts/install_hook.js",
+    "uninstall": "node ./scripts/remove_hook.js"
   },
   "keywords": [
     "react-native"
   ],
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "@react-native-community/clipboard": "1.0.0"
+  }
 }

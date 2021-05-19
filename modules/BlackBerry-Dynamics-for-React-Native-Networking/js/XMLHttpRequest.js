@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original XMLHttpRequest API from Networking of react-native
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/XMLHttpRequest.js
  *
@@ -15,7 +15,7 @@
 'use strict';
 
 const EventTarget = require('event-target-shim');
-const RCTNetworking = require('./RCTNetworking.android');
+const RCTNetworking = require('./RCTNetworking');
 
 /* $FlowFixMe(>=0.54.0 site=react_native_oss) This comment suppresses an error
  * found when Flow v0.54 was deployed. To see the error delete this comment and
@@ -25,7 +25,6 @@ const invariant = require('invariant');
 /* $FlowFixMe(>=0.54.0 site=react_native_oss) This comment suppresses an error
  * found when Flow v0.54 was deployed. To see the error delete this comment and
  * run Flow. */
-const warning = require('fbjs/lib/warning');
 const BlobManager = require('./BlobManager');
 
 export type NativeResponseType = 'base64' | 'blob' | 'text';
@@ -189,8 +188,7 @@ class XMLHttpRequest extends EventTarget(...XHR_EVENTS) {
       );
     }
     if (!SUPPORTED_RESPONSE_TYPES.hasOwnProperty(responseType)) {
-      warning(
-        false,
+      console.warn(
         `The provided value '${responseType}' is not a valid 'responseType'.`,
       );
       return;

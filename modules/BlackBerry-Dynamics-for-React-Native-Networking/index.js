@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-const Platform = require('react-native/Libraries/Utilities/Platform');
-
 module.exports = {
-  XMLHttpRequest: Platform.OS === 'android' ? require('./js/XMLHttpRequest') : XMLHttpRequest,
-  fetch: Platform.OS === 'android' ? require('./js/fetch') : fetch,
-  Blob: Platform.OS === 'android' ? require('./js/Blob') : Blob
+  XMLHttpRequest: require('./js/XMLHttpRequest'),
+  fetch: require('./js/fetch').fetch,
+  Blob: require('./js/Blob'),
+  FileReader: require('./js/FileReader'),
+  Response: require('./js/fetch').Response,
+  Headers: require('./js/fetch').Headers,
+  WebSocket: require('./js/WebSocket')
 }

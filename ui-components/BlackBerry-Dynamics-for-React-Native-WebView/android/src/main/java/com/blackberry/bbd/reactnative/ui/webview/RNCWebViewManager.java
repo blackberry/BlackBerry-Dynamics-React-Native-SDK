@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Some modifications to the original <WebView /> UI component
  * from https://github.com/react-native-community/react-native-webview/blob/v10.8.3
@@ -25,10 +25,8 @@ import android.annotation.TargetApi;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.Manifest;
 import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Build;
@@ -61,9 +59,9 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 
+import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBChromeClient;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBWebView;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBWebViewClient;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http.GDHttpClientProvider;
@@ -1079,7 +1077,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     }
   }
 
-  protected static class RNCWebChromeClient extends WebChromeClient implements LifecycleEventListener {
+  protected static class RNCWebChromeClient extends BBChromeClient implements LifecycleEventListener {
     protected static final FrameLayout.LayoutParams FULLSCREEN_LAYOUT_PARAMS = new FrameLayout.LayoutParams(
       LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
 
@@ -1107,6 +1105,10 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected RNCWebView.ProgressChangedFilter progressChangedFilter = null;
 
     public RNCWebChromeClient(ReactContext reactContext, WebView webView) {
+      WebViewClient webViewClient = webView.getWebViewClient();
+      if (webViewClient != null && webViewClient instanceof BBWebViewClient) {
+        super.setClientObserver(((BBWebViewClient) webViewClient).getObserver());
+      }
       this.mReactContext = reactContext;
       this.mWebView = webView;
     }

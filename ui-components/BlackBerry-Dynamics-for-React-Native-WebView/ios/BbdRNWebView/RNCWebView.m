@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original react-native-webview
  * from https://github.com/react-native-webview/react-native-webview/
  *
@@ -20,8 +20,8 @@
 #endif // !TARGET_OS_OSX
 
 #if !defined (DISABLE_GD)
-    #import <GD/WKWebView+GDNET.h>
-    #import <GD/GDNetUtility.h>
+    #import <BlackBerryDynamics/GD/WKWebView+GDNET.h>
+    #import <BlackBerryDynamics/GD/GDNetUtility.h>
 #endif
 
 #import "objc/runtime.h"
@@ -1353,6 +1353,8 @@ static NSError *serverTrustError;
 - (void)resetupScripts:(WKWebViewConfiguration *)wkWebViewConfig {
   [wkWebViewConfig.userContentController removeAllUserScripts];
   [wkWebViewConfig.userContentController removeScriptMessageHandlerForName:MessageHandlerName];
+
+  wkWebViewConfig.userContentController = [WKUserContentController new];
 
   NSString *html5HistoryAPIShimSource = [NSString stringWithFormat:
     @"(function(history) {\n"

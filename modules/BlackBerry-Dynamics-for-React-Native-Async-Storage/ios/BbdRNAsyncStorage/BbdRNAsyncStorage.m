@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original @react-native-community/async-storage
  * from https://github.com/react-native-community/async-storage/
  *
@@ -20,7 +20,7 @@
 #import <React/RCTLog.h>
 #import <React/RCTUtils.h>
 
-#import <GD/GDFileManager.h>
+#import <BlackBerryDynamics/GD/GDFileManager.h>
 
 static NSString *const RCTStorageDirectory = @"RCTAsyncLocalStorage_V1";
 static NSString *const RCTOldStorageDirectory = @"RNCAsyncLocalStorage_V1";

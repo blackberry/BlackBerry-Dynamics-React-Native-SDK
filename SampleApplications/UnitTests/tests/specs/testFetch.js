@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
-import { fetch, Blob } from 'BlackBerry-Dynamics-for-React-Native-Networking';
+
+import { fetch, Blob, Response, Headers } from 'BlackBerry-Dynamics-for-React-Native-Networking';
 
 import { Ntlm } from '../scripts/ntlmHelper';
 import { Digest } from '../scripts/digestHelper';
@@ -180,6 +180,31 @@ export default function() {
         expect(response.status).toBe(200);
         expect(response.ok).toBe(true);
         expect(response.url).toBe(redirectionUrl);
+      });
+
+      it('Fetch: GET, code 304: Not Modified', async function() {
+        const notModifiedUrl = 'https://httpbin.org/cache';
+        const response = await fetch(notModifiedUrl, {
+          method: 'GET',
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.ok).toBe(true);
+
+        const lastModified = response.headers.get('Last-Modified');
+        const eTag = response.headers.get('ETag');
+
+        const response2 = await fetch(notModifiedUrl, {
+          method: 'GET',
+          headers: {
+            'If-Modified-Since': lastModified,
+            'If-None-Match': eTag,
+          },
+        });
+
+        expect(response2.status).toBe(304);
+        expect(response2.ok).toBe(false);
+
       });
 
       it('Fetch: GET, code 401: Unauthorized', async function() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ const FormInput = props => {
         numberOfLines={props.numberOfLines}
         multiline={props.multiline}
         onSubmitEditing={props.onSubmitEditing}
-        style={props.style}
+        style={[props.style, styles.white]}
         blurOnSubmit={false}
         value={props.value}
       />
@@ -46,6 +46,9 @@ const styles = StyleSheet.create({
     borderColor: '#4486f5',
     borderWidth: 1,
     borderRadius: 4
+  },
+  white: {
+    color: '#000'
   }
 });
 

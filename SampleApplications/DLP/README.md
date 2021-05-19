@@ -8,10 +8,12 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: DLP sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` by running following command:
+> NOTE: DLP sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` or `0.64.0` versions by running following command:
 `$ react-native upgrade 0.63.x`
 for example:
 `$ react-native upgrade 0.63.3`
+or
+`$ react-native upgrade 0.64.0`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -80,11 +82,11 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`  
-##### 0.63.x
+##### 0.64.0
 `$ cd <path>/SampleApplications/DLP`  
 `$ yarn`  
 `$ cd .. ; git init ; cd DLP`  
-`$ react-native upgrade 0.63.3`  
+`$ react-native upgrade 0.64.0`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
@@ -98,3 +100,8 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`
+
+## Known issues
+#### Unrecognized font family 'Material Icons'
+When running the `DLP` sample on iOS following issue can occur: [Unrecognized font family 'Material Icons'](https://github.com/oblador/react-native-vector-icons/issues/965).
+It can be resolved if to apply following fix: [Update Info.plist by setting UIAppFonts](https://github.com/oblador/react-native-vector-icons/issues/965#issuecomment-809106674).

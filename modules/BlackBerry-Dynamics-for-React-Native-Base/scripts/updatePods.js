@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,5 +51,35 @@
         fs.writeFileSync(debugXcconfigPath, debugXcconfigContent, 'utf-8');
     }
 
+    function addBuildActiveArchitectureOnly() {
+        var projectRoot = path.join(pwd, '..'),
+            projectName = require(path.join(projectRoot, 'package.json')).name,
+            projectReleaseXcconfigPath = path.join(
+                projectRoot,
+                'ios',
+                'Pods',
+                'Target\ support\ Files',
+                'Pods-' + projectName,
+                'Pods-' + projectName + '.release.xcconfig'
+            ),
+            bbdReleaseXcconfigPath = path.join(
+                projectRoot,
+                'ios',
+                'Pods',
+                'Target\ support\ Files',
+                'BlackBerryDynamics',
+                'BlackBerryDynamics.release.xcconfig'
+            ),
+            projectReleaseXcconfigContent = fs.readFileSync(projectReleaseXcconfigPath, 'utf-8'),
+            bbdReleaseXcconfigContent = fs.readFileSync(bbdReleaseXcconfigPath, 'utf-8');
+
+        projectReleaseXcconfigContent = projectReleaseXcconfigContent.replace('USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES', 'USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES\nONLY_ACTIVE_ARCH = YES');
+        bbdReleaseXcconfigContent = bbdReleaseXcconfigContent.replace('USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES', 'USE_RECURSIVE_SCRIPT_INPUTS_IN_SCRIPT_PHASES = YES\nONLY_ACTIVE_ARCH = YES');
+
+        fs.writeFileSync(projectReleaseXcconfigPath, projectReleaseXcconfigContent, 'utf-8');
+        fs.writeFileSync(bbdReleaseXcconfigPath, bbdReleaseXcconfigContent, 'utf-8');
+    }
+
     removeRNDuplLinkerFlags();
+    addBuildActiveArchitectureOnly();
 })();

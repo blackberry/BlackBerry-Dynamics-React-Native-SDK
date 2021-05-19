@@ -8,10 +8,12 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: ClipboardTestApp sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` by running following command:
+> NOTE: ClipboardTestApp sample is based on `0.63.2` version of React Native. There is a possibility to upgrade to `0.63.x` or `0.64.0` versions by running following command:
 `$ react-native upgrade 0.63.x`
 for example:
 `$ react-native upgrade 0.63.3`
+or
+`$ react-native upgrade 0.64.0`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -58,11 +60,11 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`  
-##### 0.63.x
+##### 0.64.0
 `$ cd <path>/SampleApplications/ClipboardTestApp`  
 `$ yarn`  
 `$ cd .. ; git init ; cd ClipboardTestApp`  
-`$ react-native upgrade 0.63.3`  
+`$ react-native upgrade 0.64.0`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  

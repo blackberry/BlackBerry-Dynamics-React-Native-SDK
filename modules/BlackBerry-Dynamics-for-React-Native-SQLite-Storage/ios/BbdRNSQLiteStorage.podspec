@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
   s.name          = "BbdRNSQLiteStorage"
   s.version       = "1.0.0"
   s.summary       = "BlackBerry Dynamics SQLite Storage module for React Native for iOS"
-  s.homepage      = "https://community.blackberry.com/"
+  s.homepage      = "https://developers.blackberry.com/"
   s.license       = { :type => "Apache License, Version 2.0" }
   s.authors       = {
     "Volodymyr Taliar" => "vtaliar@blackberry.com",
@@ -26,10 +26,11 @@ Pod::Spec.new do |s|
     "Nobu Ishikawa" => "nishikawa@blackberry.com"
   }
   s.platform      = :ios, "9.0"
-  s.source        = { 
-    :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git", 
+  s.source        = {
+    :git => "https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK.git",
     :tag => "#{s.version}"
   }
   s.source_files  = "BbdRNSQLiteStorage/**/*.{h,m}"
   s.dependency "React"
+  s.dependency "BlackBerryDynamics"
 end

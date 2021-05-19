@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,24 @@
 
 package com.blackberry.bbd.reactnative.ui.webview.bbwebview;
 
+import android.util.Log;
+import android.webkit.URLUtil;
 import android.webkit.WebView;
+
+import com.blackberry.bbd.reactnative.ui.webview.bbwebview.utils.Utils;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class WebClientObserver {
 
+    private static final String TAG = WebClientObserver.class.getSimpleName();
+
     private Set<OnPageFinished> finishedListeners = ConcurrentHashMap.newKeySet();
     private Set<OnPageStarted> startedListeners = ConcurrentHashMap.newKeySet();
     private Set<OnPageContentVisible> contentVisibleListeners = ConcurrentHashMap.newKeySet();
     private Set<OnLoadUrl> loadUrlListeners = ConcurrentHashMap.newKeySet();
+    private Set<ProgressListener> progressListeners = ConcurrentHashMap.newKeySet();
 
     public interface OnPageFinished {
         void onPageFinished(WebView view, String url);
@@ -43,6 +50,10 @@ public class WebClientObserver {
 
     public interface OnLoadUrl {
         void onLoadUrl(String url);
+    }
+
+    public interface ProgressListener {
+        void progressChanged(int newProgress);
     }
 
     public WebClientObserver() {
@@ -75,6 +86,12 @@ public class WebClientObserver {
     public void removeLoadUrlListener(OnLoadUrl onLoadUrl) {
         if (onLoadUrl != null) {
             loadUrlListeners.remove(onLoadUrl);
+        }
+    }
+
+    public void addProgressListener(ProgressListener listener) {
+        if (listener != null) {
+            progressListeners.add(listener);
         }
     }
 
@@ -115,8 +132,21 @@ public class WebClientObserver {
     }
 
     public void notifyLoadUrl(String url) {
+        if (!URLUtil.isNetworkUrl(url)) {
+            Log.i(TAG, "notifyLoadUrl: ignore not network url");
+            return;
+        }
+
+        Log.i(TAG, "notifyLoadUrl: new url " + url);
+
         for (OnLoadUrl listener : loadUrlListeners) {
             listener.onLoadUrl(url);
+        }
+    }
+
+    public void notifyProgressChanged(int newProgress) {
+        for (ProgressListener listener : progressListeners) {
+            listener.progressChanged(newProgress);
         }
     }
 

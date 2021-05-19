@@ -12,7 +12,6 @@
 		4611BD66229D55DC00EF6AA8 /* BBDRNLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 4611BD65229D55DC00EF6AA8 /* BBDRNLog.m */; };
 		4611BDCB229D640A00EF6AA8 /* UIApplication+BBDRN.m in Sources */ = {isa = PBXBuildFile; fileRef = 4611BDCA229D640A00EF6AA8 /* UIApplication+BBDRN.m */; };
 		4611BDCE229D681000EF6AA8 /* BBDRNRuntime.m in Sources */ = {isa = PBXBuildFile; fileRef = 4611BDCD229D681000EF6AA8 /* BBDRNRuntime.m */; };
-		4673BE1A22AFB1300096FC28 /* GD.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4673BE1922AFB1300096FC28 /* GD.framework */; };
 		46E604E222A956D1002DFF21 /* UIApplication+BBDRN.h in Headers */ = {isa = PBXBuildFile; fileRef = 4611BDC9229D640A00EF6AA8 /* UIApplication+BBDRN.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		46E604E322A956D1002DFF21 /* BBDRNLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 4611BD64229D55DC00EF6AA8 /* BBDRNLog.h */; };
 		46E604E422A956D1002DFF21 /* GDCLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 4611BDC7229D62D000EF6AA8 /* GDCLog.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -44,7 +43,6 @@
 		4611BDCA229D640A00EF6AA8 /* UIApplication+BBDRN.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "UIApplication+BBDRN.m"; sourceTree = "<group>"; };
 		4611BDCC229D681000EF6AA8 /* BBDRNRuntime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BBDRNRuntime.h; sourceTree = "<group>"; };
 		4611BDCD229D681000EF6AA8 /* BBDRNRuntime.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BBDRNRuntime.m; sourceTree = "<group>"; };
-		4673BE1922AFB1300096FC28 /* GD.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GD.framework; path = System/Library/Frameworks/GD.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,7 +50,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4673BE1A22AFB1300096FC28 /* GD.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -102,7 +99,6 @@
 		4611BDC4229D61E300EF6AA8 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4673BE1922AFB1300096FC28 /* GD.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -317,9 +313,12 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J2UNKSFBGL;
-				FRAMEWORK_SEARCH_PATHS = "../../dependencies/**";
+				FRAMEWORK_SEARCH_PATHS = (
+					"../../dependencies/**",
+					"${PODS_ROOT}/BlackBerryDynamics/Frameworks/BlackBerryDynamics.xcframework/**",
+				);
 				HEADER_SEARCH_PATHS = (
-					"../../dependencies/GD.framework/**",
+					"${PODS_ROOT}/BlackBerryDynamics/Frameworks/BlackBerryDynamics.xcframework/**",
 					"../../dependencies/node_modules/react-native/React/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";
@@ -335,9 +334,12 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = J2UNKSFBGL;
-				FRAMEWORK_SEARCH_PATHS = "../../dependencies/**";
+				FRAMEWORK_SEARCH_PATHS = (
+					"../../dependencies/**",
+					"${PODS_ROOT}/BlackBerryDynamics/Frameworks/BlackBerryDynamics.xcframework/**",
+				);
 				HEADER_SEARCH_PATHS = (
-					"../../dependencies/GD.framework/**",
+					"${PODS_ROOT}/BlackBerryDynamics/Frameworks/BlackBerryDynamics.xcframework/**",
 					"../../dependencies/node_modules/react-native/React/**",
 				);
 				OTHER_LDFLAGS = "-ObjC";

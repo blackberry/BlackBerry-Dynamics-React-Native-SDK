@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Text UI component for react-native
  * from https://github.com/facebook/react-native/tree/0.61-stable/ReactAndroid/src/main/java/com/facebook/react/views/text
  *
@@ -75,7 +75,6 @@ public class ReactTextViewManager
     view.updateView();
   }
 
-  @Override
   public Object updateLocalData(ReactTextView view, ReactStylesDiffMap props, ReactStylesDiffMap localData) {
     ReadableMap attributedString = localData.getMap("attributedString");
 

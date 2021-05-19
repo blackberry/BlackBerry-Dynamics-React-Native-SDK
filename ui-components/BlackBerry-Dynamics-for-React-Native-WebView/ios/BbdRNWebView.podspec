@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Pod::Spec.new do |spec|
   spec.version       = "1.0.0"
   spec.summary       = "BlackBerry Dynamics WebView UI component for React Native for iOS"
   spec.license       = { :type => "Apache License, Version 2.0" }
-  spec.homepage      = "https://community.blackberry.com/"
+  spec.homepage      = "https://developers.blackberry.com/"
   spec.authors       = {
     "Volodymyr Taliar" => "vtaliar@blackberry.com"
   }
@@ -28,6 +28,7 @@ Pod::Spec.new do |spec|
     :tag => "#{spec.version}"
   }
   spec.source_files  = "BbdRNWebView/*.{h,m}"
-  spec.platform      = :ios, '9.0'
+  spec.platform      = :ios, "9.0"
   spec.dependency  "React"
+  spec.dependency "BlackBerryDynamics"
 end

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,14 +28,10 @@ class BbdRNProject
   DEFAULT_PRODUCT_ID = '$(PRODUCT_BUNDLE_IDENTIFIER)'
   PRODUCT_ID = BbdRNProject.get_product_bundle_id
 
-  GD_IOS_PATH = File.expand_path('~/Library/Application Support/BlackBerry/Good.platform/iOS')
-  GD_ASSETS_BUNDLE = File.expand_path(GD_IOS_PATH + '/Frameworks/GD.framework/Versions/A/Resources/GDAssets')
-  GD_FIPS_LD = File.expand_path(GD_IOS_PATH + '/FIPS_module/$FIPS_PACKAGE/bin/gd_fipsld')
   LIBRARY_SEARCH_PATHS = '$(SDK_DIR)/usr/lib/swift $(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME) $(inherited)'
   LD_RUNPATH_SEARCH_PATHS = '/usr/lib/swift @executable_path/Frameworks'
 
   FRAMEWORKS = [
-    'GD',
     'WebKit',
     'LocalAuthentication',
     'DeviceCheck',
@@ -49,12 +45,8 @@ class BbdRNProject
     'MobileCoreServices',
     'CoreGraphics',
     'AssetsLibrary',
-    'SafariServices'
-  ]
-
-  EMBEDDED_FRAMEWORKS = [
-    'BlackBerryCerticom.framework',
-    'BlackBerryCerticomSBGSE.framework'
+    'SafariServices',
+    'AuthenticationServices'
   ]
 
   TBD_LIBS = [
@@ -63,13 +55,11 @@ class BbdRNProject
   ]
 
   BUILD_CONFIGS = {
-    'FIPS_PACKAGE'                          => '$(CURRENT_ARCH).sdk',
-    'LDPLUSPLUS'                            => GD_FIPS_LD,
-    'LD'                                    => GD_FIPS_LD,
     'ENABLE_BITCODE'                        => 'NO',
     'LIBRARY_SEARCH_PATHS'                  => LIBRARY_SEARCH_PATHS,
     'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES' => 'YES',
-    'LD_RUNPATH_SEARCH_PATHS'               => LD_RUNPATH_SEARCH_PATHS
+    'LD_RUNPATH_SEARCH_PATHS'               => LD_RUNPATH_SEARCH_PATHS,
+    'VALIDATE_WORKSPACE'                    => 'YES'
   }
 
   PLIST_CONFIG = {
@@ -189,9 +179,15 @@ class BbdRNProject
   end
 
   def get_native_target
-    @xcodeproj.targets.select do |target|
+    target = @xcodeproj.targets.select do |target|
       target.name == @product_name
     end.first
+    if target.nil? then
+      target = @xcodeproj.targets.select.first
+      @product_name = target.name
+    end
+
+    target
   end
 
   def get_product_bundle_id
@@ -239,55 +235,12 @@ class BbdRNProject
     end.first
 
     if app_group.files.select do |file|
-      file.name == 'GDAssets.bundle'
-    end.empty? then
-      gdAssetsFileRef = Xcodeproj::Project::Object::FileReferencesFactory.new_bundle(app_group, GD_ASSETS_BUNDLE)
-      @native_target.add_resources([gdAssetsFileRef])
-    end
-
-    if app_group.files.select do |file|
       file.name == 'development-tools-info.json'
     end.empty? then
       developmentToolsJsonRef = Xcodeproj::Project::Object::FileReferencesFactory.new_reference(
         app_group, @development_tools_json_path, 'SOURCE_ROOT'
       )
       @native_target.add_resources([developmentToolsJsonRef])
-    end
-
-    frameworks_group = @xcodeproj.groups.find { |group| group.display_name == 'Frameworks' }
-    frameworks_build_phase = @native_target.build_phases.find { |build_phase| build_phase.to_s == 'FrameworksBuildPhase' }
-
-    # remove previous "Embed Frameworks" Copy Build Phase
-    phases = @native_target.copy_files_build_phases().each do |phase|
-      if phase.name == 'Embed Frameworks'
-        phase.remove_from_project
-
-        # remove frameworks
-        @native_target.frameworks_build_phase.files.objects.each do |bf|
-          if EMBEDDED_FRAMEWORKS.include? bf.display_name
-            @native_target.frameworks_build_phase.remove_build_file(bf)
-          end
-        end
-
-        # remove from groups
-        frameworks_group.files.each do |file|
-          file.remove_from_project if EMBEDDED_FRAMEWORKS.include? file.name
-        end
-      end
-    end
-
-    # Add new "Embed Frameworks" build phase to target
-    embed_frameworks_build_phase = @xcodeproj.new(Xcodeproj::Project::Object::PBXCopyFilesBuildPhase)
-    embed_frameworks_build_phase.name = 'Embed Frameworks'
-    embed_frameworks_build_phase.symbol_dst_subfolder_spec = :frameworks
-    @native_target.build_phases << embed_frameworks_build_phase
-
-    # Add BlackBerryCerticom.framework and BlackBerryCerticomSBGSE.framework frameworks to target as "Embed Frameworks"
-    EMBEDDED_FRAMEWORKS.each do |framework|
-      framework_ref = frameworks_group.new_file(GD_IOS_PATH + '/Frameworks/' + framework)
-      build_file = embed_frameworks_build_phase.add_file_reference(framework_ref)
-      frameworks_build_phase.add_file_reference(framework_ref)
-      build_file.settings = { 'ATTRIBUTES' => ['CodeSignOnCopy', 'RemoveHeadersOnCopy'] }
     end
 
     # Add BlackBerry storyboard with images.xcassets and create backup for origin storyboard

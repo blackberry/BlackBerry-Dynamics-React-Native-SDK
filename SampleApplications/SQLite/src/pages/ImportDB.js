@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import TextInfo from '../components/TextInfo';
 import SelectItems from '../components/SelectItems.js';
 
 import { openDatabase, deleteDatabase } from 'BlackBerry-Dynamics-for-React-Native-SQLite-Storage';
+
+import RNFS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 
 export default class ImportDB extends Component {
   constructor(props) {
@@ -62,7 +64,7 @@ export default class ImportDB extends Component {
     ];
     if (Platform.OS == 'android') {
       items.push(
-        { label: 'case 3: /data', value: 'data/external.db' }
+        { label: 'case 3: /data', value: `${RNFS.DocumentDirectoryPath}/data/external.db` }
       );
     }
 

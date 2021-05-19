@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@
     projectRoot = process.env.INIT_CWD,
     bbdTextWidgetName = 'AndroidTextBbd',
     bbdVirtualTextWidgetName = 'AndroidVirtualTextBbd',
+    rnV64Pattern = /(^0\.64\.[0-9]+)/,
+    rnVersion = require(path.join(projectRoot, 'package.json'))['dependencies']['react-native'],
     rn61RendererImplementationsPath = path.join(projectRoot, 'node_modules', 'react-native', 'Libraries', 'Renderer', 'implementations'),
     rn61RendererDevArr = [
       path.join(rn61RendererImplementationsPath, 'ReactFabric-dev.fb.js'),
@@ -40,7 +42,6 @@
       path.join(rn61RendererImplementationsPath, 'ReactNativeRenderer-profiling.js')
     ];
 
-
   // To enable DLP within <Text \> UI component we need to extend default list of native views
   // with following views: AndroidTextBbd, AndroidVirtualTextBbd.
   // node_modules/react-native/Libraries/Renderer/implementations/* manages default native views for RN 0.61.x and higher
@@ -56,6 +57,21 @@
         'type === "AndroidTextInput" || // Android'
       );
     });
+
+    if (rnV64Pattern.test(rnVersion)) {
+      rn61RendererOtherArr.forEach(function(filePath) {
+        var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === JSCompiler_inline_result ||\n\t\t',
+          bbdVirtualTextWidgetCode = '"' + bbdVirtualTextWidgetName + '" === JSCompiler_inline_result ||\n\t\t';
+
+        addBbdTextWidget(
+          filePath,
+          bbdTextWidgetCode + bbdVirtualTextWidgetCode,
+          '"AndroidTextInput" === JSCompiler_inline_result ||'
+        );
+      });
+
+      return;
+    }
 
     rn61RendererOtherArr.forEach(function(filePath) {
       var bbdTextWidgetCode = '"' + bbdTextWidgetName + '" === nextContext ||\n\t\t',

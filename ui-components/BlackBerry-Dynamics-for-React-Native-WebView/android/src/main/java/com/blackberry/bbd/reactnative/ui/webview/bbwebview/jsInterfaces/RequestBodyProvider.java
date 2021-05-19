@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,16 @@ public class RequestBodyProvider {
     @JavascriptInterface
     public void addRequestBody(String requestId, String body, String url, String browserContext) {
         webViewClient.addRequestBody(requestId, body, url, browserContext);
+    }
+
+    @JavascriptInterface
+    public void addRequestFormData(String requestId, String name, String type, String data) {
+        webViewClient.addRequestFormData(requestId, name, type, data);
+    }
+
+    @JavascriptInterface
+    public void addRequestFileData(String filename, String mimetype, String dataurl)  {
+        webViewClient.addRequestFileData(filename, mimetype, dataurl);
     }
 
     public void setWebViewClient(BBWebViewClient webViewClient) {

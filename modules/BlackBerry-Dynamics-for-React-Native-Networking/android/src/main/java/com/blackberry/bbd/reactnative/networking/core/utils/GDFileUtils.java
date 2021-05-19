@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,13 +76,17 @@ public class GDFileUtils {
                 };
 
                 for (String contentUriPrefix : contentUriPrefixesToTry) {
-                    final Uri contentUri = ContentUris.withAppendedId(
-                            Uri.parse(contentUriPrefix), Long.valueOf(id));
                     try {
+                        final Uri contentUri = ContentUris.withAppendedId(
+                            Uri.parse(contentUriPrefix), Long.valueOf(id));
+
                         String path = getDataColumn(reactContext, contentUri, null, null);
                         if (path != null) {
                             return path;
                         }
+                    } catch (NumberFormatException e) {
+                        // if id start with 'msf:', cannot get real path
+                        return null;
                     }
                     catch (Exception e) {}
                 }

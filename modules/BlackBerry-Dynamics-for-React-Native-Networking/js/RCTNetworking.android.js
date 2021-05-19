@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Networking module of react-native (JavaScript part)
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/RCTNetworking.android.js
  *
@@ -16,10 +16,11 @@
 
 // Do not require the native RCTNetworking module directly! Use this wrapper module instead.
 // It will add the necessary requestId, so that you don't have to generate it yourself.
-const NativeEventEmitter = require('react-native/Libraries/EventEmitter/NativeEventEmitter');
-const convertRequestBody = require('./convertRequestBody');
+import { NativeEventEmitter } from 'react-native/index';
 
-import type {RequestBody} from 'convertRequestBody';
+import convertRequestBody from './convertRequestBody';
+import type { RequestBody } from './convertRequestBody';
+
 import { NativeModules } from 'react-native';
 
 const RCTNetworkingNative = NativeModules.RNReactNativeBbdNetworking;

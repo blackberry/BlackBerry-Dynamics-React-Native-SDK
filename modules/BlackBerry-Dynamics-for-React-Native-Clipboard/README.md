@@ -7,6 +7,7 @@ Clipboard API works in combination with Data Leakage Prevention (DLP). More deta
 ## Supportability
 #### React Native
  - 0.63.x
+ - 0.64.0
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Clipboard` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

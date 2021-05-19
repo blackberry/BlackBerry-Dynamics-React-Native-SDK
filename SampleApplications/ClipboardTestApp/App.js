@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ export default class App extends Component<Props> {
     };
   }
 
-  get_Text_From_Clipboard = async () => { 
+  get_Text_From_Clipboard = async () => {
     var textHolder = await Clipboard.getString();
     console.log('getting value from clipboard: ' + textHolder)
     this.setState({
@@ -39,23 +39,22 @@ export default class App extends Component<Props> {
     })
   }
 
-
   set_Text_Into_Clipboard = async () => {
     console.log('setting value to clipboard: ' + this.state.textInputText)
     await Clipboard.setString(this.state.textInputText);
   }
-  
+
   render() {
     return (
       <View style={styles.MainContainer}>
- 
+
         <TextInput
           placeholder="Enter Text Here"
           style={styles.textInputStyle}
           underlineColorAndroid='transparent'
           onChangeText={value => this.setState({textInputText: value})}
         />
- 
+
         <View>
           <Button
             title="PASTE THE COPIED TEXT"
@@ -69,15 +68,13 @@ export default class App extends Component<Props> {
             onPress={this.set_Text_Into_Clipboard}
           />
         </View>
- 
+
         <Text style={{ fontSize: 20 }}>{this.state.clipboardText}</Text>
- 
+
       </View>
     );
   }
 }
-
-
 
 const styles = StyleSheet.create({
   MainContainer:
@@ -87,9 +84,9 @@ const styles = StyleSheet.create({
       padding: 20,
       paddingBottom: 0,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
+      backgroundColor: '#fff'
     },
- 
     textInputStyle: {
       textAlign: 'center',
       height: 41,
@@ -97,11 +94,10 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: '#AA00FF',
       borderRadius: 8,
-      marginBottom: 20
+      marginBottom: 20,
+      color: '#000'
     },
- 
     button: {
- 
       width: '92%',
       paddingTop: 12,
       paddingBottom: 12,
@@ -109,7 +105,6 @@ const styles = StyleSheet.create({
       borderRadius: 5,
       marginBottom: 20
     },
- 
     TextStyle: {
       color: '#fff',
       textAlign: 'center',

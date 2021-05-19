@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
   * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 #import <React/RCTBridgeModule.h>
 #endif
 #import <React/RCTEventEmitter.h>
-#import <GD/GDServices.h>
+#import <BlackBerryDynamics/GD/GDServices.h>
 
 @interface ReactNativeBbdAppKinetics : RCTEventEmitter <RCTBridgeModule>
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,12 +214,13 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
   private void copyBundledFilesToSecureFilesystemRecursive(String path)
           throws JSONException, IOException {
     final AssetManager assetsManager = getCurrentActivity().getAssets();
+    final String root = this.getReactApplicationContext().getFilesDir().getAbsolutePath() + File.separator;
 
     InputStream inputStream = null;
     OutputStream outputStream = null;
     try {
       final String[] fileList = assetsManager.list(path);
-      File gdDataFolder = gdFileSystemDelegate.createFile(BBD_DATA_FOLDER_PATH);
+      File gdDataFolder = gdFileSystemDelegate.createFile(root + BBD_DATA_FOLDER_PATH);
       if (fileList.length > 0 &&
               !gdDataFolder.exists()) {
         gdDataFolder.mkdir();
@@ -227,7 +228,7 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
 
       for (final String fileName : fileList) {
         String filePath = path + File.separator + fileName;
-        String gdDataPathFolder = filePath.substring(filePath.indexOf(BBD_DATA_FOLDER_PATH));
+        String gdDataPathFolder = root + filePath.substring(filePath.indexOf(BBD_DATA_FOLDER_PATH));
 
         String[] list = assetsManager.list(filePath);
         if(list != null && list.length > 0){

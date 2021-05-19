@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited.
+ * Copyright (c) 2021 BlackBerry Limited.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,21 @@ package com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http;
 
 import android.os.Process;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
-import android.webkit.CookieManager;
-import android.webkit.ValueCallback;
+import android.webkit.URLUtil;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 
+import com.blackberry.bbd.apache.core.http.Consts;
+import com.blackberry.bbd.apache.core.http.ContentType;
+import com.blackberry.bbd.apache.core.util.CharsetUtils;
+import com.blackberry.bbd.apache.http.entity.mime.FormBodyPartBuilder;
+import com.blackberry.bbd.apache.http.entity.mime.MultipartEntityBuilder;
+import com.blackberry.bbd.apache.http.entity.mime.content.ByteArrayBody;
+import com.blackberry.bbd.apache.http.entity.mime.content.ContentBody;
+import com.blackberry.bbd.apache.http.entity.mime.content.StringBody;
 import com.good.gd.apache.http.Header;
 import com.good.gd.apache.http.HttpResponse;
 import com.good.gd.apache.http.NameValuePair;
@@ -39,34 +47,33 @@ import com.good.gd.apache.http.client.methods.HttpPost;
 import com.good.gd.apache.http.client.methods.HttpPut;
 import com.good.gd.apache.http.client.methods.HttpRequestBase;
 import com.good.gd.apache.http.client.protocol.ClientContext;
-import com.good.gd.apache.http.cookie.Cookie;
-import com.good.gd.apache.http.cookie.CookieOrigin;
+import com.good.gd.apache.http.conn.ConnectTimeoutException;
+import com.good.gd.apache.http.entity.InputStreamEntity;
+import com.good.gd.apache.http.entity.ByteArrayEntity;
 import com.good.gd.apache.http.entity.StringEntity;
-import com.good.gd.apache.http.impl.cookie.RFC2965Spec;
 import com.good.gd.apache.http.message.BasicHeader;
+import com.good.gd.apache.http.message.BasicHttpResponse;
 import com.good.gd.apache.http.message.BasicNameValuePair;
 import com.good.gd.apache.http.protocol.BasicHttpContext;
+import com.good.gd.apache.http.protocol.HTTP;
 import com.good.gd.apache.http.protocol.HttpContext;
 import com.good.gd.net.GDHttpClient;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBWebViewClient;
 import com.blackberry.bbd.reactnative.ui.webview.bbwebview.utils.Utils;
 
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static com.good.gd.apache.http.protocol.HTTP.US_ASCII;
 import static com.good.gd.apache.http.protocol.HTTP.UTF_8;
@@ -80,16 +87,66 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
     private WebResourceRequest request;
     private String targetUrl;
     private String originalWebViewUrl;
-    private WebView vw;
+    private WebView webView;
+    private BrowserContext browserContext;
 
     public static final String GD_INTERCEPT_TAG = "gdinterceptrequest";
 
     public static final ConcurrentHashMap<String, BrowserContext> REQUESTS_BODIES = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, List<BrowserFormData>> REQUEST_FORMDATAS = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, BrowserFile> REQUEST_FILEDATAS = new ConcurrentHashMap<>();
+
+
+    public static class BrowserFile {
+        public final String type; // mime type
+        public final byte[] data; // binary
+
+        public static final BrowserFile NULL = new BrowserFile("", "");
+
+        public BrowserFile (String mimetype, String dataurl) {
+            this.type = mimetype == null ? "" : mimetype;
+            if (URLUtil.isDataUrl(dataurl)) {
+                this.data = Base64.decode(dataurl.replaceFirst("data:.+,", "").getBytes(), Base64.DEFAULT);
+            }
+            else {
+                this.data = null;
+            }
+        }
+    }
+
+    public static class BrowserFormData {
+        private static final String FILE_TYPE = "File";
+        private static final String STRINGS_TYPE = "String";
+
+        public static final BrowserFormData NULL = new BrowserFormData("", "", "");
+
+        public final String name;
+        public final String type;   // 'File' or 'String'
+        public final String value;  // String (filename or value)
+
+        public BrowserFormData(String name, String type, String value) {
+            this.name = name == null ? "" : name;
+            this.type = type == null ? "" : type;
+            this.value = value == null ? "" : value;
+        }
+    }
 
     public static class BrowserContext {
 
         private static final String NO_CORS = "no-cors";
         private static final String FETCH_MODE = "mode";
+
+        private static final String XML_REQUEST = "XHR.prototype.send";
+        private static final String FETCH_REQUEST = "window.fetch";
+        private static final String REQUEST_CONTEXT_KEY = "this";
+
+        private static final String BODYTYPE = "bodyType";
+        private static final String FORMDATA = "FormData";
+        private static final String ARRAYBUFFER = "ArrayBuffer";
+        private static final String BLOB = "Blob";
+        private static final String CONTEXT = "context";
+        private static final String DOCUMENTSUBMIT = "document.submit";
+        private static final String ENCTYPE = "enctype";
 
         public static final BrowserContext NULL = new BrowserContext("", "", "");
 
@@ -102,6 +159,8 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
             this.body = body == null ? "" : body;
             this.url = url == null ? "" : url;
             this.context = context == null ? "" : context;
+
+            Log.i(TAG,"BrowserContext() context - " + context);
         }
 
         public boolean isNoCorsModeEnabled() {
@@ -112,12 +171,96 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                 }
             } catch (Exception e) {
                 Log.i(TAG,"isNoCorsModeEnabled, exception: " + e);
+            }
+            return false;
+        }
+
+        public boolean isInterceptedFromJSRequest() {
+            boolean result = false;
+
+            try {
+                JSONObject object = new JSONObject(context);
+                if (object.get(REQUEST_CONTEXT_KEY).equals(XML_REQUEST)
+                        || object.get(REQUEST_CONTEXT_KEY).equals(FETCH_REQUEST)) {
+
+                    Log.i(TAG,"isInterceptedFromJSRequest, found Js context");
+
+                    result = true;
+                }
+            } catch (Exception e) {
+                Log.i(TAG,"isInterceptedFromJSRequest, exception: " + e);
+            }
+
+            Log.i(TAG,"isInterceptedFromJSRequest, result " + result);
+
+            return result;
+        }
+
+        public boolean isRequestContextUnknown() { return context.isEmpty(); }
+
+        public boolean isBodyTypeFormData() {
+            try {
+                JSONObject object = new JSONObject(context);
+                if (object.get(BODYTYPE).equals(FORMDATA)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.i(TAG,"isBodyTypeFormData, exception: " + e);
                 e.printStackTrace();
             }
             return false;
         }
 
-        public boolean isRequestContextUnknown() { return context.isEmpty(); }
+        public boolean isBodyTypeArrayBuffer() {
+            try {
+                JSONObject object = new JSONObject(context);
+                if (object.get(BODYTYPE).equals(ARRAYBUFFER)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.i(TAG,"isBodyTypeArrayBuffer, exception: " + e);
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        public boolean isBodyTypeBlob() {
+            try {
+                JSONObject object = new JSONObject(context);
+                if (object.get(BODYTYPE).equals(BLOB)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.i(TAG,"isBodyTypeBlob, exception: " + e);
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        public boolean isContextDocumentSubmit() {
+            try {
+                JSONObject object = new JSONObject(context);
+                if (object.get(CONTEXT).equals(DOCUMENTSUBMIT)) {
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.i(TAG,"isContextDocumentSubmit, exception: " + e);
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        public String getEnctype() {
+            try {
+                JSONObject object = new JSONObject(context);
+                return object.get(ENCTYPE).toString();
+            }
+            catch (Exception e) {
+                Log.i(TAG,"getEnctype, exception: " + e);
+                e.printStackTrace();
+            }
+            return null;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -141,9 +284,11 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
 
     private String getRequestBodyByID(String requestID) {
         synchronized (REQUESTS_BODIES) {
-            String body = null;
+            String body = "";
             if (!TextUtils.isEmpty(requestID)) {
-                body = REQUESTS_BODIES.getOrDefault(requestID, BrowserContext.NULL).body;
+                if (REQUESTS_BODIES.containsKey(requestID)) {
+                    body = REQUESTS_BODIES.get(requestID).body;
+                }
             }
             return body;
         }
@@ -154,7 +299,25 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         return getRequestBodyByID(requestID);
     }
 
-    private BrowserContext getRequestContext(WebResourceRequest request) {
+    private boolean removeRequestBodyByID(String requestID) {
+        synchronized (REQUESTS_BODIES) {
+            if (!TextUtils.isEmpty(requestID)) {
+                if (REQUESTS_BODIES.containsKey(requestID)) {
+                    // Remove cached data after body is retried
+                    REQUESTS_BODIES.remove(requestID);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    private boolean removeRequestBody(WebResourceRequest request) {
+        String requestID = getInterceptedRequestID(request);
+        return removeRequestBodyByID(requestID);
+    }
+
+    public static BrowserContext getRequestContext(WebResourceRequest request) {
         BrowserContext context = BrowserContext.NULL;
         String requestID = getInterceptedRequestID(request);
         synchronized (REQUESTS_BODIES) {
@@ -170,8 +333,12 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         return urlString.split(divider);
     }
 
-    private String getInterceptedRequestID(WebResourceRequest request) {
-        return getUrlSegments(request, GD_INTERCEPT_TAG)[1];
+    public static String getInterceptedRequestID(WebResourceRequest request) {
+        String requestID = getUrlSegments(request, GD_INTERCEPT_TAG)[1];
+        if (requestID.contains("/")) {
+            requestID = requestID.substring(0, requestID.lastIndexOf("/"));
+        }
+        return requestID.trim();
     }
 
     private HttpRequestBase getHttpRequestBase(WebResourceRequest request, URI uri) {
@@ -179,14 +346,10 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         HttpRequestBase method;
 
         String body = null;
-        BrowserContext browserContext = BrowserContext.NULL;
 
         if (isInterceptedRequest(request)) {
-            body = getRequestBody(request);//"Amount=10&B2=Submit"
-
-            browserContext = getRequestContext(request);
-
-            Log.i(TAG,"request body: " + body);
+            body = getRequestBody(request);
+            Log.i(TAG,"request body retrieved: " + body);
         }
 
         switch (request.getMethod()) {
@@ -197,54 +360,33 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                 }
                     break;
             case "HEAD": {
-                method = new HttpHead(uri);
-                setGETRequestHeaders(uri,method,request,originalWebViewUrl, null);
-            }
-            break;
+                    method = new HttpHead(uri);
+                    setGETRequestHeaders(uri,method,request,originalWebViewUrl, null);
+                }
+                break;
             case "POST": {
-                HttpPost httpPost = new HttpPost(uri);
+                    HttpPost httpPost = new HttpPost(uri);
 
-                if (body != null) {
-                    formRequestEntity(request, uri, body, httpPost);
-                } else {
-                    Log.i(TAG,"empty POST request body");
-                }
-
-                setPOSTRequestHeaders(uri, httpPost, request,originalWebViewUrl, browserContext);
-
-                if(body != null && httpPost.containsHeader("Content-Type")){
-                    Header header = httpPost.getHeaders("Content-Type")[0];
-
-                    if(header.getValue().contains("multipart/form-data")){
-                        String boundaryFromBody = body.replaceAll("(\\r\\n|\\n)+.*", "").replaceAll("^--","");
-                        httpPost.setHeader("Content-Type",header.getValue().replaceAll("boundary.*","boundary=" + boundaryFromBody));
-                    }
-                } else if (body == null && httpPost.containsHeader("Content-Type")) {
-                    String samlResponse = BBWebViewClient.samlListener.getResponse();
-                    if (samlResponse != null && !samlResponse.isEmpty()) {
-
-                        try {
-
-                            StringEntity entity = new StringEntity(samlResponse, UTF_8);
-                            entity.setContentType(request.getRequestHeaders().get("Content-Type"));
-
-                            httpPost.setEntity(entity);
-
-                            BBWebViewClient.samlListener.reset();
-
-                            Log.i(TAG,"saml response is added to body request");
-
-                        } catch (UnsupportedEncodingException e) {
-                            Log.i(TAG,"failed - UnsupportedEncodingException: " + e);
-                            e.printStackTrace();
-                        }
-
+                    if (body != null) {
+                        formRequestEntity(request, uri, body, httpPost);
                     } else {
-                        Log.i(TAG,"saml response is empty or null: " + samlResponse);
+                        Log.i(TAG,"empty POST request body");
                     }
-                }
 
-                method = httpPost;
+                    setPOSTRequestHeaders(uri, httpPost, request,originalWebViewUrl, browserContext);
+
+                    if(body != null && httpPost.containsHeader("Content-Type")){
+                        Header header = httpPost.getHeaders("Content-Type")[0];
+
+                        if(header.getValue().contains("multipart/form-data")){
+                            // replace content-type with params(boundary and charset)
+                            HttpEntityEnclosingRequestBase entityRequest = (HttpEntityEnclosingRequestBase)httpPost;
+                            String contentTypeStr = entityRequest.getEntity().getContentType().getValue();
+                            httpPost.setHeader("Content-Type", contentTypeStr);
+                        }
+                    }
+
+                    method = httpPost;
                 }
                 break;
             case "PUT": {
@@ -255,6 +397,17 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                         formRequestEntity(request, uri, body, httpPut);
                     }
 
+                    if(body != null && httpPut.containsHeader("Content-Type")){
+                        Header header = httpPut.getHeaders("Content-Type")[0];
+
+                        if(header.getValue().contains("multipart/form-data")){
+                            // replace content-type with params(boundary and charset)
+                            HttpEntityEnclosingRequestBase entityRequest = (HttpEntityEnclosingRequestBase)httpPut;
+                            String contentTypeStr = entityRequest.getEntity().getContentType().getValue();
+                            httpPut.setHeader("Content-Type", contentTypeStr);
+                        }
+
+                    }
                     method = httpPut;
                 }
                 break;
@@ -269,8 +422,6 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
             case "PATCH": {
                     HttpPatch httpPatch = new HttpPatch(uri);
                     setPOSTRequestHeaders(uri, httpPatch, request, originalWebViewUrl, null);
-
-
                     if (body != null) {
                         formRequestEntity(request, uri, body, httpPatch);
                     }
@@ -282,6 +433,17 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                 break;
         }
 
+        if (isInterceptedRequest(request)) {
+            Map<String, String> headers = request.getRequestHeaders();
+            if (request.getMethod().equalsIgnoreCase("OPTIONS") && headers.containsKey("Access-Control-Request-Method")) {
+                // not remove request body if Preflight request
+                Log.i(TAG,"Preflight request");
+            } else {
+                removeRequestBody(request);
+                Log.i(TAG,"request body removed");
+            }
+        }
+
         Utils.debugLogHeaders(method.getAllHeaders());
 
         Log.i(TAG,"request created: " + request.getMethod() + " " + uri);
@@ -289,7 +451,7 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         return method;
     }
 
-    private static void setGETRequestHeaders(final URI targetUri, final HttpRequestBase httpMethod,final WebResourceRequest webResourceRequest,
+    public static void setGETRequestHeaders(final URI targetUri, final HttpRequestBase httpMethod,final WebResourceRequest webResourceRequest,
                                              final String originWebViewUrl, BrowserContext browserContext) {
 
         Log.i(TAG, "setGETRequestHeaders IN ");
@@ -303,6 +465,7 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         // Also check for 'Accept' and 'Origin' headers, they are required for a response to be successful.
         if (webResourceRequest.getRequestHeaders().containsKey("Accept")
                 && webResourceRequest.getRequestHeaders().containsKey("Origin")
+                && !webResourceRequest.getRequestHeaders().get("Origin").equals("null")
                 && browserContext != null && browserContext.isRequestContextUnknown()) {
 
                 Log.i(TAG, "setGETRequestHeaders - unknown context, return");
@@ -321,7 +484,11 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
             URI refererURI = null;
 
             if(originWebViewUrl != null){
-                originURI = URI.create(originWebViewUrl);
+                try {
+                    originURI = URI.create(originWebViewUrl);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "setGETRequestHeaders - failed to create originURI from - " + originWebViewUrl);
+                }
             }
 
             String refererUrl = webResourceRequest.getRequestHeaders().get("Referer");
@@ -335,11 +502,6 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
             put("Accept-Encoding", "gzip, deflate, br");
             put("Accept-Language", "en-US,en;q=0.9");
             put("Cache-Control", "no-store");
-
-            if(originURI != null) {
-                // no Origin for GET,HEAD requests
-                // put("Origin", originURI.getScheme() + "://" + originURI.getAuthority());
-            }
 
             put("Pragma", "no-cache");
             //put("Referer", "");
@@ -367,10 +529,17 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         httpMethod.addHeader("Host", completeRequestHeaders.get("Host"));
 
         for (String headerKey : webViewHeaders.keySet()) {
-            String value = webViewHeaders.get(headerKey).split(GD_INTERCEPT_TAG)[0];
+            String value = webViewHeaders.get(headerKey);
+
+            if (headerKey.equals("Referer")) {
+                value = webViewHeaders.get(headerKey).split(GD_INTERCEPT_TAG)[0];
+            }
 
             // Content cache settings are disabled. Do not add the header for images to prevent '304 Not Modified' response with no content.
-            if (!headerKey.equals("If-Modified-Since") && Utils.isImage(targetUri.toString())) {
+            boolean shouldSkip = headerKey.equals("If-Modified-Since");
+
+            if (!shouldSkip) {
+
                 httpMethod.addHeader(headerKey, value);
             }
         }
@@ -438,7 +607,7 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                     secFetchSite = "same-origin";
                 }
             }
-        }else if(originURI.getAuthority().equalsIgnoreCase(targetUri.getAuthority())){
+        }else if(originURI.getAuthority() != null && originURI.getAuthority().equalsIgnoreCase(targetUri.getAuthority())){
             secFetchSite = "none";
             if(refererURI != null){
                 secFetchSite = "same-origin";
@@ -486,7 +655,7 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
             put("Cache-Control", "no-cache");
             // put("Connection", "keep-alive");
             // put("Content-Length", "" + contentLength);//set by GDApache internally
-            put("Content-Type", "aplication/x-www-form-urlencoded");
+            put("Content-Type", "application/x-www-form-urlencoded");
 
             put("Origin", originURI.getScheme() + "://" + originURI.getAuthority());
             put("Pragma", "no-cache");
@@ -532,32 +701,77 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
     }
 
 
-    static private void formRequestEntity(final WebResourceRequest request,final URI uri,final String body,final HttpEntityEnclosingRequestBase entityRequest) {
+  private void formRequestEntity(final WebResourceRequest request,final URI uri,final String body,final HttpEntityEnclosingRequestBase entityRequest) {
         try {
 
-            if(request.getRequestHeaders().containsValue("application/x-www-form-urlencoded") && false){//TODO: no worky
+            if(request.getRequestHeaders().containsValue("application/x-www-form-urlencoded")) {
+                Log.i(TAG,"request StringEntity (application/x-www-form-urlencoded) >>");
+                // must use repeatable entity
+                StringEntity entity = new StringEntity(body, UTF_8);
+                entity.setContentType(request.getRequestHeaders().get("Content-Type"));
 
-                List<NameValuePair> list = new ArrayList<>();
+                entityRequest.setEntity(entity);
 
-                Log.i(TAG,"request FormEntity >>");
+                Log.i(TAG,"request StringEntity (application/x-www-form-urlencoded) <<");
 
-                String[] params = body.split("&");
+            } else if (getRequestContext(request).isBodyTypeFormData()) {
+                Log.i(TAG, "request MultipartEntity (FormData) >>");
+                // must use repeatable entity
+                final MultipartEntityBuilder builder = createMultiPartBuilder(request);
+                entityRequest.setEntity(builder.build());
 
-                Log.i(TAG,String.format("request FormEntity params size(%s)",params.length));
-                for (int i = 0; i < params.length; i++) {
-                    String param = params[i];
-                    Log.i(TAG,String.format("request FormEntity param[%s]=(%s)",i,param));
-                    String[] keyVal = param.split("=");
-                    list.add(new BasicNameValuePair(keyVal[0], keyVal[1]));
+                Log.i(TAG, "request MultipartEntity (FormData) <<");
+
+            } else if (getRequestContext(request).isBodyTypeArrayBuffer()) {
+                Log.i(TAG, "request ByteArrayEntity (ArrayBuffer) >>");
+                final byte[] data = Base64.decode(body.getBytes(), Base64.DEFAULT);
+                // must use repeatable entity
+                final ByteArrayEntity entity = new ByteArrayEntity(data);
+                entity.setContentType(request.getRequestHeaders().get("Content-Type"));
+
+                entityRequest.setEntity(entity);
+
+                Log.i(TAG, "request ByteArrayEntity (ArrayBuffer) <<");
+
+            } else if (getRequestContext(request).isBodyTypeBlob()) {
+                Log.i(TAG, "request ByteArrayEntity (Blob) >>");
+                BrowserFile file = BrowserFile.NULL;
+                ByteArrayEntity entity = null;
+                synchronized (REQUEST_FILEDATAS) {
+                    file = REQUEST_FILEDATAS.getOrDefault(body, BrowserFile.NULL);
+                    if (file.data != null) {
+                        // must use repeatable entity
+                        entity = new ByteArrayEntity(file.data);
+                        entity.setContentType(request.getRequestHeaders().get("Content-Type"));
+
+                        entityRequest.setEntity(entity);
+                        REQUEST_FILEDATAS.remove(body);
+                    }
                 }
 
-                UrlEncodedFormEntity urlEncodedFormEntity = new UrlEncodedFormEntity(list, US_ASCII);
+                Log.i(TAG, "request ByteArrayEntity (Blob) <<");
 
-                entityRequest.setEntity(urlEncodedFormEntity);
+            } else if (getRequestContext(request).isContextDocumentSubmit()) {
+                if (getRequestContext(request).getEnctype().equalsIgnoreCase("multipart/form-data")) {
+                    Log.i(TAG,"request MultipartEntity (form) >>");
+                    // must use repeatable entity
+                    final MultipartEntityBuilder builder = createMultiPartBuilder(request);
 
-                Log.i(TAG,String.format("request FormEntity values size(%s) <<",list.size()));
+                    entityRequest.setEntity(builder.build());
+                    Log.i(TAG,"request MultipartEntity (form) <<");
+                }
+                else {
+                    Log.i(TAG,"request StringEntity (form) >>");
+                    // must use repeatable entity
+                    StringEntity entity = new StringEntity(body, UTF_8);
+                    entity.setContentType(getRequestContext(request).getEnctype());
+
+                    entityRequest.setEntity(entity);
+                    Log.i(TAG,"request StringEntity (form) <<");
+                }
             } else {
                 Log.i(TAG,"request StringEntity >>");
+                // must use repeatable entity
                 StringEntity entity = new StringEntity(body, UTF_8);
                 entity.setContentType(request.getRequestHeaders().get("Content-Type"));
 
@@ -572,12 +786,94 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
     }
 
 
-    public RequestTask(String clientConnId, WebResourceRequest webReq, String urlIntercepted, String originalWebViewUrl, WebView vw) {
+    private MultipartEntityBuilder createMultiPartBuilder(final WebResourceRequest request) {
+        final String requestID = getInterceptedRequestID(request);
+        final MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+
+        final ContentType contentType = ContentType.parse("multipart/form-data");
+        multipartEntityBuilder.setContentType(contentType);
+        multipartEntityBuilder.setCharset(CharsetUtils.lookup(HTTP.UTF_8));
+        // emulates browser compatibility
+        multipartEntityBuilder.setLaxMode();
+        String body = getRequestBody(request);
+        multipartEntityBuilder.setBoundary(body);
+
+        List<BrowserFormData> arrayformdata = null;
+        synchronized (REQUEST_FORMDATAS) {
+            arrayformdata = REQUEST_FORMDATAS.getOrDefault(requestID, null);
+            if (arrayformdata != null) {
+                REQUEST_FORMDATAS.remove(requestID);
+            }
+        }
+
+        for (int i = 0, size = arrayformdata.size(); i < size; i++) {
+            BrowserFormData formdata = arrayformdata.get(i);
+            if(BrowserFormData.FILE_TYPE.equalsIgnoreCase(formdata.type)) {
+                final String fieldname = formdata.name;
+                final String filename = formdata.value;
+                ContentType partContentType = null;
+                BrowserFile file = BrowserFile.NULL;
+                ContentBody contentbody = null;
+                synchronized (REQUEST_FILEDATAS) {
+                    file = REQUEST_FILEDATAS.getOrDefault(filename, BrowserFile.NULL);
+                    if (file.data != null) {
+                        partContentType = ContentType.parse(file.type);
+                        // must use repeatable content body
+                        contentbody = new ByteArrayBody(file.data, partContentType, filename);
+                    }
+                    REQUEST_FILEDATAS.remove(filename);
+                }
+
+                if (contentbody != null) {
+                    try {
+                        final FormBodyPartBuilder formBodyPartBuilder =
+                                FormBodyPartBuilder.create(
+                                        fieldname,
+                                        contentbody);
+
+                        multipartEntityBuilder.addPart(formBodyPartBuilder.build());
+
+                    } catch (Exception e) {
+                        // file unavailable
+                        return null;
+                    }
+                }
+            } else if (BrowserFormData.STRINGS_TYPE.equalsIgnoreCase(formdata.type)) {
+                final String fieldname = formdata.name;
+                final String bodyValue = formdata.value;
+                if (bodyValue == null) {
+                    // Missing or invalid FormData part.
+                    return null;
+                }
+                ContentType partContentType = ContentType.create("text/html", Consts.UTF_8);
+                try {
+                    final FormBodyPartBuilder formBodyPartBuilder =
+                            FormBodyPartBuilder.create(
+                                    fieldname,
+                                    // must use repeatable content body
+                                    new StringBody(bodyValue, partContentType));
+
+                    multipartEntityBuilder.addPart(formBodyPartBuilder.build());
+                } catch (Exception e) {
+                    // string unavailable
+                    return null;
+                }
+            }
+            else {
+                return null;
+            }
+        }
+        return multipartEntityBuilder;
+    }
+
+       public RequestTask(String clientConnId, WebResourceRequest webReq, String urlIntercepted,
+                       String originalWebViewUrl, WebView webView, BrowserContext browserContext) {
         this.clientConnId = clientConnId;
         request = webReq;
         this.targetUrl = urlIntercepted;
         this.originalWebViewUrl = originalWebViewUrl;
-        this.vw = vw;
+        this.webView = webView;
+        this.browserContext = browserContext;
     }
 
     @Override
@@ -589,82 +885,18 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
 
         HttpResponse response = null;
         HttpContext httpContext = null;
+        HttpRequestBase method = null;
+
         try {
 
-            if(request.getMethod().equalsIgnoreCase("post")){
-                targetUrl = targetUrl.replaceAll("#.*","/");
+            if (targetUrl.contains("#")) {
+                targetUrl = targetUrl.substring(0, targetUrl.lastIndexOf('#'));
             }
+
             URI targetUri = URI.create(targetUrl);
 
-
-            HttpRequestBase method = getHttpRequestBase(request, targetUri);
+            method = getHttpRequestBase(request, targetUri);
             long nano;
-
-            // Sync with document.cookies set by js
-            final CountDownLatch awaitCookies = new CountDownLatch(1);
-            final AtomicReference<String> docCookies = new AtomicReference<>();
-
-            vw.post(new Runnable() {
-                @Override
-                public void run() {
-                    vw.evaluateJavascript("document.cookie", new ValueCallback<String>() {
-                        @Override
-                        public void onReceiveValue(String value) {
-                            Log.i(TAG, "document.cookie -> " + value);
-                            docCookies.set(value);
-                            awaitCookies.countDown();
-                        }
-                    });
-                }
-            });
-
-            boolean asyncCookies = awaitCookies.await(3, TimeUnit.SECONDS);
-            Log.i(TAG, "document.cookie async " + asyncCookies);
-
-            String cookiesIncludingSecure = CookieManager.getInstance().getCookie("https://" + targetUri.getHost());
-
-            if(cookiesIncludingSecure != null) {
-
-                final List<Cookie> currentHttpCookies = httpClient.getCookieStore().getCookies();
-                final Set<String> cookiesId = new HashSet<>();
-                for (Cookie currentHttpCookie : currentHttpCookies) {
-                    cookiesId.add(currentHttpCookie.getName()+currentHttpCookie.getValue());
-                }
-
-                Log.i(TAG, String.format("cookiesStore.size(%s) cookiesIdSet.size(%s)",currentHttpCookies.size(),cookiesId.size()));
-
-
-                String[] splittedCookies = cookiesIncludingSecure.split(";");
-                for (int i = 0; i < splittedCookies.length; i++) {
-                    String splittedCookie = splittedCookies[i];
-                    splittedCookie = splittedCookie.replaceAll("expires=[A-Za-z0-9,\\s:-]+;", "");
-
-                    RFC2965Spec rfc2965Spec = new RFC2965Spec();
-
-                    try {
-
-                        List<Cookie> cookies = rfc2965Spec.parse(new BasicHeader("Set-Cookie", splittedCookie),
-                                new CookieOrigin(targetUri.getHost(), 0, "/", true ));
-
-                        for (Cookie cookee : cookies) {
-                            if(!cookiesId.contains(cookee.getName()+cookee.getValue())) {
-                                httpClient.getCookieStore().addCookie(cookee);
-                                Log.i(TAG, String.format("set cookie gd(%s)", cookee));
-
-                            } else {
-
-                                Log.i(TAG, String.format("skipping cookie gd(%s)", cookee));
-
-                            }
-
-                        }
-
-                    } catch (Exception e) {
-                        Log.e(TAG, String.format("set cookie"), e);
-                    }
-                }
-
-            }
 
             Log.i(TAG, "HTTP_EXEC " + httpClient.hashCode() + " >> " + "[" + Process.myTid() + "] <" + TimeUnit.NANOSECONDS.toMillis(nano = System.nanoTime()) + "> " + method.getURI().toString());
 
@@ -675,38 +907,26 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
 
             response = httpClient.execute(method, httpContext);
 
-            List<Cookie> cookies = httpClient.getCookieStore().getCookies();
-
-            String targetHost = targetUri.getAuthority();
-
-            URI locationURI = (URI) httpContext.getAttribute("webview.redirect.url");
-
-            //sync cookies from the http response to the webview
-            for (Cookie cookie : cookies) {
-                if(cookie.getValue() != null) {
-                    if(cookie.getDomain() != null &&
-                            (cookie.getDomain().equalsIgnoreCase(targetHost) ||
-                            (locationURI != null && cookie.getDomain().equalsIgnoreCase(locationURI.getAuthority())))){
-
-                        String cookieValue = cookie.getName() + "=" + cookie.getValue() + "; path=" + cookie.getPath() + "; " +
-                                ((cookie.getExpiryDate() != null) ? ("expires=" + cookie.getExpiryDate()) : "") +
-                                (cookie.isSecure() ? "; Secure;" : "");
-
-                        CookieManager.getInstance().setCookie((cookie.isSecure() ? "https://" : "") + cookie.getDomain(),
-                                cookieValue);
-
-                        Log.d(TAG, String.format("set cookie(%s) to webview(%s)",cookie.getName(), cookieValue));
-                    }
-
-                }
-            }
-
-            CookieManager.getInstance().flush();
-
             Log.i(TAG, "HTTP_EXEC " + httpClient.hashCode() + " << " + "[" + Process.myTid() + "] <" + TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - nano) + "> " + method.getURI().toString() +" " + response.getStatusLine());
+        } catch (ConnectTimeoutException e) {
+            Log.e(TAG, "HTTP_EXEC execute ERROR: ConnectTimeoutException, resend request");
+            try {
+                response = httpClient.execute(method, httpContext);
+            } catch (Exception exception) {
+                Log.e(TAG, "HTTP_EXEC execute ERROR: request failed after resend " + exception);
+            }
         } catch (Exception e) {
             Log.e(TAG, "HTTP_EXEC execute ERROR: " + e);
             e.printStackTrace();
+        }
+
+        // Check if redirect is needed
+        if (response != null && response.getStatusLine().getStatusCode() == 200
+                && isRedirectionRequested(httpContext, method, response)
+                && !browserContext.isInterceptedFromJSRequest()) {
+
+            Log.i(TAG, "doInClientThread, process http redirection");
+            return handleRedirect(httpContext, response);
         }
 
         Log.i(TAG, "doInClientThread OUT, targetUrl: " + targetUrl);
@@ -714,7 +934,7 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
         return Pair.create(response,httpContext);
     }
 
-    private static HttpContext createHttpContext(GDHttpClient httpClient) {
+    public static HttpContext createHttpContext(GDHttpClient httpClient) {
         HttpContext context = new BasicHttpContext();
         context.setAttribute(
                 ClientContext.AUTHSCHEME_REGISTRY,
@@ -730,4 +950,49 @@ public class RequestTask implements GDHttpClientProvider.ClientCallback<Pair<Htt
                 httpClient.getCredentialsProvider());
         return context;
     }
+
+    private boolean isRedirectionRequested(HttpContext context, HttpRequestBase method, HttpResponse response) {
+
+        boolean isContentPage = false;
+        if (response.containsHeader("Content-Type")) {
+            isContentPage = response.getFirstHeader("Content-Type").getValue().contains("text/html");
+        }
+
+        boolean isMoved301Redirect = context.getAttribute("webview.redirect.moved.permanently") != null;
+        boolean isMoved302Redirect = context.getAttribute("webview.redirect.moved.temprorary") != null;
+        boolean hasLocationUrl = context.getAttribute("webview.redirect.url") != null;
+        boolean isGetMethod = method.getMethod().equals("GET");
+
+        Log.i(TAG, "isRedirectionRequested, isContentPage " + isContentPage + ", isRedirect " + (isMoved301Redirect || isMoved302Redirect)
+                + ", hasLocationUrl " + hasLocationUrl + ", isGetMethod " + isGetMethod);
+
+        return isContentPage && (isMoved301Redirect || isMoved302Redirect) && hasLocationUrl && isGetMethod;
+    }
+
+    private Pair<HttpResponse,HttpContext> handleRedirect(HttpContext context, HttpResponse response) {
+        Object locationUrl = context.getAttribute("webview.redirect.url");
+        String clientId = (String) context.getAttribute("webview.connectionId");
+
+        Log.i(TAG, "handleRedirect, cache request, locationUrl - " + locationUrl + ", clientId " + clientId);
+
+        // Cache response
+        Future<Pair<HttpResponse, HttpContext>> futureResponse = CompletableFuture.completedFuture(Pair.create(response, context));
+        GDHttpClientProvider.getInstance().cacheResponseData((String) locationUrl, clientId, futureResponse);
+
+        // Form html redirection page
+        String redirectPage = "<html><head><meta http-equiv=\"Refresh\" content=\"0; URL=" + locationUrl +
+                "\"></head></html>";
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(redirectPage.getBytes());
+
+        HttpResponse redirectResponse = new BasicHttpResponse(response.getStatusLine());
+        redirectResponse.setHeader(new BasicHeader("Content-Length", String.valueOf(redirectPage.length())));
+        redirectResponse.setHeader(new BasicHeader("Content-Type", "text/html; charset=UTF-8"));
+
+        redirectResponse.setEntity(new InputStreamEntity(inputStream, redirectPage.length()));
+
+        // Return new response
+        return Pair.create(redirectResponse, context);
+    }
+
 }

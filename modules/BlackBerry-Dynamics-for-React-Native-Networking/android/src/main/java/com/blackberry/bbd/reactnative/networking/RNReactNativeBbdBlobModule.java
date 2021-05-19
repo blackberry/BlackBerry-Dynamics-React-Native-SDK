@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Blob API of react-native (Java part)
  * from https://github.com/facebook/react-native/blob/0.61-stable/ReactAndroid/src/main/java/com/facebook/react/modules/blob/BlobModule.java
  *
@@ -53,6 +53,28 @@ public class RNReactNativeBbdBlobModule extends ReactContextBaseJavaModule {
   protected static final String NAME = "RNReactNativeBbdBlob";
 
   private final Map<String, byte[]> mBlobs = new HashMap<>();
+
+  private final RNReactNativeBbdWebSocketModule.ContentHandler mWebSocketContentHandler =
+    new RNReactNativeBbdWebSocketModule.ContentHandler() {
+      @Override
+      public void onMessage(String text, WritableMap params) {
+        params.putString("data", text);
+      }
+
+      @Override
+      public void onMessage(ByteString bytes, WritableMap params) {
+        byte[] data = bytes.toByteArray();
+
+        WritableMap blob = Arguments.createMap();
+
+        blob.putString("blobId", store(data));
+        blob.putInt("offset", 0);
+        blob.putInt("size", data.length);
+
+        params.putMap("data", blob);
+        params.putString("type", "blob");
+      }
+    };
 
   private final RNReactNativeBbdNetworkingModule.UriHandler mNetworkingUriHandler =
     new RNReactNativeBbdNetworkingModule.UriHandler() {
@@ -264,12 +286,37 @@ public class RNReactNativeBbdBlobModule extends ReactContextBaseJavaModule {
     return type;
   }
 
+  private RNReactNativeBbdWebSocketModule getWebSocketModule() {
+    return getReactApplicationContext().getNativeModule(RNReactNativeBbdWebSocketModule.class);
+  }
+
   @ReactMethod
   public void addNetworkingHandler() {
     RNReactNativeBbdNetworkingModule networkingModule = getReactApplicationContext().getNativeModule(RNReactNativeBbdNetworkingModule.class);
     networkingModule.addUriHandler(mNetworkingUriHandler);
     networkingModule.addRequestBodyHandler(mNetworkingRequestBodyHandler);
     networkingModule.addResponseHandler(mNetworkingResponseHandler);
+  }
+
+  @ReactMethod
+  public void addWebSocketHandler(final int id) {
+    getWebSocketModule().setContentHandler(id, mWebSocketContentHandler);
+  }
+
+  @ReactMethod
+  public void removeWebSocketHandler(final int id) {
+    getWebSocketModule().setContentHandler(id, null);
+  }
+
+  @ReactMethod
+  public void sendOverSocket(ReadableMap blob, int id) {
+    byte[] data = resolve(blob.getString("blobId"), blob.getInt("offset"), blob.getInt("size"));
+
+    if (data != null) {
+      getWebSocketModule().sendBinary(ByteString.of(data), id);
+    } else {
+      getWebSocketModule().sendBinary((ByteString) null, id);
+    }
   }
 
   @ReactMethod
