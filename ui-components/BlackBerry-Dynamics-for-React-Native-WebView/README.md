@@ -81,4 +81,3 @@ For more, read the [API Reference](https://github.com/react-native-community/rea
 
 ## Known issues
  - [Android] Response with error message is not shown for unsuccessful request
- - [Android] Unable to copy/cut/paste text from one Dynacmis app into other Dynamics app when DPL is on

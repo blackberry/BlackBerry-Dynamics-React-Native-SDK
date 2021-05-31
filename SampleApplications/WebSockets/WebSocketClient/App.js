@@ -22,8 +22,8 @@ import { WebSocket, Blob, FileReader, Response, Headers } from 'BlackBerry-Dynam
 const webSocketServerAddress = Platform.select({
   ios: 'ws://localhost:8080',
   android: 'ws://10.0.2.2:8080'
-  // ios: 'ws://echo.wss-websocket.net',
-  // android: 'ws://echo.wss-websocket.net'
+  // ios: 'wss://echo.websocket.org',
+  // android: 'wss://echo.websocket.org'
 });
 
 export default class App extends Component {

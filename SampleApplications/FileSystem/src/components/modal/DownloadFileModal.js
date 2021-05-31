@@ -63,10 +63,12 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
   const downloadHandler = async () => {
     onSubmit();
     try {
+      let { extension } = url.lastPathComponent().exposeNameAndExtension();
       let downloadTask = FS.downloadFile({
         fromUrl: url,
-        toFile: `${storage.currentPath}/${name}`,
+        toFile: `${storage.currentPath}/${name}.${extension}`,
         progress: res => {
+          console.log(res)
           const percentage = Math.floor((res.bytesWritten / res.contentLength) * 100);
           notification.emmit('success', `File dowloaded: ${percentage}%`);
         },
@@ -74,8 +76,17 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
       });
 
       downloadTask.promise
-        .then(() => onDownloadEnd(true))
-        .catch((error) => notification.emmit('alert', error.message));
+        .then((res) => {
+          if(res.statusCode === 200) {
+            onDownloadEnd()
+          } else {
+            notification.emmit('alert', 'File doesn\'t exist at path.');
+          }
+        })
+        .catch((error) => {
+          notification.emmit('alert', error.message);
+          console.log(error)
+        });
 
     } catch (error) {
       notification.emmit('alert', error.message);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import React from 'react';
 import { Text, StyleSheet, SafeAreaView, ScrollView, Platform } from 'react-native';
 import {
@@ -22,16 +23,19 @@ import {
 } from '../components';
 import { useNavigation } from '../context/ApplicationContext';
 import { theme } from '../static';
+
 export const ShowContentScreen = ({title, content, textAlign}) => {
   const nav = useNavigation();
   const handleBackAction = () => {
     nav.pop();
   };
+
   // Due to <Text> element limitation on iOS number of text symbols to be displayed limited to 200 000
   const maxTextLength = 200000;
   if(Platform.OS === 'ios' && content && content.length > maxTextLength) {
     content = content.substring(0, maxTextLength) + '...';
   }
+
   return (
     <SafeAreaView style={styles.screenContainer}>
       <Header title={title} marginVertical={15} />
@@ -51,6 +55,7 @@ export const ShowContentScreen = ({title, content, textAlign}) => {
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   screenContainer: {
     flex: 1,
