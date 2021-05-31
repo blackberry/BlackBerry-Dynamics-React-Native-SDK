@@ -850,10 +850,20 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
       boolean hasBeginCallback = options.getBoolean("hasBeginCallback");
       boolean hasProgressCallback = options.getBoolean("hasProgressCallback");
 
+      final String filepath = file.getAbsolutePath();
+      final File destFile;
+      if (isSecureAbsolutePath(filepath, this.getReactApplicationContext())) {
+        destFile = new com.good.gd.file.File(filepath);
+      }
+      else {
+        destFile = new File(filepath);
+      }
+      final OutputStream destStream = getOutputStream(filepath, false);;
+
       DownloadParams params = new DownloadParams();
 
       params.src = url;
-      params.dest = getOutputStream(file.getAbsolutePath(), false);
+      params.dest = destStream;
       params.headers = headers;
       params.progressInterval = progressInterval;
       params.progressDivider = progressDivider;
@@ -871,6 +881,15 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
 
             promise.resolve(infoMap);
           } else {
+            try {
+              destStream.close();
+            }
+            catch (Exception ex) {
+              ex.printStackTrace();
+            }
+            if (destFile.exists()) {
+              destFile.delete();
+            }
             reject(promise, options.getString("toFile"), res.exception);
           }
         }

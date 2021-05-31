@@ -85,7 +85,15 @@
   config.timeoutIntervalForResource = [_params.backgroundTimeout intValue] / 1000.0;
 
   _session = [NSURLSession sessionWithConfiguration:config delegate:self delegateQueue:nil];
-  _task = [_session downloadTaskWithURL:url];
+
+  // TODO: According to issue GD-55565
+  // we apply Workaround with "cachePolicy:NSURLRequestReloadIgnoringLocalCacheData" in method "requestWithURL:"
+  // when the issue is fixed cachePolicy should be changed to "cachePolicy:NSURLRequestReturnCacheDataElseLoad"
+  // or switch back to "downloadTaskWithURL:"
+  NSURLRequest* req = [NSURLRequest requestWithURL:url
+                                       cachePolicy:NSURLRequestReloadIgnoringLocalCacheData
+                                   timeoutInterval:60.0f];
+  _task = [_session downloadTaskWithRequest:req];
   [_task resume];
 
     return uuid;
@@ -139,9 +147,14 @@
   if([_statusCode integerValue] >= 200 && [_statusCode integerValue] < 300) {
     [fm removeItemAtURL:destURL error:nil];       // Remove file at destination path, if it exists
     [fm moveItemAtURL:location toURL:destURL error:&error];
+    // remove tmp dir after file was moved from it
+    [fm removeItemAtURL:[location URLByDeletingLastPathComponent] error:nil];
     // There are no guarantees about how often URLSession:downloadTask:didWriteData: will fire,
     // so we read an authoritative number of bytes written here.
     _bytesWritten = @([fm attributesOfItemAtPath:_params.toFile error:nil].fileSize);
+  } else {
+      // remove temp file
+      [fm removeItemAtURL:location error:nil];
   }
   if (error) {
     NSLog(@"RNFS download: unable to move tempfile to destination. %@, %@", error, error.userInfo);
