@@ -11,7 +11,7 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
  - yarn
 #### React Native
  - 0.63.x
- - 0.64.0
+ - 0.64.x
 #### iOS
  - Xcode 12+
  - iOS 13, 14
@@ -19,8 +19,8 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
 #### Android
  - Android 8+, API 26+
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v9.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
- - BlackBerry Dynamics SDK for Android v9.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
+ - BlackBerry Dynamics SDK for iOS v9.1 and v9.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
+ - BlackBerry Dynamics SDK for Android v9.1 and v9.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
 #### BlackBerry Dynamics Launcher
  - BlackBerry Dynamics Launcher library for iOS v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
  - BlackBerry Dynamics Launcher library for Android v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
