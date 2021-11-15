@@ -52,6 +52,11 @@ import javax.net.ssl.SSLSession;
 public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaModule {
   public static final String NAME = "BbdRNWebSocketModule";
 
+  private static final String WEBSOCKET_OPEN = "bbdWebsocketOpen";
+  private static final String WEBSOCKET_MESSAGE = "bbdWebsocketMessage";
+  private static final String WEBSOCKET_CLOSED = "bbdWebsocketClosed";
+  private static final String WEBSOCKET_FAILED = "bbdWebsocketFailed";
+
   public interface ContentHandler {
     void onMessage(String text, WritableMap params);
 
@@ -366,7 +371,7 @@ public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaM
       WritableMap params = Arguments.createMap();
       params.putInt("id", id);
       params.putString("protocol", "Sec-WebSocket-Protocol: \"\"");
-      sendEvent("websocketOpen", params);
+      sendEvent(WEBSOCKET_OPEN, params);
     }
 
     @Override
@@ -381,7 +386,7 @@ public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaM
       } else {
         params.putString("data", text);
       }
-      sendEvent("websocketMessage", params);
+      sendEvent(WEBSOCKET_MESSAGE, params);
     }
 
     @Override
@@ -401,7 +406,7 @@ public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaM
         params.putString("data", text);
       }
 
-      sendEvent("websocketMessage", params);
+      sendEvent(WEBSOCKET_MESSAGE, params);
     }
 
     @Override
@@ -412,7 +417,7 @@ public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaM
 
       params.putInt("code", code);
       params.putString("reason", reason);
-      sendEvent("websocketClosed", params);
+      sendEvent(WEBSOCKET_CLOSED, params);
     }
 
     @Override
@@ -420,7 +425,7 @@ public final class RNReactNativeBbdWebSocketModule extends ReactContextBaseJavaM
       WritableMap params = Arguments.createMap();
       params.putInt("id", id);
       params.putString("message", e.getMessage());
-      sendEvent("websocketFailed", params);
+      sendEvent(WEBSOCKET_FAILED, params);
     }
 
     @Override

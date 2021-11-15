@@ -16,6 +16,11 @@
 #import <React/RCTConvert.h>
 #import <React/RCTUtils.h>
 
+NSString *const WebSocketOpen = @"bbdWebsocketOpen";
+NSString *const WebSocketMessage = @"bbdWebsocketMessage";
+NSString *const WebSocketClosed = @"bbdWebsocketClosed";
+NSString *const WebSocketFailed = @"bbdWebsocketFailed";
+
 @implementation BbdRNWebSocketModule
 {
     NSMutableDictionary<NSNumber *, JFRWebSocket *> *_sockets;
@@ -29,10 +34,10 @@ RCT_EXPORT_MODULE(BbdRNWebSocketModule)
 
 - (NSArray *)supportedEvents
 {
-  return @[@"websocketMessage",
-           @"websocketOpen",
-           @"websocketFailed",
-           @"websocketClosed"];
+  return @[WebSocketMessage,
+           WebSocketOpen,
+           WebSocketFailed,
+           WebSocketClosed];
 }
 
 - (dispatch_queue_t)methodQueue
@@ -96,7 +101,7 @@ RCT_EXPORT_METHOD(close:(NSInteger)code reason:(NSString *)reason socketID:(nonn
 
 -(void)websocketDidConnect:(JFRWebSocket*)socket {
     NSLog(@"websocket is connected");
-      [self sendEventWithName:@"websocketOpen" body:@{
+      [self sendEventWithName:WebSocketOpen body:@{
         @"id": socket.socketID,
         @"protocol": @""
       }];
@@ -107,7 +112,7 @@ RCT_EXPORT_METHOD(close:(NSInteger)code reason:(NSString *)reason socketID:(nonn
     NSNumber *socketID = [socket socketID];
     _contentHandlers[socketID] = nil;
     _sockets[socketID] = nil;
-    [self sendEventWithName:@"websocketClosed" body:@{
+    [self sendEventWithName:WebSocketClosed body:@{
         @"code": @(1000),
         @"reason": @"Socket was disconnected",
         @"clean": @"",
@@ -119,14 +124,14 @@ RCT_EXPORT_METHOD(close:(NSInteger)code reason:(NSString *)reason socketID:(nonn
     NSLog(@"websocket error: %@", [error localizedDescription]);
     NSNumber *socketID = [socket socketID];
 
-    [self sendEventWithName:@"websocketFailed" body:@{
+    [self sendEventWithName:WebSocketFailed body:@{
         @"message": [error localizedDescription],
         @"id": socketID
     }];
 }
 
 -(void)websocket:(JFRWebSocket*)socket didReceiveMessage:(NSString*)string {
-    [self sendEventWithName:@"websocketMessage" body:@{
+    [self sendEventWithName:WebSocketMessage body:@{
         @"data": string,
         @"type": @"text",
         @"id": socket.socketID
@@ -146,7 +151,7 @@ RCT_EXPORT_METHOD(close:(NSInteger)code reason:(NSString *)reason socketID:(nonn
         type = @"binary";
     }
 
-    [self sendEventWithName:@"websocketMessage" body:@{
+    [self sendEventWithName:WebSocketMessage body:@{
         @"data": message,
         @"type": type,
         @"id": socket.socketID

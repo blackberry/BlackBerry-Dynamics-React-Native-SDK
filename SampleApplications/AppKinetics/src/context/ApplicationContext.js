@@ -170,7 +170,7 @@ class ApplicationProvider extends React.Component {
           screenProps.textAlign = 'left';
         }
 
-        await moveReceivedFileToDocuments(path);
+        await this.moveReceivedFileToDocuments(path);
 
         this.screen.push(<ShowContentScreen {...screenProps} />);
       } catch (error) {

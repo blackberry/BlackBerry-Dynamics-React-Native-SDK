@@ -70,6 +70,18 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
   }
 
   @ReactMethod
+  public void addListener(String eventName) {
+    // DEVNOTE: keep it, as it's required for Event Emitter calls starting from 0.65 RN
+    // Set up any upstream listeners or background tasks as necessary
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    // DEVNOTE: keep it, as it's required for Event Emitter calls starting from 0.65 RN
+    // Remove upstream listeners, stop unnecessary background tasks
+  }
+
+  @ReactMethod
   private void bringAppToFront(final ReadableMap arguments,
                                final Promise promise) {
     final String applicationId = arguments.getString("applicationId");

@@ -61,10 +61,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.util.Pair;
 
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBChromeClient;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBWebView;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.BBWebViewClient;
-import com.blackberry.bbd.reactnative.ui.webview.bbwebview.tasks.http.GDHttpClientProvider;
+import com.blackberry.bbwebview.BBChromeClient;
+import com.blackberry.bbwebview.BBWebViewClient;
+import com.blackberry.bbwebview.BBWebView;
 import com.facebook.common.logging.FLog;
 import com.facebook.react.views.scroll.ScrollEvent;
 import com.facebook.react.views.scroll.ScrollEventType;
@@ -615,7 +614,6 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   @Override
   protected void addEventEmitters(ThemedReactContext reactContext, WebView view) {
     // Do not register default touch emitter and let WebView implementation handle touches
-    GDHttpClientProvider.getInstance().initHttpClientsPool();
     bbWebViewClient = new RNCWebViewClient();
     BBWebViewClient.init(view,bbWebViewClient);
     view.setWebViewClient(bbWebViewClient);
@@ -1105,10 +1103,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected RNCWebView.ProgressChangedFilter progressChangedFilter = null;
 
     public RNCWebChromeClient(ReactContext reactContext, WebView webView) {
-      WebViewClient webViewClient = webView.getWebViewClient();
-      if (webViewClient != null && webViewClient instanceof BBWebViewClient) {
-        super.setClientObserver(((BBWebViewClient) webViewClient).getObserver());
-      }
+      super(((BBWebViewClient) webView.getWebViewClient()).getObserver());
       this.mReactContext = reactContext;
       this.mWebView = webView;
     }

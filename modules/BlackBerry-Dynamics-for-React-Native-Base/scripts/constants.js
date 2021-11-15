@@ -21,11 +21,21 @@ const podPlatformPatternVersion = /platform :ios, '([0-9\.]+)'/;
 const podPlatformV13 = 'platform :ios, \'13.0\'';
 
 const bbdPodCommand = 'pod \'BlackBerryDynamics\', ' +
-  ':path => \'../node_modules/BlackBerry-Dynamics-for-React-Native-Base/ios/BlackBerryDynamics\'\n';
+  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/BlackBerryDynamics.podspec\'\n';
+
+const enabledFlipper = '  use_flipper!()';
+
+const disabledFlipper = '  #\n' +
+  '  # Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on iOS\n' +
+  '  # in debug configuration as it disables some BlackBerry Dynamics functionality\n' +
+  '  # related to secure networking.\n' +
+  '  # use_flipper!()';
 
 module.exports = {
   updatePodsCommand,
   bbdPodCommand,
   podPlatformPatternVersion,
-  podPlatformV13
+  podPlatformV13,
+  enabledFlipper,
+  disabledFlipper
 };

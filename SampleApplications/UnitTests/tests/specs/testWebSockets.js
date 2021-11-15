@@ -35,6 +35,8 @@ export default function() {
     const OPEN = 1;
     const CLOSING = 2;
     const CLOSED = 3;
+    // DEVNOTE: maximum message length is 50 on 'wss://javascript.info/article/websocket/chat/ws'
+    const MAXMESSAGELENGTH = 50;
 
     const currentDate = new Date();
     const currentDay = currentDate.getDate();
@@ -102,8 +104,9 @@ export default function() {
       expect(isAvailableWebSocketProps).toBe(true);
     });
 
-    describe('WebSocket callbacks: onopen, onmessage, onclose with ws:// scheme' , function() {
-      const url = 'ws://echo.websocket.org';
+    describe('WebSocket callbacks: onopen, onmessage, onclose with ws:// scheme - DEVNOTE: as this test server is unavailable for "ws://" scheme, "wss://" instead of "ws://" is used here temporary.' , function() {
+      // DEVNOTE: 'javascript.info' only accept 'wss:', not 'ws:'
+      const url = 'wss://javascript.info/article/websocket/chat/ws';
 
       it('WebSocket: check onopen connection callback - ws:// scheme - positive case', function(done) {
         let isConditionChecked = false;
@@ -256,7 +259,7 @@ export default function() {
     });
 
     describe('WebSocket events: open, message, close with wss:// scheme' , function() {
-      const url = 'wss://echo.websocket.org';
+      const url = 'wss://javascript.info/article/websocket/chat/ws';
 
       it('WebSocket: check open connection event - wss:// scheme', function(done) {
         let isConditionChecked = false;
@@ -368,7 +371,7 @@ export default function() {
           expect(date.getFullYear()).toBe(currentYear);
 
           isConditionChecked = true;
-          done();
+          webSocket.close();
         });
 
         webSocket.addEventListener('close', function (event) {
@@ -385,7 +388,7 @@ export default function() {
     });
 
     describe('WebSocket send and receive different type of messages', function() {
-      const url = 'ws://echo.websocket.org';
+      const url = 'wss://javascript.info/article/websocket/chat/ws';
 
       it('WebSocket: send, receive text message', function(done) {
         const message = 'Some test message with symbols !@#$%^&*()""';
@@ -552,7 +555,12 @@ export default function() {
           expect(data).toBeDefined();
           expect(data instanceof ArrayBuffer).toBe(true);
           const textMessage = await DataConverter.convertArrayBufferToString(data);
-          expect(textMessage).toBe(dataString);
+          if (arrayBufferMessage.byteLength > MAXMESSAGELENGTH) {
+            expect(textMessage).toBe(dataString.slice(0, MAXMESSAGELENGTH / 2));
+          }
+          else {
+            expect(textMessage).toBe(dataString);
+          }
 
           expect(timeStamp).toBeDefined();
           expect(typeof timeStamp).toBe('number');
@@ -577,69 +585,70 @@ export default function() {
       });
 
       it('WebSocket: multiple sequential connections with sending, receiving text messages', function(done) {
-        if (Platform.OS === 'ios') done();
-        const message = 'Some test message with symbols !@#$%^&*()""';
-        let opened = 0;
-        let closed = 0;
-
-        const webSocket = new WebSocket(url);
-        expect(webSocket.readyState).toBe(CONNECTING);
-
-        const onOpen = function(event) {
-          expect(this.readyState).toBe(OPEN);
-          opened++;
-          this.send(message);
-        };
-
-        const onMessage = function(event) {
-          expect(this.readyState).toBe(OPEN);
-          const { data, type } = event;
-
-          expect(type).toBe('message');
-          expect(data).toBeDefined();
-          expect(data).toBe(message);
-
-          this.close();
-        };
-
-        const onClose = function(event) {
-          expect(this.readyState).toBe(CLOSED);
-          const { type, code, reason } = event;
-
-          expect(typeof event).toBe('object');
-          expect(type).toBeDefined();
-          expect(type).toBe('close');
-
-          closed++;
-          if (closed === 3 && opened === 3) {
-            done();
-          }
-        };
-
-        const onError = function(error) {
-          expect(error.message).toBe(true);
+        if (Platform.OS === 'ios') {
           done();
-        };
+        }
+        else {
+          const message = 'Some test message with symbols !@#$%^&*()""';
+          let opened = 0;
+          let closed = 0;
 
-        const webSocket1 = new WebSocket(url);
-        webSocket1.onopen = onOpen.bind(webSocket1);
-        webSocket1.onmessage = onMessage.bind(webSocket1);
-        webSocket1.onclose = onClose.bind(webSocket1);
-        webSocket1.onerror = onError.bind(webSocket1);
+          const onOpen = function(event) {
+            expect(this.readyState).toBe(OPEN);
+            opened++;
+            this.send(message);
+          };
 
-        const webSocket2 = new WebSocket(url);
-        webSocket2.onopen = onOpen.bind(webSocket2);
-        webSocket2.onmessage = onMessage.bind(webSocket2);
-        webSocket2.onclose = onClose.bind(webSocket2);
-        webSocket2.onerror = onError.bind(webSocket2);
+          const onMessage = function(event) {
+            expect(this.readyState).toBe(OPEN);
+            const { data, type } = event;
 
-        const webSocket3 = new WebSocket(url);
-        webSocket3.onopen = onOpen.bind(webSocket3);
-        webSocket3.onmessage = onMessage.bind(webSocket3);
-        webSocket3.onclose = onClose.bind(webSocket3);
-        webSocket3.onerror = onError.bind(webSocket3);
+            expect(type).toBe('message');
+            expect(data).toBeDefined();
+            expect(data).toBe(message);
+
+            const self = this;
+            setTimeout(function(){self.close()}, 500); // sometimes we get CLOSING readtState. Need a little delay
+          };
+
+          const onClose = function(event) {
+            expect(this.readyState).toBe(CLOSED);
+            const { type, code, reason } = event;
+
+            expect(typeof event).toBe('object');
+            expect(type).toBeDefined();
+            expect(type).toBe('close');
+
+            closed++;
+            if (closed === 3 && opened === 3) {
+              done();
+            }
+          };
+
+          const onError = function(error) {
+            expect(error.message).toBe(true);
+            done();
+          };
+
+          const webSocket1 = new WebSocket(url);
+          webSocket1.onopen = onOpen.bind(webSocket1);
+          webSocket1.onmessage = onMessage.bind(webSocket1);
+          webSocket1.onclose = onClose.bind(webSocket1);
+          webSocket1.onerror = onError.bind(webSocket1);
+
+          const webSocket2 = new WebSocket(url);
+          webSocket2.onopen = onOpen.bind(webSocket2);
+          webSocket2.onmessage = onMessage.bind(webSocket2);
+          webSocket2.onclose = onClose.bind(webSocket2);
+          webSocket2.onerror = onError.bind(webSocket2);
+
+          const webSocket3 = new WebSocket(url);
+          webSocket3.onopen = onOpen.bind(webSocket3);
+          webSocket3.onmessage = onMessage.bind(webSocket3);
+          webSocket3.onclose = onClose.bind(webSocket3);
+          webSocket3.onerror = onError.bind(webSocket3);
+        }
       });
-
     });
 
     describe('WebSocket integration tests with fetch / XMLHttpRequest using Blob messages',function() {
@@ -653,7 +662,7 @@ export default function() {
       });
 
       it('WebSocket: get image as Blob by fetch, send and receive it as Blob', async function(done) {
-        const url = 'ws://echo.websocket.org';
+        const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
         const imageUrl = 'https://via.placeholder.com/720';
         let isConditionChecked = false;
@@ -673,51 +682,55 @@ export default function() {
         expect(responseBlob.size).toBe(expectedSize);
 
         const webSocket = new WebSocket(url);
-          expect(webSocket.readyState).toBe(CONNECTING);
+        expect(webSocket.readyState).toBe(CONNECTING);
 
-          webSocket.onopen = function(event) {
-            expect(webSocket.readyState).toBe(OPEN);
+        webSocket.onopen = function(event) {
+          expect(webSocket.readyState).toBe(OPEN);
 
-            webSocket.binaryType = 'blob';
-            webSocket.send(responseBlob);
-          };
+          webSocket.binaryType = 'blob';
+          webSocket.send(responseBlob);
+        };
 
-          webSocket.onmessage = async function(event) {
-            expect(webSocket.readyState).toBe(OPEN);
-            const { data, type, timeStamp } = event;
+        webSocket.onmessage = async function(event) {
+          expect(webSocket.readyState).toBe(OPEN);
+          const { data, type, timeStamp } = event;
 
-            expect(type).toBe('message');
-            expect(data).toBeDefined();
-            expect(data instanceof Blob).toBe(true);
+          expect(type).toBe('message');
+          expect(data).toBeDefined();
+          expect(data instanceof Blob).toBe(true);
+          if (expectedSize > MAXMESSAGELENGTH) {
+            expect(data.size).toBe(MAXMESSAGELENGTH);
+          } else {
             expect(data.size).toBe(expectedSize);
+          }
 
-            expect(timeStamp).toBeDefined();
-            expect(typeof timeStamp).toBe('number');
-            const date = new Date(timeStamp);
-            expect(date.getDate()).toBe(currentDay);
-            expect(date.getMonth()).toBe(currentMonth);
-            expect(date.getFullYear()).toBe(currentYear);
+          expect(timeStamp).toBeDefined();
+          expect(typeof timeStamp).toBe('number');
+          const date = new Date(timeStamp);
+          expect(date.getDate()).toBe(currentDay);
+          expect(date.getMonth()).toBe(currentMonth);
+          expect(date.getFullYear()).toBe(currentYear);
 
-            isConditionChecked = true;
-            webSocket.close();
-          };
+          isConditionChecked = true;
+          webSocket.close();
+        };
 
-          webSocket.onclose = function(error) {
-            expect(isConditionChecked).toBe(true);
-            done();
-          };
+        webSocket.onclose = function(event) {
+          expect(isConditionChecked).toBe(true);
+          done();
+        };
 
-          webSocket.onerror = function(error) {
-            expect(error.message).toBe(true);
-            done();
-          };
+        webSocket.onerror = function(error) {
+          expect(error.message).toBe(true);
+          done();
+        };
       });
 
       it('WebSocket: get JSON as Blob by fetch, use it to send and receive Blob message, ' +
         'convert received Blob to text using Response', async function(done) {
-        const url = 'wss://echo.websocket.org';
+        const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
-        const jsonUrl = 'http://echo.jsontest.com/test_prop/test_value12345';
+        const jsonUrl = 'http://httpbin.org/get?test_prop=test_value12345';
         let isConditionChecked = false;
 
         const response = await fetch(jsonUrl, {
@@ -735,51 +748,56 @@ export default function() {
         const convertedBlobToText = await new Response(responseBlob).text();
 
         const webSocket = new WebSocket(url);
-          expect(webSocket.readyState).toBe(CONNECTING);
+        expect(webSocket.readyState).toBe(CONNECTING);
 
-          webSocket.onopen = function(event) {
-            expect(webSocket.readyState).toBe(OPEN);
+        webSocket.onopen = function(event) {
+          expect(webSocket.readyState).toBe(OPEN);
 
-            webSocket.binaryType = 'blob';
-            webSocket.send(responseBlob);
-          };
+          webSocket.binaryType = 'blob';
+          webSocket.send(responseBlob);
+        };
 
-          webSocket.onmessage = async function(event) {
-            expect(webSocket.readyState).toBe(OPEN);
-            const { data, type, timeStamp } = event;
+        webSocket.onmessage = async function(event) {
+          expect(webSocket.readyState).toBe(OPEN);
+          const { data, type, timeStamp } = event;
 
-            expect(type).toBe('message');
-            expect(data).toBeDefined();
-            expect(data instanceof Blob).toBe(true);
+          expect(type).toBe('message');
+          expect(data).toBeDefined();
+          expect(data instanceof Blob).toBe(true);
+          const textMessage = await new Response(data).text();
+          if (convertedBlobToText.length > MAXMESSAGELENGTH) {
+            expect(data.size).toBe(MAXMESSAGELENGTH);
+            expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
+          } else {
             expect(data.size).toBe(expectedBlobSize);
-            const textMessage = await new Response(data).text();
             expect(textMessage).toBe(convertedBlobToText);
+          }
 
-            expect(timeStamp).toBeDefined();
-            expect(typeof timeStamp).toBe('number');
-            const date = new Date(timeStamp);
-            expect(date.getDate()).toBe(currentDay);
-            expect(date.getMonth()).toBe(currentMonth);
-            expect(date.getFullYear()).toBe(currentYear);
+          expect(timeStamp).toBeDefined();
+          expect(typeof timeStamp).toBe('number');
+          const date = new Date(timeStamp);
+          expect(date.getDate()).toBe(currentDay);
+          expect(date.getMonth()).toBe(currentMonth);
+          expect(date.getFullYear()).toBe(currentYear);
 
-            isConditionChecked = true;
-            webSocket.close();
-          };
+          isConditionChecked = true;
+          webSocket.close();
+        };
 
-          webSocket.onclose = function(error) {
-            expect(isConditionChecked).toBe(true);
-            done();
-          };
+        webSocket.onclose = function(error) {
+          expect(isConditionChecked).toBe(true);
+          done();
+        };
 
-          webSocket.onerror = function(error) {
-            expect(error.message).toBe(true);
-            done();
-          };
+        webSocket.onerror = function(error) {
+          expect(error.message).toBe(true);
+          done();
+        };
       });
 
       it('WebSocket: get HTML as Blob by fetch, use it to send and receive Blob message, ' +
         'convert received Blob to text using FileReader', async function(done) {
-        const url = 'wss://echo.websocket.org';
+        const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
         const htmlUrl = 'https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API';
 
@@ -812,9 +830,14 @@ export default function() {
           expect(type).toBe('message');
           expect(data).toBeDefined();
           expect(data instanceof Blob).toBe(true);
-          expect(data.size).toBe(expectedBlobSize);
-          const textMessage = await DataConverter.readBlobAsText(responseBlob);
-          expect(textMessage).toBe(convertedBlobToText);
+          const textMessage = await DataConverter.readBlobAsText(data);
+          if (convertedBlobToText.length > MAXMESSAGELENGTH) {
+            expect(data.size).toBe(MAXMESSAGELENGTH);
+            expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
+          } else {
+            expect(data.size).toBe(expectedBlobSize);
+            expect(textMessage).toBe(convertedBlobToText);
+          }
 
           expect(timeStamp).toBeDefined();
           expect(typeof timeStamp).toBe('number');
@@ -823,6 +846,10 @@ export default function() {
           expect(date.getMonth()).toBe(currentMonth);
           expect(date.getFullYear()).toBe(currentYear);
 
+          webSocket.close();
+        };
+
+        webSocket.onclose = function(event) {
           done();
         };
 
@@ -834,10 +861,10 @@ export default function() {
 
       it('WebSocket: get JSON as Blob by XMLHttpRequest, use it to send and receive Blob message, ' +
         'convert received Blob to text using FileReader', async function(done) {
-        const url = 'wss://echo.websocket.org';
+        const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
         const responseType = 'blob';
-        const jsonUrl = 'http://echo.jsontest.com/test_prop/test_value12345';
+        const jsonUrl = 'http://httpbin.org/get?test_prop=test_value12345';
         let isConditionChecked = false;
 
         const xhr = new XMLHttpRequest();
@@ -879,9 +906,14 @@ export default function() {
               expect(type).toBe('message');
               expect(data).toBeDefined();
               expect(data instanceof Blob).toBe(true);
-              expect(data.size).toBe(expectedBlobSize);
-              const textMessage = await DataConverter.readBlobAsText(responseBlob);
-              expect(textMessage).toBe(convertedBlobToText);
+              const textMessage = await DataConverter.readBlobAsText(data);
+              if (convertedBlobToText.length > MAXMESSAGELENGTH) {
+                expect(data.size).toBe(MAXMESSAGELENGTH);
+                expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
+              } else {
+                expect(data.size).toBe(expectedBlobSize);
+                expect(textMessage).toBe(convertedBlobToText);
+              }
 
               expect(timeStamp).toBeDefined();
               expect(typeof timeStamp).toBe('number');

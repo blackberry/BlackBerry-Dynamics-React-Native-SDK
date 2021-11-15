@@ -17,10 +17,13 @@
 (function() {
   checkAndExitOrContinue();
 
-  const fs = require('fs'),
+  const shell = require('shelljs'),
+    fs = require('fs'),
     path = require('path'),
     projectRoot = process.env.INIT_CWD,
-    androidProjectRoot = path.join(projectRoot, 'android');
+    androidProjectRoot = path.join(projectRoot, 'android'),
+    iosProjectRoot = path.join(projectRoot, 'ios'),
+    isWindows = process.platform === 'win32';
 
   if (fs.existsSync(androidProjectRoot)) {
     // Cleanup root build.gradle
@@ -37,6 +40,20 @@
     if (fs.existsSync(projectLauncherLibPath)) {
       fs.unlinkSync(projectLauncherLibPath);
     }
+  }
+
+  if (fs.existsSync(iosProjectRoot)) {
+   if (isWindows) { return; }
+
+   try {
+      const uninstallScript = path.join(
+         projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Launcher',
+         'scripts', 'ios', 'rmLauncherFramework.rb'
+       );
+      shell.exec(`ruby "${uninstallScript}"`);
+   } catch (error) {
+     console.log(error);
+   }
   }
 
   function checkAndExitOrContinue() {

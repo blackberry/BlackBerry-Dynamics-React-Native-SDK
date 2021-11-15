@@ -21,8 +21,10 @@ The JavaScript API remains unchanged.
 
 ## Supportability
 #### React Native
- - 0.63.x
- - 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Networking` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

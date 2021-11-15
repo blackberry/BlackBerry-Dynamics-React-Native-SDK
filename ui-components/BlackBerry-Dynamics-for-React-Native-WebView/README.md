@@ -2,7 +2,7 @@
 
 Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](https://github.com/react-native-webview/react-native-webview) and allows to access to private/corporate network resources through BlackBerry Dynamics SDK. The JavaScript API remains unchanged.
 
-> **NOTE:** on Android `GDWebView` library is used under the hood.
+> **NOTE:** on Android `BBWebView` library is used under the hood.
 
 ## Supportability
 
@@ -12,8 +12,10 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
 - [x] Android
 
 #### React Native
- - 0.63.x
- - 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 
 #### Supported on iOS and Android
  - HTTP redirection
@@ -37,7 +39,7 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
  - SSO
 
 ## Preconditions
-`BlackBerry-Dynamics-for-React-Native-WebView` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` and `BlackBerry-Dynamics-for-React-Native-Networking` modules, so please install required modules first.
+`BlackBerry-Dynamics-for-React-Native-WebView` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module, so please install required modules first.
 
 ## Installation
 

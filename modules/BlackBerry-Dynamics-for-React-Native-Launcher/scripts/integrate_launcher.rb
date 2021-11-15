@@ -1,5 +1,6 @@
+#!/usr/bin/env ruby
 #
-# Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +15,12 @@
 # limitations under the License.
 #
 
-# Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+begin
+  require_relative 'ios/launcherManager.rb'
 
-target 'BbdRNBase' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
-
-  # Pods for BbdRNBase
-
+  manager = LauncherPluginManager.new
+  manager.add_framework
+rescue => e
+  ErrorManager.print_exception e
+  exit 1
 end
