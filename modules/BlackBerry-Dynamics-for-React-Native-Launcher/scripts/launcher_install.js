@@ -17,7 +17,8 @@
 (function() {
   checkAndExitOrContinue();
 
-  const execSync = require('child_process').execSync,
+  const shell = require('shelljs'),
+    execSync = require('child_process').execSync,
     path = require('path'),
     fs = require('fs'),
     fse = require('fs-extra'),
@@ -29,6 +30,10 @@
     scriptPath = path.join(
       projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Base',
       'scripts', 'react_native_info', 'update_development_info.js'
+    ),
+    addLauncherScriptPath = path.join(
+      projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Launcher',
+      'scripts', 'ios', 'addLauncherFramework.rb'
     );
 
   try {
@@ -77,6 +82,14 @@
         '\n\nError, please refer to preconditions ' +
         'in BlackBerry-Dynamics-for-React-Native-Launcher/README.md ' +
         'to correctly setup Launcher module dependencies.\n';
+    }
+
+    try {
+      if( !shell.exec(`ruby "${addLauncherScriptPath}"`).code !== 0 ) {
+        throw new Error('\nERROR: addLauncherFramework exited with error!');
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 

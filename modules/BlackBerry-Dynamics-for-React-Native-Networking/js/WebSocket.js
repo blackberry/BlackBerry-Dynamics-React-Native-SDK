@@ -130,7 +130,11 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
       protocols = null;
     }
 
-    this._eventEmitter = new NativeEventEmitter(NativeWebSocketModule);
+    this._eventEmitter = new NativeEventEmitter(
+      // T88715063: NativeEventEmitter only used this parameter on iOS. Now it uses it on all platforms, so this code was modified automatically to preserve its behavior
+      // If you want to use the native module on other platforms, please remove this condition and test its behavior
+      Platform.OS !== 'ios' ? null : NativeWebSocketModule,
+    );
     this._socketId = nextWebSocketId++;
     this._registerEvents();
     NativeWebSocketModule.connect(url, protocols, {headers}, this._socketId);
@@ -220,7 +224,7 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
 
   _registerEvents(): void {
     this._subscriptions = [
-      this._eventEmitter.addListener('websocketMessage', ev => {
+      this._eventEmitter.addListener('bbdWebsocketMessage', ev => {
         if (ev.id !== this._socketId) {
           return;
         }
@@ -235,7 +239,7 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
         }
         this.dispatchEvent(new WebSocketEvent('message', {data}));
       }),
-      this._eventEmitter.addListener('websocketOpen', ev => {
+      this._eventEmitter.addListener('bbdWebsocketOpen', ev => {
         if (ev.id !== this._socketId) {
           return;
         }
@@ -243,7 +247,7 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
         this.protocol = ev.protocol;
         this.dispatchEvent(new WebSocketEvent('open'));
       }),
-      this._eventEmitter.addListener('websocketClosed', ev => {
+      this._eventEmitter.addListener('bbdWebsocketClosed', ev => {
         if (ev.id !== this._socketId) {
           return;
         }
@@ -257,7 +261,7 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
         this._unregisterEvents();
         this.close();
       }),
-      this._eventEmitter.addListener('websocketFailed', ev => {
+      this._eventEmitter.addListener('bbdWebsocketFailed', ev => {
         if (ev.id !== this._socketId) {
           return;
         }

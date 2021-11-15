@@ -89,7 +89,8 @@ class BbdRNProject
   def initialize
     @rn_project_path = projectRoot = ENV['PROJECT_ROOT'] || ENV['INIT_CWD'] || Dir.pwd
     rn_project_json = JSON.load File.open "#{@rn_project_path}/package.json"
-    @product_name = rn_project_json['name']
+    rn_app_json = JSON.load File.open "#{@rn_project_path}/app.json"
+    @product_name = rn_app_json['name']
     @rn_version = rn_project_json['dependencies']['react-native']
     @development_tools_json_path = "#{@rn_project_path}/ios/#{@product_name}/Resources/development-tools-info.json"
     @xcodeproj = Xcodeproj::Project.open("#{@rn_project_path}/ios/#{@product_name}.xcodeproj")

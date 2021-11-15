@@ -172,21 +172,10 @@ class BbdRNProject
   end
 
   def restore_xcodeproj
-
     # remove frameworks
     @native_target.frameworks_build_phase.files.objects.each do |bf|
       if BUILD_FILES_TO_REMOVE.include? bf.display_name
         @native_target.frameworks_build_phase.remove_build_file(bf)
-      end
-    end
-    frameworks_group = @xcodeproj.groups.select do |group|
-      group.name == 'Frameworks'
-    end.first
-    frameworks_group.children.objects.each do |el|
-      if el.display_name == 'iOS' ||
-        el.display_name == 'BlackBerryCerticom.framework' ||
-        el.display_name == 'BlackBerryCerticomSBGSE.framework'
-        el.remove_from_project
       end
     end
 

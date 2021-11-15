@@ -1,4 +1,8 @@
 /**
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original react-native-fs module for react-native
+ * from https://github.com/itinance/react-native-fs
+ *
  * React Native FS
  * @flow
  */
@@ -9,9 +13,14 @@
 
 var RNFSManager = require('react-native').NativeModules.BbdRNFileSystem;
 
+var Platform = require('react-native/Libraries/Utilities/Platform');
 var NativeEventEmitter = require('react-native').NativeEventEmitter;
 
-var RNFS_NativeEventEmitter = new NativeEventEmitter(RNFSManager);
+var RNFS_NativeEventEmitter = new NativeEventEmitter(
+  // NativeEventEmitter only used this parameter on iOS. Now it uses it on all platforms, so this code was modified automatically to preserve its behavior
+  // If you want to use the native module on other platforms, please remove this condition and test its behavior
+  Platform.OS !== 'ios' ? null : RNFSManager
+);
 
 var base64 = require('base-64');
 var utf8 = require('utf8');

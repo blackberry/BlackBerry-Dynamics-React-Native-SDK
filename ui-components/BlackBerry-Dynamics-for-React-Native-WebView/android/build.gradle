@@ -64,10 +64,11 @@ def kotlin_version = getExtOrDefault('kotlinVersion')
 dependencies {
     implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
     implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
+    implementation 'com.blackberry.blackberrydynamics:android_webview:+'
     implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Base')
-    implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Networking')
     implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'org.brotli:dec:0.1.2'// 'br' content-encoding
     implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.6.2'
+    implementation 'androidx.webkit:webkit:1.4.0'
 }

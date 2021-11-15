@@ -7,3 +7,5 @@
 - Yoshihiro Kawaguchi - ykawaguchi@blackberry.com
 - Nobuya Ishikawa - nishikawa@blackberry.com
 - Bohdan Pidluzhnyy - bpidluzhnyy@blackberry.com
+- Eugeniy Leontiev - eleontiev@blackberry.com
+- Nazarii Shavuk - nshavuk@blackberry.com

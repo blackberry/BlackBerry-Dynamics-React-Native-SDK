@@ -109,11 +109,15 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
           validationError={validationError.name}
         />
         <View style={{height: 10}} />
-        <CustomButton
-          title={'Download file'}
-          disabled={!!validationError.name || !!validationError.url}
-          onPress={downloadHandler}
-        />
+        { name && name.trim().length > 0 ? (
+          <CustomButton
+            title={'Download file'}
+            disabled={!!validationError.name || !!validationError.url}
+            onPress={downloadHandler}
+          />)
+          :
+          null
+        }
         <View style={{height: 10}} />
         <CustomButton
           title="Close"

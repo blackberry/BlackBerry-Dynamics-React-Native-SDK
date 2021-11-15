@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "description": "BlackBerry Dynamics Launcher module for React Native",
   "main": "index.js",
+  "bin": {
+    "integrate-launcher": "./scripts/integrate_launcher.rb"
+  },
   "scripts": {
     "install": "node ./scripts/launcher_install.js",
     "uninstall": "node ./scripts/launcher_cleanup.js"
@@ -13,6 +16,7 @@
   ],
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "fs-extra": "^2.0.0"
+    "fs-extra": "^2.0.0",
+    "shelljs": "^0.7.0"
   }
 }

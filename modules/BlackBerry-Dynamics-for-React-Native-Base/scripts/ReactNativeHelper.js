@@ -36,28 +36,6 @@ class ReactNativeHelper {
 
     console.log('Setting BBD configurations for iOS...');
 
-    const notFoundFrameworks = [
-      'BlackBerryDynamics.xcframework',
-      'BlackBerryCerticom.xcframework',
-      'BlackBerryCerticomSBGSE.xcframework'
-    ].filter(framework => {
-      if (!fs.existsSync(path.join('.', 'ios', 'BlackBerryDynamics', 'frameworks', framework))) {
-        return framework;
-      }
-    });
-
-    if (notFoundFrameworks.length) {
-      const message = notFoundFrameworks.join(', ') +
-        ' not found in ' + path.resolve('..', '..', '..', '..',
-        'modules', 'BlackBerry-Dynamics-for-React-Native-Base',
-        'ios', 'BlackBerryDynamics', 'frameworks') + '.' +
-        '\nPlease follow instruction provided in ' +
-        'README.md for BlackBerry-Dynamics-for-React-Native-Base module and re-install it.';
-
-      console.log(`\x1b[31m${message}\x1b[0m`);
-      process.exit(1);
-    }
-
     let cmdiOSCommand = path.join('.', 'scripts', 'bbd_rn_install_ios.rb');
 
     if (bundleId) {
@@ -100,6 +78,10 @@ class ReactNativeHelper {
     };
 
     podfileContent = podfileContent.replace(constants.podPlatformPatternVersion, constants.podPlatformV13);
+
+    if (!podfileContent.includes(constants.disabledFlipper)) {
+      podfileContent = podfileContent.replace(constants.enabledFlipper, constants.disabledFlipper);
+    }
 
     podfileContent = addContentToPodFile({
       afterWhere: postInstall,

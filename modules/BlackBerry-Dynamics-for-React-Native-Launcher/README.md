@@ -5,12 +5,14 @@ For more details please refer to [Dynamics Launcher library on Android](https://
 
 ## Supportability
 #### React Native
- - 0.63.x
- - 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 #### BlackBerry Dynamics Launcher library for iOS
- - 3.2.0.296
+ - 3.3.0.303
 #### BlackBerry Dynamics Launcher library for Android
- - 3.2.0.204
+ - 3.3.0.215
 
 ## Preconditions
 #### Install Base module
@@ -36,6 +38,7 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
     $ cd ios
     $ pod install
     $ cd ..
+    $ yarn integrate-launcher
     $ react-native run-ios
 ###### Android
     $ react-native run-android

@@ -57,6 +57,7 @@
       podfileContent = fs.readFileSync(podfilePath, 'utf-8'),
       newPodfileContent = podfileContent.replace(constants.updatePodsCommand, ''),
       newPodfileContent = newPodfileContent.replace(constants.bbdPodCommand, '');
+      newPodfileContent = newPodfileContent.replace(constants.disabledFlipper, constants.enabledFlipper);
 
     fs.writeFileSync(podfilePath, newPodfileContent, 'utf-8');
   }

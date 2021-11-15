@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,20 +74,6 @@ public class GDFileSystemDelegate {
      */
     public String getAbsoluteEncryptedPath(final String path) {
         return GDFileSystem.getAbsoluteEncryptedPath(path);
-    }
-
-    /**
-     * Upload BlackBerry Dynamics logs.
-     */
-    public void uploadLogs() {
-        GDFileSystem.uploadLogs();
-    }
-
-    /**
-     * Dump BlackBerry Dynamics logs out to an accessible folder.
-     */
-    public void exportLogFileToFilesFolder() {
-        GDFileSystem.exportLogFileToFilesFolder();
     }
 
     /**

@@ -10,20 +10,24 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
 #### Package manager
  - yarn
 #### React Native
- - 0.63.x
+ - 0.63.x (deprecated)
  - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 #### iOS
  - Xcode 12+
- - iOS 13, 14
+ - iOS 13, 14, 15
  - cocoapods 1.10.1+
 #### Android
  - Android 8+, API 26+
+ - NDK 20.1.5948944 (for React Native version < 0.66.0)
+ - NDK 21.4.7075529 (for React Native version >= 0.66.0)
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v9.1 and v9.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
- - BlackBerry Dynamics SDK for Android v9.1 and v9.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
+ - BlackBerry Dynamics SDK for iOS v9.2 and v10.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
+ - BlackBerry Dynamics SDK for Android v9.2 and v10.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
 #### BlackBerry Dynamics Launcher
- - BlackBerry Dynamics Launcher library for iOS v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
- - BlackBerry Dynamics Launcher library for Android v3.2, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
+ - BlackBerry Dynamics Launcher library for iOS v3.3, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
+ - BlackBerry Dynamics Launcher library for Android v3.3, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
 
 # Features
 #### Integration with BlackBerry Dynamics
@@ -55,6 +59,24 @@ To implement some ICC capabilities in a Dynamics React Native application `Black
 
 #### Launcher integration
 `BlackBerry-Dynamics-for-React-Native-Launcher` provides Launcher integration in Dynamics React Native application.
+
+#### Android SafetyNet
+BlackBerry UEM version 12.10 and later supports [SafetyNet](https://developers.google.com/android/reference/com/google/android/gms/safetynet/SafetyNet) attestation for BlackBerry Dynamics apps. You can use SafetyNet to extend BlackBerry's root and exploit detection by adding checks for device tampering and application integrity. For more information about SafetyNet attestation, implementation considerations, and instructions for enabling the feature, see the [BlackBerry UEM Configuration Guide](https://docs.blackberry.com/en/endpoint-management/blackberry-uem/current/installation-configuration/configuration). This chapter details considerations for developers who want to enable SafetyNet support for their BlackBerry Dynamics apps.
+###### Adding the GDSafetyNet library to the app project
+The BlackBerry Dynamics SDK for Android version 5.0 and later includes a GDSafetyNet library. To support SafetyNet, add this library to the app project dependencies along with the main GDLibrary.
+
+The GDSafetyNet library includes all of the client-side source code that is required to support SafetyNet. No additional app code is required. The GDSafetyNet library requires Google Play Services 11.0 or later to use device SafetyNet APIs. Verify that your BlackBerry Dynamics app is dependent on only a single version of Google Play Services.
+```
+implementation 'com.google.android.gms:play-services-safetynet:xx.x.x'
+implementation 'com.blackberry.blackberrydynamics:android_handheld_gd_safetynet:+'
+```
+It can be added in `BlackBerry-Dynamics-for-React-Native-Base/android/gd.gradle` before Base module is added to the application.
+###### Completing SafetyNet registration
+You must [obtain an API key from Google](https://developer.android.com/training/safetynet/attestation#add-api-key) and add it to the app’s AndroidManifest.xml file in the <application> element:
+```
+<meta-data android:name="com.blackberry.attestation.ApiKey" android:value="YOUR_API_KEY" />
+```
+More details can be found [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/10_0/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps).
 
 # Package contents
 #### Modules
@@ -109,7 +131,7 @@ To integrate BlackBerry Dynamics into a new React Native application please foll
 
 ### Integrate into existing React Native application
 To integrate BlackBerry Dynamics into existing React Native application:
- - Check you are using `0.63.x` version of React Native.
+ - Check you are using `0.64.x` version of React Native.
 
       - [React Native Upgrade Helper](https://react-native-community.github.io/upgrade-helper/) may be used to upgrade your application prior to integrating BlackBerry Dynamics. Confirm the application builds and works correctly after upgrade.
 
@@ -132,3 +154,9 @@ To integrate BlackBerry Dynamics into existing React Native application:
      - If `<WebView />` UI component is used you can secure resource loading within WebView by adding `BlackBerry-Dynamics-for-React-Native-WebView` UI component. See [WebView UI component](./ui-components/BlackBerry-Dynamics-for-React-Native-WebView/README.md).
 
  - Lastly, do not forget to update the imports in your code.
+ 
+## Limitations
+### Flipper is disabled on iOS
+Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on iOS in debug configuration as it disables some BlackBerry Dynamics functionality related to secure networking.
+Flipper is disabled on iOS by default. If your Dynamics React Native application on iOS does not use Secure Connectivity feature (`BlackBerry-Dynamics-for-React-Native-Networking` module) you can enable Flipper by uncommenting `use_flipper!()` line in `Podfile` of your application.
+

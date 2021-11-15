@@ -6,8 +6,10 @@ For more details please refer to [com.good.gd.icc](https://developer.blackberry.
 
 ## Supportability
 #### React Native
- - 0.63.x
- - 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-AppKinetics` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -28,7 +30,7 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## API
 #### Service discovery
 > Service discovery feature allows to find a list of the available service providers of a specified service.
-In other words, the API will return an information about Dynamics applications currently installed and activated on the device that provide specific Dynamcis application-based service like [Transfer File Service](https://marketplace.blackberry.com/services/273065) or [Send Email Service](https://marketplace.blackberry.com/services/855115).
+In other words, the API will return an information about Dynamics applications currently installed and activated on the device that provide specific Dynamics application-based service like [Transfer File Service](https://marketplace.blackberry.com/services/273065) or [Send Email Service](https://marketplace.blackberry.com/services/855115).
 Full list of Dynamics application-based services can be found [here](https://marketplace.blackberry.com/services).
 
 ###### _getServiceProvidersFor_(serviceId: `string`, version: `string`) : Promise<Array<{address: `string`, applicationId: `string`, name: `string`, version: `string`}>>
@@ -227,7 +229,7 @@ type ServiceMessage = {
 ```
 
 **`onError` event**
-Dynamics React Native application should be subscribed on `onError` event in order to be able to handle error message when error is occured.
+Dynamics React Native application should be subscribed on `onError` event in order to be able to handle error message when error is occurred.
 
 **Example of usage**
 ```typescript

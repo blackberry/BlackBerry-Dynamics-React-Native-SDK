@@ -9,9 +9,10 @@ Please setup your environment as described in the [React Native documentation](h
 ## Supportability
 
 #### React Native
-
-- 0.63.x
-- 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 
 ## Preconditions
 
@@ -20,45 +21,9 @@ Please setup your environment as described in the [React Native documentation](h
     $ gem install xcodeproj
     $ gem install plist
 
-#### Install BlackBerry Dynamics SDK
+#### Dynamics SDK Dependency
 
-Download one of the supported versions of the BlackBerry Dynamics SDK for iOS / Android (for manual installation only) from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) and follow installation steps attached below.
-
-> When you click the link, you are prompted to log in to the Developer site with your BlackBerry Online Account. If you don’t already have an account, you can register and create one.
-
-To download appropriate version from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) use following steps:
-
-1. Select "Prior Releases".
-2. Select "Dynamics SDK for iOS" or "Dynamics SDK for Android" product from drop down menu.
-3. Find appropriate product version and download it by link.
-
-##### BlackBerry Dynamics SDK for iOS
-
-Supported versions of the BlackBerry Dynamics SDK for iOS:
-
-- `Dynamic Framework v9.1`
-  > IMPORTANT: Dynamic framework is the only framework, that is supported by the BlackBerry Dynamics SDK for React Native right now.
-
-BlackBerry Dynamics SDK for iOS (Dynamic Framework) can be downloaded from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html).
-
-- Unzip `/Users/<user>/Downloads/gdsdk-release-dylib-<version>.zip`
-- Copy `/Users/<user>/Downloads/gdsdk-release-dylib-<version>/BlackBerry_Dynamics_SDK_for_iOS_v<version>_dylib/Frameworks/BlackBerryDynamics.xcframework` to `<path>/BlackBerry-Dynamics-React-Native-SDK/modules/BlackBerry-Dynamics-for-React-Native-Base/ios/BlackBerryDynamics/frameworks` with the same name
-- Copy `/Users/<user>/Downloads/gdsdk-release-dylib-<version>/BlackBerry_Dynamics_SDK_for_iOS_v<version>_dylib/Frameworks/BlackBerryCerticom.xcframework` to `<path>/BlackBerry-Dynamics-React-Native-SDK/modules/BlackBerry-Dynamics-for-React-Native-Base/ios/BlackBerryDynamics/frameworks` with the same name
-- Copy `/Users/<user>/Downloads/gdsdk-release-dylib-<version>/BlackBerry_Dynamics_SDK_for_iOS_v<version>_dylib/Frameworks/BlackBerryCerticomSBGSE.xcframework` to `<path>/BlackBerry-Dynamics-React-Native-SDK/modules/BlackBerry-Dynamics-for-React-Native-Base/ios/BlackBerryDynamics/frameworks` with the same name
-
-##### BlackBerry Dynamics SDK for Android
-
-Supported versions of the BlackBerry Dynamics SDK for Android:
-
-- `BlackBerry Dynamics SDK for Android - v9.1`
-
-There are 2 supported ways to install the BlackBerry Dynamics SDK for Android:
-
-- Installation via the Android SDK manager: start the Android SDK Manager and follow the steps detailed in [Getting Started with the BlackBerry Dynamics SDK for Android](https://developers.blackberry.com/us/en/resources/get-started/blackberry-dynamics-getting-started.html?platform=android#step-2) from "Install the SDK using the Android SDK Manager" section on the BlackBerry Developers website.
-  Please note, it will be installed the latest available version of BlackBerry Dynamics SDK for Android from BlackBerry Developers website. If you need some older version, that is currently supported by BlackBerry Dynamics SDK for React Native, than use manual installation instead.
-- Manual installation: download appropriate version from [BlackBerry Developers](https://developers.blackberry.com/us/en/resources/downloads.html) using the instructions above. For further installation follow the steps detailed in [Getting Started with the BlackBerry Dynamics SDK for Android](https://developers.blackberry.com/us/en/resources/get-started/blackberry-dynamics-getting-started.html?platform=android#step-2) from "Manually download & install the SDK" section on the BlackBerry Developers website.
-
-> It is recommended to install the BlackBerry Dynamics SDK for Android via the Android SDK Manager. If you are unable to use the Android SDK Manager, you can install the SDK manually.
+Dynamics SDK for iOS and Android are now installed as part of the Base plugin using CocoaPods & Gradle. The integration uses the iOS "Dynamic Framework" version of BlackBerry Dynamics as the static library is no longer supported.
 
 ## Installation
 
@@ -99,3 +64,8 @@ To activate your new BlackBerry Dynamics application with the BlackBerry UEM man
     $ cd ios
     $ pod install
     $ cd ..
+
+## Limitations
+### Flipper is disabled on iOS
+Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on iOS in debug configuration as it disables some BlackBerry Dynamics functionality related to secure networking.
+Flipper is disabled on iOS by default. If your Dynamics React Native application on iOS does not use Secure Connectivity feature (`BlackBerry-Dynamics-for-React-Native-Networking` module) you can enable Flipper by uncommenting `use_flipper!()` line in `Podfile` of your application.

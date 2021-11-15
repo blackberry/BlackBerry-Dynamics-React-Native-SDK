@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,24 @@
     path = require('path'),
     fse = require('fs-extra'),
     projectRoot = process.env.PROJECT_ROOT || process.env.INIT_CWD,
+    androidProjectRoot = path.join(projectRoot, 'android'),
     bbdBasePath = process.cwd();
 
-  if (fs.existsSync(path.join(projectRoot, 'android'))) {
+  if (fs.existsSync(androidProjectRoot)) {
     // Update root build.gradle
-    var projectBuildGradle = path.join(projectRoot, 'android', 'build.gradle'),
+    var projectBuildGradle = path.join(androidProjectRoot, 'build.gradle'),
       projectBuildGradleContent = fs.readFileSync(projectBuildGradle, 'utf-8'),
       bbdMavenString = `maven {
           apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Base/android/helper.gradle"
           url getBbdMavenLocation
       }
       mavenLocal()`;
+
+    // store original top-level build.gradle to recover to original if remove base plugin
+    var projectBuildGradleOriginal = path.join(projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Base', 'android', 'build.gradle.original');
+    if (!fs.existsSync(projectBuildGradleOriginal)) {
+      fs.writeFileSync(projectBuildGradleOriginal, projectBuildGradleContent, 'utf-8');
+    }
 
     if (projectBuildGradleContent.indexOf(bbdMavenString) < 0) {
       projectBuildGradleContent = projectBuildGradleContent
@@ -39,7 +46,7 @@
     }
 
     // Update app/build.gradle
-    var projectAppBuildGradle = path.join(projectRoot, 'android', 'app', 'build.gradle'),
+    var projectAppBuildGradle = path.join(androidProjectRoot, 'app', 'build.gradle'),
       projectAppBuildGradleContent = fs.readFileSync(projectAppBuildGradle, 'utf-8'),
       bbdDependenciesString = `apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Base/android/gd.gradle"
     implementation fileTree`;
@@ -54,7 +61,7 @@
 
     // Read project name and project package name
     var bbdBaseAndroidMainPath = path.join(bbdBasePath, 'android', 'src', 'main'),
-      projectAndroidMainPath = path.join(projectRoot, 'android', 'app', 'src', 'main'),
+      projectAndroidMainPath = path.join(androidProjectRoot, 'app', 'src', 'main'),
       projectAndroidManifestPath = path.join(projectAndroidMainPath, 'AndroidManifest.xml'),
       projectPackageName = getPackageNameFromAndroidManifest(projectAndroidManifestPath),
       resStringsXmlPath = path.join(projectAndroidMainPath, 'res', 'values', 'strings.xml');
@@ -90,7 +97,7 @@
 
     fs.writeFileSync(
       projectMainActivityPath,
-      addImportLineInJavaFile(bbdReactActivityImport, 
+      addImportLineInJavaFile(bbdReactActivityImport,
         updateExtendsClassInMainActivity(
           updatePackageNameInJavaFile(projectMainActivityContent, projectPackageName)
         )
@@ -98,7 +105,7 @@
     );
     fs.writeFileSync(
       projectMainApplicationPath,
-      addImportLineInJavaFile(bbdLifeCycleImport, 
+      addImportLineInJavaFile(bbdLifeCycleImport,
         updateOnCreateInMainApplication(
           updatePackageNameInJavaFile(projectMainApplicationContent, projectPackageName)
         )
@@ -124,6 +131,18 @@
       path.join(bbdBaseAndroidMainPath, 'assets', 'com.blackberry.dynamics.settings.json'),
       path.join(projectAndroidMainPath, 'assets', 'com.blackberry.dynamics.settings.json')
     );
+
+    // Add keyword 'final' to inner class variables in ReactNativeFlipper.java
+    var androidSrcDebugPath = path.join(androidProjectRoot, 'app', 'src', 'debug', 'java'),
+      rnFlipperFileName = 'ReactNativeFlipper.java',
+      // Set up the file finder
+      finder = require('findit')(androidSrcDebugPath);
+
+    finder.on('file', function(filePath) {
+      if (filePath.includes(rnFlipperFileName)) {
+        updateRnFlipperClass(filePath);
+      }
+    });
 
     function updateExtendsClassInMainActivity(fileContent) {
       return fileContent.replace('extends ReactActivity', 'extends BBDReactActivity');
@@ -184,6 +203,26 @@
         newReturnStatement = 'return "' + getApplicationName(resStringsXmlPath) + '";';
 
       return fileContent.replace(oldReturnStatement, newReturnStatement);
+    }
+
+    function updateRnFlipperClass(rnFlipperFilePath) {
+      var rnFlipperFileContent = fs.readFileSync(rnFlipperFilePath, 'utf-8'),
+        toAddFinalKeywordList = [
+        'ReactInstanceManager reactInstanceManager',
+        'NetworkFlipperPlugin networkFlipperPlugin'
+      ];
+
+      toAddFinalKeywordList.forEach(function(entry) {
+        var entryWithFinalKeyword = 'final ' + entry;
+
+        if (rnFlipperFileContent.includes(entryWithFinalKeyword)) {
+          return;
+        };
+
+        rnFlipperFileContent = rnFlipperFileContent.replace(entry, entryWithFinalKeyword);
+      });
+
+      fs.writeFileSync(rnFlipperFilePath, rnFlipperFileContent, 'utf-8');
     }
 
   } else {

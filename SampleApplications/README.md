@@ -1,9 +1,10 @@
 # Sample Applications
 
 ## Supportability
-#### React Native
- - 0.63.x
- - 0.64.0
+ - 0.63.x (deprecated)
+ - 0.64.x
+ - 0.65.x
+ - 0.66.x (0.66.1 is latest supported)
 
 ## General tips
 
@@ -85,6 +86,7 @@ Generate ios and android directories:
 	$ cd ios
 	$ pod install
 	$ cd ..
+	$ yarn integrate-launcher
 
 #### How to secure Clipboard API
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Clipboard
