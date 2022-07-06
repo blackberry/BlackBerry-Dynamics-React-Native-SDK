@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { BottomSheet } from './BottomSheet';
 import { CustomButton } from '../CustomButton';
-import { NotificationContext } from '../../context/NotificationContext';
 import { colorScheme } from '../../theme';
-import { ApplicationContext } from '../../context/ApplicationContext';
 import { validate } from '../../services/validation.service';
 import { CustomTextInput } from '../CustomTextInput';
+import { useNotification, useStorage } from '../../context/hooks';
 
-import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem'
+import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 
-export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
-  const { notification } = useContext(NotificationContext);
-  const { storage } = useContext(ApplicationContext);
+export const DownloadFileModal = ({ onSubmit, onDownloadEnd, onDismiss }) => {
+  const { notification } = useNotification();
+  const { storage } = useStorage();
 
   const [url, setUrl] = useState('http://www.textfiles.com/programming/24hrs.txt');
   const [name, setName] = useState('');
@@ -38,10 +37,10 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
   });
 
   useEffect(() => {
-    let validated = { url: null, name: null};
+    let validated = { url: null, name: null };
 
     const urlPattern = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
-    if(!urlPattern.test(url)) {
+    if (!urlPattern.test(url)) {
       validated.url = 'Please provide correct url!';
     }
 
@@ -77,10 +76,10 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
 
       downloadTask.promise
         .then((res) => {
-          if(res.statusCode === 200) {
+          if (res.statusCode === 200) {
             onDownloadEnd()
           } else {
-            notification.emmit('alert', 'File doesn\'t exist at path.');
+            notification.emmit('alert', 'File can\'t be downloaded from following URL.');
           }
         })
         .catch((error) => {
@@ -108,8 +107,8 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
           onChangeText={nameHandler}
           validationError={validationError.name}
         />
-        <View style={{height: 10}} />
-        { name && name.trim().length > 0 ? (
+        <View style={{ height: 10 }} />
+        {name && name.trim().length > 0 ? (
           <CustomButton
             title={'Download file'}
             disabled={!!validationError.name || !!validationError.url}
@@ -118,7 +117,7 @@ export const DownloadFileModal = ({onSubmit, onDownloadEnd, onDismiss}) => {
           :
           null
         }
-        <View style={{height: 10}} />
+        <View style={{ height: 10 }} />
         <CustomButton
           title="Close"
           color={colorScheme.red}

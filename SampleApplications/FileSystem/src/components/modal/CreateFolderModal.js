@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import FileSystemService from '../../services/file-system.service';
 import { BottomSheet } from './BottomSheet';
 import { CustomButton } from '../CustomButton';
-import { NotificationContext } from '../../context/NotificationContext';
 import { colorScheme } from '../../theme';
 import { validate } from '../../services/validation.service';
 import { CustomTextInput } from '../CustomTextInput';
+import { useNotification } from '../../context/hooks';
 
-export const CreateFolderModal = ({path, onSubmit, onDismiss}) => {
-  const { notification } = useContext(NotificationContext);
+export const CreateFolderModal = ({ path, onSubmit, onDismiss }) => {
+  const { notification } = useNotification();
   const [name, setName] = useState('');
 
   const [validationError, setValidationError] = useState({
@@ -61,8 +61,8 @@ export const CreateFolderModal = ({path, onSubmit, onDismiss}) => {
           onChangeText={folderNameHandler}
           validationError={validationError.name}
         />
-        <View style={{height: 10}} />
-        { name && name.trim().length > 0 ? (
+        <View style={{ height: 10 }} />
+        {name && name.trim().length > 0 ? (
           <CustomButton
             title="Create Folder"
             disabled={!!validationError.name}
@@ -71,7 +71,7 @@ export const CreateFolderModal = ({path, onSubmit, onDismiss}) => {
           :
           null
         }
-        <View style={{height: 10}} />
+        <View style={{ height: 10 }} />
         <CustomButton
           title="Close"
           color={colorScheme.red}

@@ -1,10 +1,11 @@
 # Sample Applications
 
 ## Supportability
- - 0.63.x (deprecated)
- - 0.64.x
- - 0.65.x
- - 0.66.x (0.66.1 is latest supported)
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 
 ## General tips
 
@@ -49,8 +50,19 @@ Generate ios and android directories:
 	$ pod install
 	$ cd ..
 
+#### How to add Application module
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Application
+###### iOS
+	$ cd ios
+	$ pod install
+	$ cd ..
+
 #### How to secure Networking
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Networking
+###### iOS
+	$ cd ios
+	$ pod install
+	$ cd ..
 
 #### How to secure AsyncStorage
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Async-Storage

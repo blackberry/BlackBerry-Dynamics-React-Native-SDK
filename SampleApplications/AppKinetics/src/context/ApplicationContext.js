@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,24 @@
  * limitations under the License.
  */
 
-import React, {createContext, useContext} from 'react';
-import {NativeEventEmitter, NativeModules} from 'react-native';
-import {ShowContentScreen} from '../screens/ShowContentScreen';
+import React from 'react';
+import { NativeEventEmitter, NativeModules } from 'react-native';
+import { ShowContentScreen } from '../screens/ShowContentScreen';
 import {
   faCheckCircle,
   faExclamationCircle,
   faComment,
 } from '@fortawesome/free-solid-svg-icons';
-import {ToastMessage} from '../components/ToastMessage';
+import { ToastMessage } from '../components/ToastMessage';
 import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 import BbdAppKinetics from 'BlackBerry-Dynamics-for-React-Native-AppKinetics';
-import {SAVE_FILE_SERVICE, TRANSFER_FILE_SERVICE} from '../static';
+import { SAVE_FILE_SERVICE, TRANSFER_FILE_SERVICE } from '../static';
+
+import { ApplicationContext } from './context';
 
 const eventEmitter = new NativeEventEmitter(
   NativeModules.ReactNativeBbdAppKinetics,
 );
-
-export const ApplicationContext = createContext();
-
-export const useNavigation = () => {
-  const {screen} = useContext(ApplicationContext);
-  return screen;
-};
-
-export const useNotification = () => {
-  const {notification} = useContext(ApplicationContext);
-  return notification;
-};
 
 class ApplicationProvider extends React.Component {
   constructor(props) {
@@ -110,7 +100,8 @@ class ApplicationProvider extends React.Component {
 
   async componentDidMount() {
     try {
-      await BbdAppKinetics.copyFilesToSecureStorage();
+      const result = await BbdAppKinetics.copyFilesToSecureStorage();
+      console.log('Copy files to secure storage result: ', JSON.stringify(result));
       await BbdAppKinetics.readyToProvideService(
         TRANSFER_FILE_SERVICE.ID,
         TRANSFER_FILE_SERVICE.VERSION,
@@ -212,4 +203,4 @@ class ApplicationProvider extends React.Component {
   }
 }
 
-export {ApplicationProvider};
+export { ApplicationProvider };

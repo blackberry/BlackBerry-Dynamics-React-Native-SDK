@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original react-native-rename
  * from https://github.com/junedomingo/react-native-rename/
  */
@@ -240,6 +240,7 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
           var javaFileBase = '/android/app/src/main/java';
           var newJavaPath = javaFileBase + '/' + newBundleID.replace(/\./g, '/');
           var currentJavaPath = javaFileBase + '/' + currentBundleID.replace(/\./g, '/');
+          var shouldDelete = !newJavaPath.includes(currentJavaPath);
 
           if (bundleID) {
             newBundlePath = newJavaPath;
@@ -257,19 +258,24 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
             if (!_fs2.default.existsSync(fullNewBundlePath)) {
               _shelljs2.default.mkdir('-p', fullNewBundlePath);
             }
-            var move = _shelljs2.default.exec('git mv "' + fullCurrentBundlePath + '/"* "' + fullNewBundlePath + '" 2>/dev/null');
+            var gitMove = _shelljs2.default.exec('git mv "' + fullCurrentBundlePath + '/"* "' + fullNewBundlePath + '"', { silent: true });
             var successMsg = newBundlePath + ' ' + _colors2.default.green('BUNDLE INDENTIFIER CHANGED');
 
-            if (move.code === 0) {
+            if (gitMove.code === 0) {
               console.log(successMsg);
-            } else if (move.code === 128) {
+            } else if (gitMove.code === 128) {
               // if "outside repository" error occured
-              if (_shelljs2.default.mv('-f', fullCurrentBundlePath + '/*', fullNewBundlePath).code === 0) {
+              var shellMove = _shelljs2.default.mv('-f', fullCurrentBundlePath + '/*', fullNewBundlePath);
+              if (shellMove.code === 0) {
                 console.log(successMsg);
               } else {
                 console.log('Error moving: "' + currentJavaPath + '" "' + newBundlePath + '"');
               }
             }
+          }
+
+          if (shouldDelete) {
+            _shelljs2.default.rm('-rf', fullCurrentBundlePath);
           }
 
           var vars = {
@@ -310,7 +316,7 @@ readFile(_path2.default.join(__dirname, 'android/app/src/main/res/values/strings
                 replaceContent(file.regex, file.replacement, newPaths);
                 if (itemsProcessed === filePathsCount) {
                   var oldBundleNameDir = _path2.default.join(__dirname, javaFileBase, currentBundleID);
-                  resolve({ oldBundleNameDir: oldBundleNameDir, shouldDelete: (newJavaPath+"/").indexOf(currentJavaPath+"/") != 0 });
+                  resolve({ oldBundleNameDir: oldBundleNameDir, shouldDelete: !newJavaPath.includes(currentJavaPath) });
                 }
               }, 200 * index);
             }

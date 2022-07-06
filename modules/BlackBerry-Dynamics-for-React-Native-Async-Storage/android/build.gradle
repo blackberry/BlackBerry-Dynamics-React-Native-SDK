@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original @react-native-community/async-storage
  * from https://github.com/react-native-community/async-storage/
  */
@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:10.2.0.79'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:10.2.0.79'
     implementation "com.facebook.react:react-native:+"
 }

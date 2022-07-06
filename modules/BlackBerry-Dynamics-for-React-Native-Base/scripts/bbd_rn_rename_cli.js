@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,32 +36,6 @@
   process.env.PROJECT_ROOT = projectRoot;
 
   readBundleIdCli();
-
-  var projectAndroidMainPath = path.join(projectRoot, 'android', 'app', 'src', 'main'),
-    projectAndroidManifestPath = path.join(projectAndroidMainPath, 'AndroidManifest.xml'),
-    projectPackageName = getPackageNameFromAndroidManifest(projectAndroidManifestPath);
-
-  // On Windows there is an issue with react-native-rename module.
-  // It does not move MainActivity and MainApplication classes to new package.
-  // Both classes get removed completely
-  // We need to backup in Base module
-  if (isWindows) {
-    var oldProjectMainClassesPath = path.join(projectAndroidMainPath, 'java',
-        ...projectPackageName.split('.')),
-      oldProjectMainActivityPath = path.join(oldProjectMainClassesPath, 'MainActivity.java'),
-      oldProjectMainApplicationPath = path.join(oldProjectMainClassesPath, 'MainApplication.java'),
-      bbdBaseJavaCorePath = path.join(bbdBasePath, 'android', 'src', 'main', 'java',
-        'com', 'blackberry', 'bbd', 'reactnative', 'core'),
-      resStringsXmlPath = path.join(projectAndroidMainPath, 'res', 'values', 'strings.xml');
-
-    // Backuping application name before remaning
-    process.env.oldApplicationName = getApplicationName(resStringsXmlPath);
-
-    fse.moveSync(oldProjectMainActivityPath,
-      path.join(bbdBaseJavaCorePath, 'MainActivity.java'), { overwrite: true });
-    fse.moveSync(oldProjectMainApplicationPath,
-      path.join(bbdBaseJavaCorePath, 'MainApplication.java'), { overwrite: true });
-  }
 
   function readBundleIdCli() {
     rl.question('[REQUIRED] Enter iOS Bundle Identifier / Android Package Name (e.g. "com.company.myapp"):\n', function(input) {
@@ -145,15 +119,32 @@
 
   function updateRnRename(pathToRNRenameModuleRoot) {
     // Add custom functionality to handle application bundle-id and name in react-native-rename module
-    var rnRenameUpdatedScriptsPath = path.join(bbdBasePath, 'scripts', 'custom_rn_rename');
+    var rnRenameUpdatedScriptsPath = path.join(bbdBasePath, 'scripts', 'custom_rn_rename'),
+      rnRenameModuleLibPath = path.join(pathToRNRenameModuleRoot, 'lib');
 
     fs.copyFileSync(
       path.join(rnRenameUpdatedScriptsPath, 'index.js'),
-      path.join(pathToRNRenameModuleRoot, 'lib', 'index.js')
+      path.join(rnRenameModuleLibPath, 'index.js')
     );
     fs.copyFileSync(
       path.join(rnRenameUpdatedScriptsPath, 'bundleIdentifiers.js'),
-      path.join(pathToRNRenameModuleRoot, 'lib', 'config', 'bundleIdentifiers.js')
+      path.join(rnRenameModuleLibPath, 'config', 'bundleIdentifiers.js')
+    );
+
+    // Update list with files to be updated on RN > 0.68: add 'AppDelegate.mm', 'LaunchScreen.storyboard'
+    var filesToModifyContentPath = path.join(rnRenameModuleLibPath, 'config', 'filesToModifyContent.js'),
+      filesToModifyContentContent = fs.readFileSync(filesToModifyContentPath, 'utf-8'),
+      appDelegateStringToBeReplaced = `'/AppDelegate.m',`,
+      launchScreenStringToBeReplaced = '/Base.lproj/LaunchScreen.xib';
+
+    fs.writeFileSync(
+      filesToModifyContentPath,
+      filesToModifyContentContent
+        .replace(
+          appDelegateStringToBeReplaced, appDelegateStringToBeReplaced + `'ios/' + nS_NewName + '/AppDelegate.mm',`
+        )
+        .replace(launchScreenStringToBeReplaced, '/LaunchScreen.storyboard'),
+      'utf-8'
     );
   }
 
@@ -162,24 +153,6 @@
     reactNativeHelper.setBbdConfigurationsForiOS(bundleId);
     console.log('Your BlackBerry Dynamics Entitlement ID or GDApplicationID has been set to ' + bundleId);
     console.log('Your BlackBerry Dynamics Entitlement Version or GDApplicationVersion has been set to 1.0.0.0\n');
-  }
-
-  function getPackageNameFromAndroidManifest(pathToAndroidManifest) {
-    var androidManifestContent = fs.readFileSync(pathToAndroidManifest, 'utf-8'),
-      startIndexOfPackageString = androidManifestContent.indexOf(
-        '"', androidManifestContent.indexOf('package=')
-      ) + 1,
-      endIndexOfPackageString = androidManifestContent.indexOf('"', startIndexOfPackageString);
-
-    return androidManifestContent.substring(startIndexOfPackageString, endIndexOfPackageString);
-  }
-
-  function getApplicationName(pathToResStringsXml) {
-    var resStringsXmlContent = fs.readFileSync(pathToResStringsXml, 'utf-8'),
-      beforeAppName = resStringsXmlContent.indexOf('>', resStringsXmlContent.indexOf('<string name="app_name">')) + 1,
-      afterAppName = resStringsXmlContent.indexOf('</string>', beforeAppName);
-
-    return resStringsXmlContent.substring(beforeAppName, afterAppName);
   }
 
 })();

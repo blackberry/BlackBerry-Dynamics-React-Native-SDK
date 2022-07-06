@@ -5,10 +5,11 @@
 
 # Supportability
 #### React Native
- - 0.63.x (deprecated)
- - 0.64.x
- - 0.65.x
- - 0.66.x (0.66.1 is latest supported)
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Text` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.

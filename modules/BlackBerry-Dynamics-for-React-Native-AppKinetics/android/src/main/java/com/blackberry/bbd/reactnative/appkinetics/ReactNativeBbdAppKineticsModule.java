@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -235,7 +235,7 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
       File gdDataFolder = gdFileSystemDelegate.createFile(root + BBD_DATA_FOLDER_PATH);
       if (fileList.length > 0 &&
               !gdDataFolder.exists()) {
-        gdDataFolder.mkdir();
+        gdDataFolder.mkdirs();
       }
 
       for (final String fileName : fileList) {

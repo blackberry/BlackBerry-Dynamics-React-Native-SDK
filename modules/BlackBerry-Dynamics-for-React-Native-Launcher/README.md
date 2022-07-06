@@ -5,14 +5,15 @@ For more details please refer to [Dynamics Launcher library on Android](https://
 
 ## Supportability
 #### React Native
- - 0.63.x (deprecated)
- - 0.64.x
- - 0.65.x
- - 0.66.x (0.66.1 is latest supported)
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 #### BlackBerry Dynamics Launcher library for iOS
- - 3.3.0.303
+ - 3.4.0.324
 #### BlackBerry Dynamics Launcher library for Android
- - 3.3.0.215
+ - 3.4.0.228
 
 ## Preconditions
 #### Install Base module

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,8 @@
   var fs = require('fs'),
     path = require('path'),
     projectRoot = process.env.INIT_CWD,
-    androidProjectRoot = path.join(projectRoot, 'android');
+    androidProjectRoot = path.join(projectRoot, 'android'),
+    constants = require('./constants');
 
   if (fs.existsSync(androidProjectRoot)) {
     // Cleanup root build.gradle
@@ -53,12 +54,19 @@
 
     var bbdLifeCycleCall = '\n\t\tBBDLifeCycle.getInstance().initialize(this);\n',
       bbdLifeCycleImport = '\nimport com.blackberry.bbd.reactnative.core.BBDLifeCycle;\n',
+      bbdReactActivityDelegateImport = '\nimport com.blackberry.bbd.reactnative.core.BBDReactActivityDelegate;\n',
       bbdReactActivityImport = '\nimport com.blackberry.bbd.reactnative.core.BBDReactActivity;\n';
 
     fs.writeFileSync(
       projectMainActivityPath,
-      removeImportLineInJavaFile(bbdReactActivityImport,
-        updateExtendsClassInMainActivity(projectMainActivityContent)
+      removeImportLineInJavaFile(bbdReactActivityDelegateImport,
+        removeImportLineInJavaFile(bbdReactActivityImport,
+          updateReactActivityDelegateUsage(
+            updateReactActivityUsage(
+              updateExtendsClassInMainActivity(projectMainActivityContent)
+            )
+          )
+        )
       )
     );
     fs.writeFileSync(
@@ -101,7 +109,15 @@
     });
 
     function updateExtendsClassInMainActivity(fileContent) {
-      return fileContent.replace('extends BBDReactActivity', 'extends ReactActivity');
+      return fileContent.replace(/extends BBDReactActivity/gi, 'extends ReactActivity');
+    }
+
+    function updateReactActivityDelegateUsage(fileContent) {
+      return fileContent.replace(/ BBDReactActivityDelegate/gi, ' ReactActivityDelegate');
+    }
+
+    function updateReactActivityUsage(fileContent) {
+      return fileContent.replace('BBDReactActivity activity', 'ReactActivity activity');
     }
 
     function updateOnCreateInMainApplication(fileContent) {

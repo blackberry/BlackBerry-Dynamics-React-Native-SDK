@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
  * from https://github.com/facebook/react-native
  *
@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DeprecatedTextInputPropTypes = require('react-native/Libraries/DeprecatedPropTypes/DeprecatedTextInputPropTypes');
+const DeprecatedTextInputPropTypes = require('deprecated-react-native-prop-types').TextInputPropTypes;
 const Platform = require('react-native/Libraries/Utilities/Platform');
 const React = require('react');
 const ReactNative = require('react-native/Libraries/Renderer/shims/ReactNative');

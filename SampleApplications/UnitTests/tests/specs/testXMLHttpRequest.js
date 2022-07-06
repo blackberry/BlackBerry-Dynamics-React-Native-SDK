@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1389,7 +1389,7 @@ export default function() {
 
       it('XMLHttpRequest responseType: blob', function(done) {
         const method = "GET";
-        const url = "https://via.placeholder.com/720";
+        const url = "https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg";
         const responseType = "blob";
 
         const xhr = new XMLHttpRequest();
@@ -1423,7 +1423,7 @@ export default function() {
 
       it('XMLHttpRequest responseType: arraybuffer', function(done) {
         const method = "GET";
-        const url = "https://via.placeholder.com/720";
+        const url = "https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg";
         const responseType = "arraybuffer";
 
         const xhr = new XMLHttpRequest();

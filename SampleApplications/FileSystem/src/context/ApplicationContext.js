@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import React, { createContext, useState } from 'react';
+import React, { useState } from 'react';
 import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
+import { ApplicationContext } from './context';
 
-export const ApplicationContext = createContext();
-
-export const ApplicationProvider = ({children}) => {
+export const ApplicationProvider = ({ children }) => {
   const [root, setRoot] = useState(FS.DocumentDirectoryPath);
   const [currentPath, setCurrentPath] = useState(root);
   const [modal, setModal] = useState(null);
@@ -41,7 +40,6 @@ export const ApplicationProvider = ({children}) => {
     set entries(entries) {
       setEntries(entries)
     },
-    reload() {},
   };
 
   const bottomSheet = {

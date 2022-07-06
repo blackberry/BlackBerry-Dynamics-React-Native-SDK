@@ -12,10 +12,11 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
 - [x] Android
 
 #### React Native
- - 0.63.x (deprecated)
- - 0.64.x
- - 0.65.x
- - 0.66.x (0.66.1 is latest supported)
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 
 #### Supported on iOS and Android
  - HTTP redirection
@@ -24,9 +25,9 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
  - Page resource and content loading
  - MTD Safe browsing
  - DLP (secure cut/copy/paste) within WebView
+ - Browsing history - `GoBack`, `GoForward`, `Reload` and `StopLoading` API
 
  #### Supported on iOS and not supported on Android
- - Browsing history - `GoBack`, `GoForward`, `Reload` and `StopLoading` API
  - AutoZSO
 
 #### Not supported on iOS and Android
@@ -80,6 +81,3 @@ For more, read the [API Reference](https://github.com/react-native-community/rea
     $ cd ios
     $ pod install
     $ cd ..
-
-## Known issues
- - [Android] Response with error message is not shown for unsuccessful request
