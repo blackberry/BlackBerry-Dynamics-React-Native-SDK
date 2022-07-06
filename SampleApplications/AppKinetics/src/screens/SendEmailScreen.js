@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import {
   IosStyleModal as Modal
 } from '../components';
 import { faFolder, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
-import { useNavigation, useNotification } from '../context/ApplicationContext';
+import { useNavigation, useNotification } from '../context/hooks';
 import { theme } from '../static';
 
 import BbdAppKinetics from 'BlackBerry-Dynamics-for-React-Native-AppKinetics';

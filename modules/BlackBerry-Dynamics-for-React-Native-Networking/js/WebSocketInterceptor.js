@@ -16,7 +16,7 @@
 import { NativeEventEmitter } from 'react-native/index';
 
 import NativeWebSocketModule from './NativeWebSocketModule';
-
+const Platform = require('react-native/Libraries/Utilities/Platform');
 const base64 = require('base64-js');
 
 const originalRCTWebSocketConnect = NativeWebSocketModule.connect;
@@ -66,28 +66,28 @@ const WebSocketInterceptor = {
   },
 
   /**
-   * Invoked when event "websocketOpen" happens.
+   * Invoked when event "bbdWebsocketOpen" happens.
    */
   setOnOpenCallback(callback) {
     onOpenCallback = callback;
   },
 
   /**
-   * Invoked when event "websocketMessage" happens.
+   * Invoked when event "bbdWebsocketMessage" happens.
    */
   setOnMessageCallback(callback) {
     onMessageCallback = callback;
   },
 
   /**
-   * Invoked when event "websocketFailed" happens.
+   * Invoked when event "bbdWebsocketFailed" happens.
    */
   setOnErrorCallback(callback) {
     onErrorCallback = callback;
   },
 
   /**
-   * Invoked when event "websocketClosed" happens.
+   * Invoked when event "bbdWebsocketClosed" happens.
    */
   setOnCloseCallback(callback) {
     onCloseCallback = callback;
@@ -107,7 +107,7 @@ const WebSocketInterceptor = {
    */
   _registerEvents() {
     subscriptions = [
-      eventEmitter.addListener('websocketMessage', ev => {
+      eventEmitter.addListener('bbdWebsocketMessage', ev => {
         if (onMessageCallback) {
           onMessageCallback(
             ev.id,
@@ -117,17 +117,17 @@ const WebSocketInterceptor = {
           );
         }
       }),
-      eventEmitter.addListener('websocketOpen', ev => {
+      eventEmitter.addListener('bbdWebsocketOpen', ev => {
         if (onOpenCallback) {
           onOpenCallback(ev.id);
         }
       }),
-      eventEmitter.addListener('websocketClosed', ev => {
+      eventEmitter.addListener('bbdWebsocketClosed', ev => {
         if (onCloseCallback) {
           onCloseCallback(ev.id, {code: ev.code, reason: ev.reason});
         }
       }),
-      eventEmitter.addListener('websocketFailed', ev => {
+      eventEmitter.addListener('bbdWebsocketFailed', ev => {
         if (onErrorCallback) {
           onErrorCallback(ev.id, {message: ev.message});
         }
@@ -139,7 +139,11 @@ const WebSocketInterceptor = {
     if (isInterceptorEnabled) {
       return;
     }
-    eventEmitter = new NativeEventEmitter(NativeWebSocketModule);
+    eventEmitter = new NativeEventEmitter(
+      // T88715063: NativeEventEmitter only used this parameter on iOS. Now it uses it on all platforms, so this code was modified automatically to preserve its behavior
+      // If you want to use the native module on other platforms, please remove this condition and test its behavior
+      Platform.OS !== 'ios' ? null : NativeWebSocketModule,
+    );
     WebSocketInterceptor._registerEvents();
 
     // Override `connect` method for all RCTWebSocketModule requests

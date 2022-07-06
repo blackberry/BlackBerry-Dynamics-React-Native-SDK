@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,6 +67,18 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
   @Override
   public String getName() {
     return "ReactNativeBbdAppKinetics";
+  }
+
+  @ReactMethod
+  public void addListener(String eventName) {
+    // DEVNOTE: keep it, as it's required for Event Emitter calls starting from 0.65 RN
+    // Set up any upstream listeners or background tasks as necessary
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    // DEVNOTE: keep it, as it's required for Event Emitter calls starting from 0.65 RN
+    // Remove upstream listeners, stop unnecessary background tasks
   }
 
   @ReactMethod
@@ -223,7 +235,7 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
       File gdDataFolder = gdFileSystemDelegate.createFile(root + BBD_DATA_FOLDER_PATH);
       if (fileList.length > 0 &&
               !gdDataFolder.exists()) {
-        gdDataFolder.mkdir();
+        gdDataFolder.mkdirs();
       }
 
       for (final String fileName : fileList) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,22 @@
 (function() {
   var fs = require('fs'),
     path = require('path'),
-    projectRoot = process.env.INIT_CWD;
+    projectRoot = process.env.INIT_CWD,
+    androidProjectRoot = path.join(projectRoot, 'android'),
+    constants = require('./constants');
 
-  if (fs.existsSync(path.join(projectRoot, 'android'))) {
+  if (fs.existsSync(androidProjectRoot)) {
     // Cleanup root build.gradle
-    var projectBuildGradle = path.join(projectRoot, 'android', 'build.gradle'),
-      projectBuildGradleContent = fs.readFileSync(projectBuildGradle, 'utf-8'),
-      bbdMavenString = `maven {
-          apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Base/android/helper.gradle"
-          url getBbdMavenLocation
-      }
-      mavenLocal()`;
-
-    projectBuildGradleContent = projectBuildGradleContent.replace(bbdMavenString, 'mavenLocal()');
-    fs.writeFileSync(projectBuildGradle, projectBuildGradleContent, 'utf-8');
+    var projectBuildGradle = path.join(androidProjectRoot, 'build.gradle'),
+      projectBuildGradleOriginal = path.join(projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Base', 'android', 'build.gradle.original');
+    if (fs.existsSync(projectBuildGradleOriginal)) {
+      // Recover to original top-level build.gradle
+      var projectBuildGradleContent = fs.readFileSync(projectBuildGradleOriginal, 'utf-8');
+      fs.writeFileSync(projectBuildGradle, projectBuildGradleContent, 'utf-8');
+    }
 
     // Cleanup app/build.gradle
-    var projectAppBuildGradle = path.join(projectRoot, 'android', 'app', 'build.gradle'),
+    var projectAppBuildGradle = path.join(androidProjectRoot, 'app', 'build.gradle'),
       projectAppBuildGradleContent = fs.readFileSync(projectAppBuildGradle, 'utf-8'),
       bbdDependenciesString = `apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Base/android/gd.gradle"
     implementation fileTree`;
@@ -42,7 +41,7 @@
     fs.writeFileSync(projectAppBuildGradle, projectAppBuildGradleContent, 'utf-8');
 
     // Read project name and project package name
-    var projectAndroidMainPath = path.join(projectRoot, 'android', 'app', 'src', 'main'),
+    var projectAndroidMainPath = path.join(androidProjectRoot, 'app', 'src', 'main'),
       projectAndroidManifestPath = path.join(projectAndroidMainPath, 'AndroidManifest.xml'),
       projectPackageName = getPackageNameFromAndroidManifest(projectAndroidManifestPath);
 
@@ -55,17 +54,24 @@
 
     var bbdLifeCycleCall = '\n\t\tBBDLifeCycle.getInstance().initialize(this);\n',
       bbdLifeCycleImport = '\nimport com.blackberry.bbd.reactnative.core.BBDLifeCycle;\n',
+      bbdReactActivityDelegateImport = '\nimport com.blackberry.bbd.reactnative.core.BBDReactActivityDelegate;\n',
       bbdReactActivityImport = '\nimport com.blackberry.bbd.reactnative.core.BBDReactActivity;\n';
 
     fs.writeFileSync(
       projectMainActivityPath,
-      removeImportLineInJavaFile(bbdReactActivityImport, 
-        updateExtendsClassInMainActivity(projectMainActivityContent)
+      removeImportLineInJavaFile(bbdReactActivityDelegateImport,
+        removeImportLineInJavaFile(bbdReactActivityImport,
+          updateReactActivityDelegateUsage(
+            updateReactActivityUsage(
+              updateExtendsClassInMainActivity(projectMainActivityContent)
+            )
+          )
+        )
       )
     );
     fs.writeFileSync(
       projectMainApplicationPath,
-      removeImportLineInJavaFile(bbdLifeCycleImport, 
+      removeImportLineInJavaFile(bbdLifeCycleImport,
         updateOnCreateInMainApplication(projectMainApplicationContent)
       )
     );
@@ -77,7 +83,7 @@
     if (fs.existsSync(settingsJsonPath)) {
       fs.unlinkSync(settingsJsonPath);
     }
-    
+
     if (fs.existsSync(dynamicsSettingsJsonPath)) {
       fs.unlinkSync(dynamicsSettingsJsonPath);
     }
@@ -91,8 +97,27 @@
       fs.unlinkSync(androidReactNativeInfoJsonPath);
     }
 
+    // Remove keyword 'final' from ReactNativeFlipper.java local class variables
+    var androidSrcDebugPath = path.join(androidProjectRoot, 'app', 'src', 'debug', 'java'),
+      rnFlipperFileName = 'ReactNativeFlipper.java',
+      finder = require('findit')(androidSrcDebugPath);
+
+    finder.on('file', function(filePath) {
+      if (filePath.includes(rnFlipperFileName)) {
+        removeFinalFromRnFlipperClass(filePath);
+      }
+    });
+
     function updateExtendsClassInMainActivity(fileContent) {
-      return fileContent.replace('extends BBDReactActivity', 'extends ReactActivity');
+      return fileContent.replace(/extends BBDReactActivity/gi, 'extends ReactActivity');
+    }
+
+    function updateReactActivityDelegateUsage(fileContent) {
+      return fileContent.replace(/ BBDReactActivityDelegate/gi, ' ReactActivityDelegate');
+    }
+
+    function updateReactActivityUsage(fileContent) {
+      return fileContent.replace('BBDReactActivity activity', 'ReactActivity activity');
     }
 
     function updateOnCreateInMainApplication(fileContent) {
@@ -101,6 +126,24 @@
 
     function removeImportLineInJavaFile(importLine, fileContent) {
       return fileContent.replace(importLine, '');
+    }
+
+    function removeFinalFromRnFlipperClass(rnFlipperFilePath) {
+      var rnFlipperFileContent = fs.readFileSync(rnFlipperFilePath, 'utf-8'),
+        toRemoveFinalKeywordList = [
+        'ReactInstanceManager reactInstanceManager',
+        'NetworkFlipperPlugin networkFlipperPlugin'
+      ];
+
+      toRemoveFinalKeywordList.forEach(function(entry) {
+        var entryWithFinalKeyword = 'final ' + entry;
+
+        if (rnFlipperFileContent.includes(entryWithFinalKeyword)) {
+          rnFlipperFileContent = rnFlipperFileContent.replace(entryWithFinalKeyword, entry);
+        };
+      });
+
+      fs.writeFileSync(rnFlipperFilePath, rnFlipperFileContent, 'utf-8');
     }
 
     function getPackageNameFromAndroidManifest(pathToAndroidManifest) {

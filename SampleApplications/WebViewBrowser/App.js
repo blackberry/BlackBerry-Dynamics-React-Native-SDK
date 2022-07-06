@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: 'https://google.com',
+      url: 'https://www.google.com',
       modalVisible: false,
       permissions: []
     };
@@ -65,11 +65,9 @@ export default class App extends Component {
   }
 
   onLoadEnd(syntheticEvent) {
-    if (Platform.OS === "ios") {
-      this.setState({
-        url: syntheticEvent.nativeEvent.url
-      });
-    }
+    this.setState({
+      url: syntheticEvent.nativeEvent.url
+    });
   }
 
   onReload() {

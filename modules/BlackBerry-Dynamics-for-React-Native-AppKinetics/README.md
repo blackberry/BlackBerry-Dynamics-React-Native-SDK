@@ -6,8 +6,11 @@ For more details please refer to [com.good.gd.icc](https://developer.blackberry.
 
 ## Supportability
 #### React Native
- - 0.63.x
- - 0.64.0
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-AppKinetics` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -28,7 +31,7 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## API
 #### Service discovery
 > Service discovery feature allows to find a list of the available service providers of a specified service.
-In other words, the API will return an information about Dynamics applications currently installed and activated on the device that provide specific Dynamcis application-based service like [Transfer File Service](https://marketplace.blackberry.com/services/273065) or [Send Email Service](https://marketplace.blackberry.com/services/855115).
+In other words, the API will return an information about Dynamics applications currently installed and activated on the device that provide specific Dynamics application-based service like [Transfer File Service](https://marketplace.blackberry.com/services/273065) or [Send Email Service](https://marketplace.blackberry.com/services/855115).
 Full list of Dynamics application-based services can be found [here](https://marketplace.blackberry.com/services).
 
 ###### _getServiceProvidersFor_(serviceId: `string`, version: `string`) : Promise<Array<{address: `string`, applicationId: `string`, name: `string`, version: `string`}>>
@@ -227,12 +230,12 @@ type ServiceMessage = {
 ```
 
 **`onError` event**
-Dynamics React Native application should be subscribed on `onError` event in order to be able to handle error message when error is occured.
+Dynamics React Native application should be subscribed on `onError` event in order to be able to handle error message when error is occurred.
 
 **Example of usage**
 ```typescript
 import BbdAppKinetics from 'BlackBerry-Dynamics-for-React-Native-AppKinetics';
-import { NativeEventEmitter } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
 async function testAppKinetics() {
     try {
@@ -243,7 +246,7 @@ async function testAppKinetics() {
     }
 }
 
-const eventEmitter = new NativeEventEmitter(BbdAppKinetics);
+const eventEmitter = new NativeEventEmitter(NativeModules.ReactNativeBbdAppKinetics);
 
 // subscribe on onReceivedFile
 // event is fired when you receive file sent by 'com.good.gdservice.transfer-file' service
@@ -269,9 +272,9 @@ testAppKinetics();
 #### Secure storage helper
 
 ###### _copyFilesToSecureStorage_() : Promise<{copiedInThisCall: `Array<string>`, securedDataDirEntries: `Array<string>`}>
-`copyFilesToSecureStorage` API recursively copies files and directories from public `data` folder that is located in application bunlde to `/data` in secure container:
+`copyFilesToSecureStorage` API recursively copies files and directories from public `data` folder that is located in application bundle to `/data` in secure container:
  - On Android it copies from `<app>/android/app/src/main/assets/data` folder
- - On iOS it copies from `<app>/ios/<app_name>/data` folder
+ - On iOS it copies from linked `<app>/ios/<app_name>/data` folder: open the app in Xcode and drag-n-drop **`data`** folder (from _`<app>/ios/<app_name>/data`_) to **`<app_name>`** group so it is recognized as part of the project.
 
 `copyFilesToSecureStorage` returns object with following structure:
 ```typescript

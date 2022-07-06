@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import React, { createContext, useState } from 'react';
+import React, { useState } from 'react';
 import { screens } from './src/context/ScreenContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { ApplicationProvider } from './src/context/ApplicationContext';
-
-export const ScreenContext = createContext();
+import { ScreenContext } from './src/context/context';
 
 const App = () => {
   const [_screen, setScreen] = useState([screens.main]);

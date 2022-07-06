@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, SafeAreaView, ScrollView} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import {
   BottomArea,
   BottomTabBar,
@@ -27,14 +27,14 @@ import {
   TabButton,
   AngleRightButton,
 } from '../components';
-import {faFolder, faPaperPlane} from '@fortawesome/free-solid-svg-icons';
-import {useNavigation, useNotification} from '../context/ApplicationContext';
-import {ShowContentScreen} from './ShowContentScreen';
-import {theme} from '../static';
+import { faFolder, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { useNavigation, useNotification } from '../context/hooks';
+import { ShowContentScreen } from './ShowContentScreen';
+import { theme } from '../static';
 
 import BbdAppKinetics from 'BlackBerry-Dynamics-for-React-Native-AppKinetics';
 import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
-import {TRANSFER_FILE_SERVICE} from '../static';
+import { TRANSFER_FILE_SERVICE } from '../static';
 
 export const HomeScreen = () => {
   const nav = useNavigation();

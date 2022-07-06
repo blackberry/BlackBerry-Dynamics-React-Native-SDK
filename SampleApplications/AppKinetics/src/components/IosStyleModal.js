@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import React from 'react';
 import { View, Modal, Text, StyleSheet } from 'react-native';
-import { TransparentButton } from '../components';
+import { TransparentButton } from './TransparentButton';
 import { theme } from '../static';
 
 export const IosStyleModal = ({visible, title, onShow, children, buttons}) => (

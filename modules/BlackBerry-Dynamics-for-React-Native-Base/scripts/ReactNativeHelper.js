@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,28 +35,6 @@ class ReactNativeHelper {
     if (isWindows) { return; }
 
     console.log('Setting BBD configurations for iOS...');
-
-    const notFoundFrameworks = [
-      'BlackBerryDynamics.xcframework',
-      'BlackBerryCerticom.xcframework',
-      'BlackBerryCerticomSBGSE.xcframework'
-    ].filter(framework => {
-      if (!fs.existsSync(path.join('.', 'ios', 'BlackBerryDynamics', 'frameworks', framework))) {
-        return framework;
-      }
-    });
-
-    if (notFoundFrameworks.length) {
-      const message = notFoundFrameworks.join(', ') +
-        ' not found in ' + path.resolve('..', '..', '..', '..',
-        'modules', 'BlackBerry-Dynamics-for-React-Native-Base',
-        'ios', 'BlackBerryDynamics', 'frameworks') + '.' +
-        '\nPlease follow instruction provided in ' +
-        'README.md for BlackBerry-Dynamics-for-React-Native-Base module and re-install it.';
-
-      console.log(`\x1b[31m${message}\x1b[0m`);
-      process.exit(1);
-    }
 
     let cmdiOSCommand = path.join('.', 'scripts', 'bbd_rn_install_ios.rb');
 
@@ -99,7 +77,11 @@ class ReactNativeHelper {
       return beforePostInstall + content + afterPostInstall;
     };
 
-    podfileContent = podfileContent.replace(constants.podPlatformPatternVersion, constants.podPlatformV13);
+    podfileContent = podfileContent.replace(constants.podPlatformPatternVersion, constants.podPlatformVersion);
+
+    if (!podfileContent.includes(constants.disabledFlipper)) {
+      podfileContent = podfileContent.replace(constants.enabledFlipper, constants.disabledFlipper);
+    }
 
     podfileContent = addContentToPodFile({
       afterWhere: postInstall,

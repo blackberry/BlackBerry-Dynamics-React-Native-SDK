@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -134,8 +134,8 @@ export default class TestRunnerComponent extends Component {
     if (this.state.jasmineReporterResults.suites && this.state.jasmineReporterResults.suites.length > 0) {
       let suiteChildren = this.state.jasmineReporterResults.suites.filter(suite => suite.parent === parent);
 
-      return suiteChildren && suiteChildren.length > 0 ? suiteChildren.map((suite, index) => (
-        <View key={index} style={styles.container}>
+      return suiteChildren && suiteChildren.length > 0 ? suiteChildren.map((suite) => (
+        <View key={_.uniqueId()} style={styles.container}>
           <View style={{ paddingLeft: 8 }}>
             <Text
               style={[styles.specsResultsFont, styles.suiteTitle]}
@@ -143,14 +143,11 @@ export default class TestRunnerComponent extends Component {
               {suite.description}
             </Text>
 
-            {suite.specs && suite.specs.length > 0 ?
-              <FlatList
-                data={suite.specs}
-                ref={flatList => { this.flatList = flatList }}
-                keyExtractor={(item, index) => item.id}
-                renderItem={({ item }) => this.renderSpecResult(item)}
-                onContentSizeChange={() => { this.testResultsScrollView.scrollToEnd() }}
-              />
+            {suite.specs && suite.specs.length > 0 ? suite.specs.map((spec) => (
+              <View key={_.uniqueId()}>
+                {this.renderSpecResult(spec)}
+              </View>)
+              )
               :
               null
             }
@@ -188,7 +185,7 @@ export default class TestRunnerComponent extends Component {
 
       return (
         <Text
-          key={index}
+          key={_.uniqueId()}
           style={[styles.testStatusIcon, styles[specResult.specClass]]}>
           {symbol}
         </Text>
@@ -256,7 +253,7 @@ export default class TestRunnerComponent extends Component {
                   <Text>No expectations: {jasmineReporterResults.statistic.noExpectationSpecsCounter}</Text>
                 </Text>
               </View>
-            )
+              )
               :
               null
           }
@@ -267,7 +264,8 @@ export default class TestRunnerComponent extends Component {
 
         <ScrollView
           style={{ paddingHorizontal: 3 }}
-          ref={scrollView => { this.testResultsScrollView = scrollView }}>
+          ref={scrollView => { this.testResultsScrollView = scrollView }}
+          onContentSizeChange={() => {this.testResultsScrollView.scrollToEnd()}}>
           {this.renderSuiteResultsByParent('')}
         </ScrollView>
 
@@ -319,8 +317,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap'
   },
   testStatusIcon: {
-    fontSize: 20,
-    maxWidth: 20
+    fontSize: 18,
+    maxWidth: 18
   },
   testPassed: {
     color: '#007069'

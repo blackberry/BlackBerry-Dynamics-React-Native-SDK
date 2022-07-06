@@ -1,7 +1,7 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native/tree/v0.63.2/ReactAndroid/src/main/java/com/facebook/react/views/textinput
+ * from https://github.com/facebook/react-native
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -37,6 +37,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import androidx.annotation.Nullable;
+
+import com.facebook.react.views.text.ReactBaseTextShadowNode;
 import com.good.gd.widget.GDEditText;
 import androidx.core.view.AccessibilityDelegateCompat;
 import androidx.core.view.ViewCompat;
@@ -96,8 +98,8 @@ public class ReactEditText extends GDEditText {
   private TextAttributes mTextAttributes;
   private boolean mTypefaceDirty = false;
   private @Nullable String mFontFamily = null;
-  private int mFontWeight = ReactTypefaceUtils.UNSET;
-  private int mFontStyle = ReactTypefaceUtils.UNSET;
+  private int mFontWeight = ReactBaseTextShadowNode.UNSET;
+  private int mFontStyle = ReactBaseTextShadowNode.UNSET;
   private boolean mAutoFocus = false;
   private boolean mDidAttachToWindow = false;
 

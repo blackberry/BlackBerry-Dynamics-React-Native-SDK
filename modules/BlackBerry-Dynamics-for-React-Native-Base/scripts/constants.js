@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,27 @@ const updatePodsCommand = '\t\tsystem("node ../node_modules/BlackBerry-Dynamics-
   '/scripts/updatePods.js")\n';
 
 const podPlatformPatternVersion = /platform :ios, '([0-9\.]+)'/;
-const podPlatformV13 = 'platform :ios, \'13.0\'';
+const podPlatformVersion = 'platform :ios, \'14.0\'';
 
 const bbdPodCommand = 'pod \'BlackBerryDynamics\', ' +
-  ':path => \'../node_modules/BlackBerry-Dynamics-for-React-Native-Base/ios/BlackBerryDynamics\'\n';
+  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/10.2.0.83/BlackBerryDynamics-10.2.0.83.podspec\'\n';
+
+const bbdPodTemplate = /pod 'BlackBerryDynamics', (:podspec|:path) => '(.+)'/;
+
+const enabledFlipper = '  use_flipper!()';
+
+const disabledFlipper = '  #\n' +
+  '  # Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on iOS\n' +
+  '  # in debug configuration as it disables some BlackBerry Dynamics functionality\n' +
+  '  # related to secure networking.\n' +
+  '  # use_flipper!()';
 
 module.exports = {
   updatePodsCommand,
   bbdPodCommand,
+  bbdPodTemplate,
   podPlatformPatternVersion,
-  podPlatformV13
+  podPlatformVersion,
+  enabledFlipper,
+  disabledFlipper
 };

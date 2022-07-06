@@ -21,7 +21,7 @@
 
     function removeRNDuplLinkerFlags() {
         var projectRoot = path.join(pwd, '..'),
-        	projectName = require(path.join(projectRoot, 'package.json')).name,
+        	projectName = require(path.join(projectRoot, 'app.json')).name,
             releaseXcconfigPath = path.join(
                 projectRoot,
                 'ios',

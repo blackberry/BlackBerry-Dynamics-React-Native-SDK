@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, SafeAreaView, KeyboardAvoidingView, ScrollView } from 'react-native';
 
-import { SearchBar, Input } from 'react-native-elements';
-import Icon from 'react-native-vector-icons/FontAwesome';
+// DEVNOTE: Uncomment this to use UI components from "react-native-elements", see additional info at README.md
+// import { SearchBar, Input } from 'react-native-elements';
+// import Icon from 'react-native-vector-icons/FontAwesome';
 
 import TextInput from 'BlackBerry-Dynamics-for-React-Native-TextInput';
 import Text from 'BlackBerry-Dynamics-for-React-Native-Text';
@@ -115,7 +116,8 @@ export default class App extends Component {
               />
             </View>
 
-            <Text style={styles.pageHeader}>react-native-elements</Text>
+            {/* Uncomment this to show block with UI components from "react-native-elements" */}
+            {/* <Text style={styles.pageHeader}>react-native-elements</Text>
             <View>
               <SearchBar
                 placeholder="RN-Elements: Search bar"
@@ -142,7 +144,7 @@ export default class App extends Component {
                   />
                 }
               />
-            </View>
+            </View> */}
 
           </ScrollView>
         </KeyboardAvoidingView>

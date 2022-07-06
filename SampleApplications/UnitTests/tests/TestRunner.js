@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import runSpecsForAsyncStorage from './specs/testAsyncStorage';
 import runSpecsForAppKinetics from './specs/testAppKinetics';
 import runSpecsForFileSystem from './specs/testFileSystem';
 import runSpecsForLauncher from './specs/testLauncher';
+import runSpecsForApplication from './specs/testApplication';
 
 export default {
   execute: function() {
@@ -182,6 +183,7 @@ export default {
     runSpecsForAppKinetics();
     runSpecsForFileSystem();
     runSpecsForLauncher();
+    runSpecsForApplication();
 
     // Run tests
     env.execute();

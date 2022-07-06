@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,69 +14,7 @@
  * limitations under the License.
  */
 
-String composeDefaultMavenUrl() {
-    String sdkDir = getAndroidSdkDir()
-    String[] mavenExtraPaths = ['extras', 'blackberry', 'dynamics_sdk', 'm2repository']
-    sdkDir + File.separator + mavenExtraPaths.join(File.separator) + File.separator
-}
-
-String getLocalSdkDir() {
-    def localProperties = new File(rootDir, "local.properties")
-    if (!localProperties.exists()) {
-        return null
-    }
-
-    Properties properties = new Properties()
-    localProperties.withInputStream { instr ->
-        properties.load(instr)
-    }
-
-    properties.getProperty('sdk.dir')
-}
-
-String getAndroidSdkDir() {
-    String androidSdkDir = getLocalSdkDir()
-    if (androidSdkDir == null) {
-        androidSdkDir = System.getenv('ANDROID_HOME')
-        String androidHomeProperty = System.getProperty('android.home')
-
-        if (androidSdkDir == null && androidHomeProperty != null) {
-            androidSdkDir = androidHomeProperty
-        }
-    }
-
-    println('Android SDK location: ' + androidSdkDir)
-    androidSdkDir
-}
-
-def getGradleProperties() {
-    String[] propertiesExtraPaths = ['app', 'src', 'main', 'gradle.properties']
-    def gradleProperties = new File(rootDir, propertiesExtraPaths.join(File.separator))
-    if (!gradleProperties.exists()) {
-        return null
-    }
-
-    Properties properties = new Properties()
-    gradleProperties.withInputStream { instr ->
-        properties.load(instr)
-    }
-
-    properties
-}
-
-String getBbdMavenLocation() {
-    String mavenLocation
-    def gradleProperties = getGradleProperties()
-    mavenLocation = gradleProperties != null ? gradleProperties.getProperty('bbdSdkPath') : null
-    if (mavenLocation == null) {
-        mavenLocation = composeDefaultMavenUrl()
-    }
-
-    println('BlackBerry Dynamics m2repository location: ' + mavenLocation)
-    mavenLocation
-}
-
 ext {
-    getBbdMavenLocation = getBbdMavenLocation()
-    minSdkVersion = 26
+    getBbdMavenLocation = 'https://software.download.blackberry.com/repository/maven'
+    minSdkVersion = 28
 }

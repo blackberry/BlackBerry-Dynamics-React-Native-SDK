@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -878,6 +878,10 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
             infoMap.putInt("jobId", jobId);
             infoMap.putInt("statusCode", res.statusCode);
             infoMap.putDouble("bytesWritten", (double)res.bytesWritten);
+
+            if (res.bytesWritten == 0 && destFile.exists()) {
+              destFile.delete();
+            }
 
             promise.resolve(infoMap);
           } else {
