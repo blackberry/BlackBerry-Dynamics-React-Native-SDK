@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { faPlus, faFolderOpen, faFileAlt, faDownload } from '@fortawesome/free-solid-svg-icons';
-
-import { ScreenContext } from '../../App';
-import { NotificationContext } from '../context/NotificationContext';
 import { ViewEditFileScreen } from './ViewEditFileScreen';
 import { FloatingActionButton } from '../components/FloatingActionButton';
 import { Header } from '../components/Header';
@@ -29,16 +26,15 @@ import { BackListItem } from '../components/BackListItem';
 import { CreateTxtFile } from '../components/modal/CreateTxtFile';
 import { colorScheme } from '../theme';
 import { CreateFolderModal } from '../components/modal/CreateFolderModal';
-import { ApplicationContext } from '../context/ApplicationContext';
 import { DownloadFileModal } from '../components/modal/DownloadFileModal';
 import { NoEntries } from '../components/NoEntries';
-
 import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
+import { useNavigation, useNotification, useStorage } from '../context/hooks';
 
 export const MainScreen = () => {
-  const { storage } = useContext(ApplicationContext);
-  const { screen } = useContext(ScreenContext);
-  const { notification } = useContext(NotificationContext);
+  const { storage } = useStorage();
+  const { screen } = useNavigation();
+  const { notification } = useNotification();
 
   const [modal, setModal] = useState(null);
 

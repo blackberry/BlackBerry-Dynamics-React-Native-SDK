@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -664,7 +664,7 @@ export default function() {
       it('WebSocket: get image as Blob by fetch, send and receive it as Blob', async function(done) {
         const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
-        const imageUrl = 'https://via.placeholder.com/720';
+        const imageUrl = 'https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg';
         let isConditionChecked = false;
 
         const response = await fetch(imageUrl, {

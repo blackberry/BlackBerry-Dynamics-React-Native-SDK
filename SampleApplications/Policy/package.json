@@ -1,0 +1,24 @@
+{
+  "name": "Policy",
+  "version": "1.0.0",
+  "description": "BlackBerry Dynamics Policy sample",
+  "dependencies": {
+    "react": "17.0.2",
+    "react-native": "0.66.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.9",
+    "@babel/runtime": "^7.17.9",
+    "@react-native-community/eslint-config": "^3.0.1",
+    "babel-jest": "^28.0.2",
+    "eslint": "^8.14.0",
+    "jest": "^28.0.2",
+    "metro-react-native-babel-preset": "^0.70.2",
+    "react-test-renderer": "17.0.2",
+    "react-native-eject": "^0.1.2"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "jest": {
+    "preset": "react-native"
+  }
+}

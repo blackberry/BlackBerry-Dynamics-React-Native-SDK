@@ -6,10 +6,11 @@ For more details please refer to [com.good.gd.icc](https://developer.blackberry.
 
 ## Supportability
 #### React Native
- - 0.63.x (deprecated)
- - 0.64.x
- - 0.65.x
- - 0.66.x (0.66.1 is latest supported)
+ - 0.64.x (deprecated)
+ - 0.65.x (deprecated)
+ - 0.66.x
+ - 0.67.x
+ - 0.68.x (0.68.2 is latest supported)
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-AppKinetics` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -234,7 +235,7 @@ Dynamics React Native application should be subscribed on `onError` event in ord
 **Example of usage**
 ```typescript
 import BbdAppKinetics from 'BlackBerry-Dynamics-for-React-Native-AppKinetics';
-import { NativeEventEmitter } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
 async function testAppKinetics() {
     try {
@@ -245,7 +246,7 @@ async function testAppKinetics() {
     }
 }
 
-const eventEmitter = new NativeEventEmitter(BbdAppKinetics);
+const eventEmitter = new NativeEventEmitter(NativeModules.ReactNativeBbdAppKinetics);
 
 // subscribe on onReceivedFile
 // event is fired when you receive file sent by 'com.good.gdservice.transfer-file' service
@@ -271,9 +272,9 @@ testAppKinetics();
 #### Secure storage helper
 
 ###### _copyFilesToSecureStorage_() : Promise<{copiedInThisCall: `Array<string>`, securedDataDirEntries: `Array<string>`}>
-`copyFilesToSecureStorage` API recursively copies files and directories from public `data` folder that is located in application bunlde to `/data` in secure container:
+`copyFilesToSecureStorage` API recursively copies files and directories from public `data` folder that is located in application bundle to `/data` in secure container:
  - On Android it copies from `<app>/android/app/src/main/assets/data` folder
- - On iOS it copies from `<app>/ios/<app_name>/data` folder
+ - On iOS it copies from linked `<app>/ios/<app_name>/data` folder: open the app in Xcode and drag-n-drop **`data`** folder (from _`<app>/ios/<app_name>/data`_) to **`<app_name>`** group so it is recognized as part of the project.
 
 `copyFilesToSecureStorage` returns object with following structure:
 ```typescript

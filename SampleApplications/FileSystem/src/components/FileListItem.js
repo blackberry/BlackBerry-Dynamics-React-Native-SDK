@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableHighlight } from 'react-native';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faTrashAlt, faCopy, faUpload, faFileAlt, faFileImport } from '@fortawesome/free-solid-svg-icons';
 import { colorScheme } from '../theme';
 import { MoreButton } from './MoreButton';
-import { ApplicationContext } from '../context/ApplicationContext';
 import { IconButton } from './IconButton';
-import { NotificationContext } from '../context/NotificationContext';
+import { useNotification, useStorage } from '../context/hooks';
 import { UploadFileModal } from './modal/UploadFileModal';
 import { MoveFileModal } from './modal/MoveFileModal';
 
@@ -31,11 +30,11 @@ import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 
 const iconSize = 22;
 
-export const FileListItem = ({name, path, size, onPress, onReload}) => {
+export const FileListItem = ({ name, path, size, onPress, onReload }) => {
   const [showSubItems, setShowSubItems] = useState(false);
 
-  const { storage, bottomSheet } = useContext(ApplicationContext);
-  const { notification } = useContext(NotificationContext);
+  const { storage, bottomSheet } = useStorage();
+  const { notification } = useNotification();
 
   const removeItem = async () => {
     setShowSubItems(!showSubItems);
@@ -67,7 +66,7 @@ export const FileListItem = ({name, path, size, onPress, onReload}) => {
     setShowSubItems(!showSubItems);
     try {
       let fileName = path.lastPathComponent();
-      let {name} = fileName.exposeNameAndExtension();
+      let { name } = fileName.exposeNameAndExtension();
       let type = 'text/plain'; // there is no API to get file's mime type: https://github.com/itinance/react-native-fs/issues/910
       bottomSheet.show(
         <UploadFileModal
@@ -77,7 +76,7 @@ export const FileListItem = ({name, path, size, onPress, onReload}) => {
             filepath: path,
             filetype: type
           }}
-          onDismiss={() => {bottomSheet.hide()}}
+          onDismiss={() => { bottomSheet.hide() }}
         />
       );
     } catch (error) {
@@ -99,7 +98,7 @@ export const FileListItem = ({name, path, size, onPress, onReload}) => {
           notification.emmit('success', `File "${name}" moved.`);
         }}
         onError={(message) => notification.emmit('alert', message)}
-        onDismiss={() => {bottomSheet.hide()}}
+        onDismiss={() => { bottomSheet.hide() }}
       />
     );
   };

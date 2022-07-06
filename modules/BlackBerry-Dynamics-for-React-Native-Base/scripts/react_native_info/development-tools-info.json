@@ -1,7 +1,7 @@
 {
   "framework": {
     "name": "ReactNative",
-    "bbdSdkForReactNativeVersion": "10.0.0.6",
+    "bbdSdkForReactNativeVersion": "10.1.0.9",
     "react-native": "",
     "react": "",
     "system": {

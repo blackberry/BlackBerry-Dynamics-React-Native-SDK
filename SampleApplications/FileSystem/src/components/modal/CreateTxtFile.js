@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { colorScheme } from '../../theme';
 import { CustomButton } from '../CustomButton';
-import { ApplicationContext} from '../../context/ApplicationContext';
-import { NotificationContext } from '../../context/NotificationContext';
 import { BottomSheet } from './BottomSheet';
 import { validate } from '../../services/validation.service';
 import { CustomTextInput } from '../CustomTextInput';
 
 import FileSystemService from '../../services/file-system.service';
+import { useNotification, useStorage } from '../../context/hooks';
 
-export const CreateTxtFile = ({visible, onSubmit, onDismiss}) => {
-  const { storage } = useContext(ApplicationContext);
-  const { notification } = useContext(NotificationContext);
+export const CreateTxtFile = ({ visible, onSubmit, onDismiss }) => {
+  const { storage } = useStorage();
+  const { notification } = useNotification();
 
   const [name, setName] = useState('');
   const [validationError, setValidationError] = useState({
@@ -71,8 +70,8 @@ export const CreateTxtFile = ({visible, onSubmit, onDismiss}) => {
           onChangeText={fileNameHandler}
           validationError={validationError.name}
         />
-        <View style={{height: 10}} />
-        { name && name.trim().length > 0 ? (
+        <View style={{ height: 10 }} />
+        {name && name.trim().length > 0 ? (
           <CustomButton
             title="Create File"
             disabled={!!validationError.name}
@@ -82,7 +81,7 @@ export const CreateTxtFile = ({visible, onSubmit, onDismiss}) => {
           null
         }
 
-        <View style={{height: 10}} />
+        <View style={{ height: 10 }} />
         <CustomButton
           title="Close"
           color={colorScheme.red}

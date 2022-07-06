@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,58 +14,57 @@
  * limitations under the License.
  */
 
-import React, { createContext, useState } from 'react';
+import React, { useState } from 'react';
 import { ToastMessage } from '../components/ToastMessage';
 import { faCheckCircle, faExclamationCircle, faExclamationTriangle, faComment } from '@fortawesome/free-solid-svg-icons'
+import { NotificationContext } from './context';
 
-export const NotificationContext = createContext();
-
-export const NotificationProvider = ({children}) => {
+export const NotificationProvider = ({ children }) => {
   const [notification, setNotification] = useState(null);
 
   const emmit = (type, message) => {
-    switch(type) {
+    switch (type) {
       case 'alert':
         setNotification(
-        <ToastMessage
-          icon={faExclamationCircle}
-          color="red"
-          message={message}
-          onDismiss={() => setNotification(null)}
-        />);
+          <ToastMessage
+            icon={faExclamationCircle}
+            color="red"
+            message={message}
+            onDismiss={() => setNotification(null)}
+          />);
         break;
       case 'warning':
         setNotification(
-        <ToastMessage
-          icon={faExclamationTriangle}
-          color="yellow"
-          message={message}
-          onDismiss={() => setNotification(null)}
-        />);
+          <ToastMessage
+            icon={faExclamationTriangle}
+            color="yellow"
+            message={message}
+            onDismiss={() => setNotification(null)}
+          />);
         break;
       case 'success':
         setNotification(
-        <ToastMessage
-          icon={faCheckCircle}
-          color="green"
-          message={message}
-          onDismiss={() => setNotification(null)}
-        />);
+          <ToastMessage
+            icon={faCheckCircle}
+            color="green"
+            message={message}
+            onDismiss={() => setNotification(null)}
+          />);
         break;
       default:
         setNotification(
-        <ToastMessage
-          icon={faComment}
-          color="#ccc"
-          message={message}
-          onDismiss={() => setNotification(null)}
-        />);
+          <ToastMessage
+            icon={faComment}
+            color="#ccc"
+            message={message}
+            onDismiss={() => setNotification(null)}
+          />);
     }
   };
 
   return (
     <NotificationContext.Provider value={{
-      notification: {emmit}
+      notification: { emmit }
     }}>
       {children}
       {notification}

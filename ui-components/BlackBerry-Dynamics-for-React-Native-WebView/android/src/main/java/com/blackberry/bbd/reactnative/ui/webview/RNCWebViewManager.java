@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 BlackBerry Limited.
+ * Copyright (c) 2022 BlackBerry Limited.
  *
  * Some modifications to the original <WebView /> UI component
  * from https://github.com/react-native-community/react-native-webview/blob/v10.8.3
@@ -61,7 +61,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.util.Pair;
 
-import com.blackberry.bbwebview.BBChromeClient;
+import com.blackberry.bbwebview.BBWebChromeClient;
 import com.blackberry.bbwebview.BBWebViewClient;
 import com.blackberry.bbwebview.BBWebView;
 import com.facebook.common.logging.FLog;
@@ -615,7 +615,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   protected void addEventEmitters(ThemedReactContext reactContext, WebView view) {
     // Do not register default touch emitter and let WebView implementation handle touches
     bbWebViewClient = new RNCWebViewClient();
-    BBWebViewClient.init(view,bbWebViewClient);
+    bbWebViewClient.initializeClient(reactContext.getApplicationContext());
     view.setWebViewClient(bbWebViewClient);
   }
 
@@ -1075,7 +1075,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     }
   }
 
-  protected static class RNCWebChromeClient extends BBChromeClient implements LifecycleEventListener {
+  protected static class RNCWebChromeClient extends BBWebChromeClient implements LifecycleEventListener {
     protected static final FrameLayout.LayoutParams FULLSCREEN_LAYOUT_PARAMS = new FrameLayout.LayoutParams(
       LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, Gravity.CENTER);
 
@@ -1103,7 +1103,6 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     protected RNCWebView.ProgressChangedFilter progressChangedFilter = null;
 
     public RNCWebChromeClient(ReactContext reactContext, WebView webView) {
-      super(((BBWebViewClient) webView.getWebViewClient()).getObserver());
       this.mReactContext = reactContext;
       this.mWebView = webView;
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,31 +14,27 @@
  * limitations under the License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Text,
   StyleSheet,
   View,
   ScrollView,
   TextInput,
-  Dimensions,
   KeyboardAvoidingView,
   Platform
 } from 'react-native';
 import FileSystemService from '../services/file-system.service';
-import { ScreenContext } from '../../App';
-import { NotificationContext } from '../context/NotificationContext';
 import { Header } from '../components/Header';
 import { IconButton, icons } from '../components/IconButton';
 import { FloatingButton } from '../components/FloatingButton';
 import { colorScheme } from '../theme';
 import { faSave, faEdit } from '@fortawesome/free-solid-svg-icons';
-
-const screenHeight = Math.round(Dimensions.get('window').height);
+import { useNavigation, useNotification } from '../context/hooks';
 
 export const ViewEditFileScreen = ({ source }) => {
-  const { screen } = useContext(ScreenContext);
-  const { notification } = useContext(NotificationContext);
+  const { screen } = useNavigation();
+  const { notification } = useNotification();
 
   const [file, setFile] = useState(source);
   const [edit, setEdit] = useState(false);

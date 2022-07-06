@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,12 +54,14 @@
   function removeUpdatePodsFromPodfile() {
     var projectRoot = process.env.INIT_CWD,
       podfilePath = path.join(projectRoot, 'ios', 'Podfile'),
-      podfileContent = fs.readFileSync(podfilePath, 'utf-8'),
-      newPodfileContent = podfileContent.replace(constants.updatePodsCommand, ''),
-      newPodfileContent = newPodfileContent.replace(constants.bbdPodCommand, '');
-      newPodfileContent = newPodfileContent.replace(constants.disabledFlipper, constants.enabledFlipper);
+      podfileContent = fs.readFileSync(podfilePath, 'utf-8');
 
-    fs.writeFileSync(podfilePath, newPodfileContent, 'utf-8');
+    podfileContent = podfileContent
+      .replace(constants.updatePodsCommand, '')
+      .replace(constants.bbdPodTemplate, '')
+      .replace(constants.disabledFlipper, constants.enabledFlipper);
+
+    fs.writeFileSync(podfilePath, podfileContent, 'utf-8');
   }
 
 })();

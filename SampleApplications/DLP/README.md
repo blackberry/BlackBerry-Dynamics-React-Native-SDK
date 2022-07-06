@@ -8,12 +8,12 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: DLP sample is based on `0.64.2` version of React Native. There is a possibility to upgrade to `0.65.0`, `0.65.1` or `0.66.0`, `0.66.1` versions by running following command:
+> NOTE: DLP sample is based on `0.66.4` version of React Native. There is a possibility to upgrade to `0.67.x` or `0.68.x` versions (`0.67.0` - `0.67.4`, `0.68.0` - `0.68.2`) by running one of following commands:
 `$ react-native upgrade 0.6x.x`
 for example:
-`$ react-native upgrade 0.65.1`
+`$ react-native upgrade 0.67.4`
 or
-`$ react-native upgrade 0.66.1`
+`$ react-native upgrade 0.68.2`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -66,7 +66,7 @@ import TextInput from 'BlackBerry-Dynamics-for-React-Native-TextInput';
 `$ react-native run-android`
 
 #### Examples of usage
-##### 0.64.2
+##### 0.66.4
 `$ cd <path>/SampleApplications/DLP`  
 `$ yarn`  
 `$ react-native eject`  
@@ -82,11 +82,11 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`  
-##### 0.65.1
+##### 0.68.2
 `$ cd <path>/SampleApplications/DLP`  
 `$ yarn`  
 `$ cd .. ; git init ; cd DLP`  
-`$ react-native upgrade 0.65.1`  
+`$ react-native upgrade 0.68.2`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  

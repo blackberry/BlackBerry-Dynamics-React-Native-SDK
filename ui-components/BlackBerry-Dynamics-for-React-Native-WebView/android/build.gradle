@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,16 @@ buildscript {
     if (project == rootProject) {
         repositories {
             google()
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {
-            classpath("com.android.tools.build:gradle:3.6.0")
+            classpath("com.android.tools.build:gradle:4.2.2")
             classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}")
         }
     } else {
         repositories {
-            jcenter()
+            mavenCentral()
         }
 
         dependencies {
@@ -62,9 +62,9 @@ android {
 def kotlin_version = getExtOrDefault('kotlinVersion')
 
 dependencies {
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:+'
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:+'
-    implementation 'com.blackberry.blackberrydynamics:android_webview:+'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:10.2.0.79'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:10.2.0.79'
+    implementation 'com.blackberry.blackberrydynamics:android_webview:10.2.0.79'
     implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Base')
     implementation "com.facebook.react:react-native:+"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

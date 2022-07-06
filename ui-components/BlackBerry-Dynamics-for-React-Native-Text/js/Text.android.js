@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Text UI component for react-native
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Text/Text.js
  *
@@ -14,7 +14,7 @@
 
 'use strict';
 
-const DeprecatedTextPropTypes = require('react-native/Libraries/DeprecatedPropTypes/DeprecatedTextPropTypes');
+const DeprecatedTextPropTypes = require('deprecated-react-native-prop-types').TextPropTypes;
 const React = require('react');
 const ReactNativeViewAttributes = require('react-native/Libraries/Components/View/ReactNativeViewAttributes');
 const TextAncestor = require('react-native/Libraries/Text/TextAncestor');

@@ -1,5 +1,5 @@
 ## UnitTests sample application
-> UnitTests sample application runs Jasmine unit tests for `fetch`, `XMLHttpRequest`, `Clipboard`, `AsyncStorage`, `SQLite` and `AppKinetics`, `FileSystem`, `Launcher` in React Native application.
+> UnitTests sample application runs Jasmine unit tests for `fetch`, `XMLHttpRequest`, `Clipboard`, `AsyncStorage`, `SQLite` and `AppKinetics`, `FileSystem`, `Launcher`, `Application` in React Native application.
 
 #### How to prepare the app
 Open the sample app directory in Terminal window:
@@ -8,12 +8,12 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: UnitTests sample is based on `0.64.2` version of React Native. There is a possibility to upgrade to `0.65.0`, 0.65.1 or `0.66.0`, `0.66.1` versions by running following command:
+> NOTE: UnitTests sample is based on `0.66.4` version of React Native. There is a possibility to upgrade to `0.67.x` or `0.68.x` versions (`0.67.0` - `0.67.4`, `0.68.0` - `0.68.2`) by running one of following commands:
 `$ react-native upgrade 0.6x.x`
 for example:
-`$ react-native upgrade 0.65.1`
+`$ react-native upgrade 0.67.4`
 or
-`$ react-native upgrade 0.66.1`
+`$ react-native upgrade 0.68.2`
 
 Generate ios and android directories:
 `$ react-native eject`
@@ -48,8 +48,11 @@ There are some dependencies that need to be installed before using `BlackBerry-D
 #### How to secure FileSystem
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-FileSystem
 
-#### How to add Launcher
+#### How to add Launcher module
 	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Launcher
+
+#### How to add Application module
+	$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Application
 
 ##### iOS
 `$ cd ios`  
@@ -65,7 +68,7 @@ There are some dependencies that need to be installed before using `BlackBerry-D
 `$ react-native run-android`
 
 #### Examples of usage
-##### 0.64.2
+##### 0.66.4
 `$ cd <path>/SampleApplications/UnitTests`  
 `$ yarn`  
 `$ react-native eject`  
@@ -78,6 +81,7 @@ There are some dependencies that need to be installed before using `BlackBerry-D
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-AppKinetics`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-FileSystem`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Launcher`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Application`  
 For iOS:  
 `$ cd ios`  
 `$ pod install`  
@@ -86,11 +90,11 @@ For iOS:
 `$ react-native run-ios`  
 For Android:  
 `$ react-native run-android`  
-##### 0.65.1
+##### 0.68.2
 `$ cd <path>/SampleApplications/UnitTests`  
 `$ yarn`  
 `$ cd .. ; git init ; cd UnitTests`  
-`$ react-native upgrade 0.65.1`  
+`$ react-native upgrade 0.68.2`  
 `$ react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
@@ -101,6 +105,7 @@ For Android:
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-AppKinetics`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-FileSystem`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Launcher`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Application`  
 For iOS:  
 `$ cd ios`  
 `$ pod install`  
