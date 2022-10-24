@@ -17,8 +17,8 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
  - 0.67.x
  - 0.68.x (0.68.2 is latest supported)
 #### iOS
- - Xcode 12, 13
- - iOS 13, 14, 15
+ - Xcode 12+
+ - iOS 14+
  - cocoapods 1.10.2+
 #### Android
  - Java 8 (for React Native version < 0.68.0)
@@ -27,11 +27,11 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
  - NDK 20.1.5948944 (for React Native version < 0.66.0)
  - NDK 21.4.7075529 (for React Native version >= 0.66.0)
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v10.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
- - BlackBerry Dynamics SDK for Android v10.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
+ - BlackBerry Dynamics SDK for iOS v11.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
+ - BlackBerry Dynamics SDK for Android v11.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
 #### BlackBerry Dynamics Launcher
- - BlackBerry Dynamics Launcher library for iOS v3.4, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
- - BlackBerry Dynamics Launcher library for Android v3.4, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
+ - BlackBerry Dynamics Launcher library for iOS v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
+ - BlackBerry Dynamics Launcher library for Android v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
 
 # Features
 #### Integration with BlackBerry Dynamics
@@ -188,3 +188,8 @@ When the project is compiled and run DB functionality works incorrectly.
 
 ##### Workaround
 To resolve the conflict **`sqlite3`** dependency should be removed in *<app>/node_modules/react-native-webrtc/react-native-webrtc.podspec*. Then, do **"pod install"** again. This should not break anything as secured **`sqlite3`** dependency will remain linked to the project.
+
+### Android 12+ support for React Native version less than `0.68`
+Apps targeting Android 12 and higher are required to specify an explicit value for `android:exported` when the corresponding component has an intent filter defined. More details can be found [here](https://developer.android.com/guide/topics/manifest/activity-element#exported).
+React Native `0.68` and higher supports Android 12+ by default by setting appropriate setting in AndroidManifest.xml.
+For React Native versions `<= 0.67` setting `android:exported` should be set manually.

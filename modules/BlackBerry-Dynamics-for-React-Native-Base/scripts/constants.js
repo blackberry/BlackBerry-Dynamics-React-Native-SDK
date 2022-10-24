@@ -21,7 +21,7 @@ const podPlatformPatternVersion = /platform :ios, '([0-9\.]+)'/;
 const podPlatformVersion = 'platform :ios, \'14.0\'';
 
 const bbdPodCommand = 'pod \'BlackBerryDynamics\', ' +
-  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/10.2.0.83/BlackBerryDynamics-10.2.0.83.podspec\'\n';
+  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/11.0.1.137/BlackBerryDynamics-11.0.1.137.podspec\'\n';
 
 const bbdPodTemplate = /pod 'BlackBerryDynamics', (:podspec|:path) => '(.+)'/;
 
