@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original WebSocket API of react-native
  * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network
  *
@@ -291,7 +291,10 @@ RCT_EXPORT_MODULE(BbdRCTNetworking)
     }
   }];
 
-  request.timeoutInterval = [RCTConvert NSTimeInterval:query[@"timeout"]];
+  // Fix for the issue when request are failing because of timeout on 11.0 core sdk
+  if ((double)[RCTConvert NSTimeInterval:query[@"timeout"]] > 0) {
+    request.timeoutInterval = [RCTConvert NSTimeInterval:query[@"timeout"]];
+  }
   NSDictionary<NSString *, id> *data = [RCTConvert NSDictionary:RCTNilIfNull(query[@"data"])];
   NSString *trackingName = data[@"trackingName"];
   if (trackingName) {

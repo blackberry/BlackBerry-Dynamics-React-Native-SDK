@@ -9,3 +9,6 @@
 - Bohdan Pidluzhnyy - bpidluzhnyy@blackberry.com
 - Eugeniy Leontiev - eleontiev@blackberry.com
 - Nazarii Shavuk - nshavuk@blackberry.com
+- Uliana Varlamova - uvarlamova@blackberry.com
+- Vikas Bansal - vbansal@blackberry.com
+- Madhav Srivastava - masrivastava@blackberry.com

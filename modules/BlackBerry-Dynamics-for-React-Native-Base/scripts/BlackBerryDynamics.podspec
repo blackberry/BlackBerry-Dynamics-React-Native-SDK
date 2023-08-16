@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ Pod::Spec.new do |spec|
   spec.description         = <<-DESC
                           Framework for building secure enterprise applications managed by BlackBerry Unified Endpoint Management (UEM).
                           DESC
-  spec.platform            = :ios, '13.0'
+  spec.platform            = :ios, '15.0'
   spec.source              = { :git => "", :tag => "#{spec.version}" }
   spec.requires_arc        = true
   spec.swift_version       = '5.0'
