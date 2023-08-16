@@ -26,18 +26,27 @@ Please setup your environment as described in the [React Native documentation](h
 
 Dynamics SDK for iOS and Android are now installed as part of the Base module using CocoaPods & Gradle. The integration uses the iOS "Dynamic Framework" version of BlackBerry Dynamics as the static library is no longer supported.
 
+Supported Dynamics SDK for iOS versions:
+- 11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_1)
+- 11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_2)
+
+Supported Dynamics SDK for Android versions:
+- 11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_1)
+- 11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2)
+
 ##### BlackBerry Dynamics SDK for iOS integration
-###### Using latest released version - default
-By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **latest** available BlackBerry Dynamics SDK for iOS using following podspec: `https://software.download.blackberry.com/repository/framework/dynamics/ios/11.0.1.137/BlackBerryDynamics-11.0.1.137.podspec`.
+###### Using default (11.1) released version - default
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for iOS using following podspec: `https://software.download.blackberry.com/repository/framework/dynamics/ios/11.1.0.62/BlackBerryDynamics-11.1.0.62.podspec`.
 > NOTE: If one of the below integration methods was used there is an option to reset **default** configuration by running following command:
 `$ yarn set-dynamics-podspec --default`
 `$ cd ios && pod install && cd ..`
 
 ###### Using other released version
 There is possibility to integrate other released build of BlackBerry Dynamics SDK for iOS.
-Following command should be run:
+Currently, the **latest** supported versions is 11.2.  
+Following command should be run to use BlackBerry Dynamics SDK for iOS v11.2:
 ```
-$ yarn set-dynamics-podspec --url "https://software.download.blackberry.com/repository/framework/dynamics/ios/10.2.0.83/BlackBerryDynamics-10.2.0.83.podspec"
+$ yarn set-dynamics-podspec --url "https://software.download.blackberry.com/repository/framework/dynamics/ios/11.2.0.26/BlackBerryDynamics-11.2.0.26.podspec"
 $ cd ios && pod install && cd ..
 ```
 ###### Using locally downloaded version
@@ -46,6 +55,37 @@ Following command should be run:
 ```
 $ yarn set-dynamics-podspec --path "/Users/<user>/Downloads/gdsdk-release-dylib-X.X.X.X/BlackBerry_Dynamics_SDK_for_iOS_vX.X.X.X_dylib"
 $ cd ios && pod install && cd ..
+```
+
+##### BlackBerry Dynamics SDK for Android integration
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for Android.
+###### Using other released version
+There is possibility to integrate other released build of BlackBerry Dynamics SDK for Android.  
+Currently, the **latest** supported versions is 11.2.  
+Following steps should be done to use BlackBerry Dynamics SDK for Android v11.2:
+- update versions of Dynamics dependencies in all modules from `<path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/modules/` and ui-components from `<path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/ui-components/`:
+    ```
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:11.2.0.13'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:11.2.0.13'
+    implementation 'com.blackberry.blackberrydynamics:android_webview:11.2.0.13'
+    ```
+- if your application contains some modules or ui-components from BlackBerry_Dynamics_SDK_for_React_Native, you will need to uninstall them first by using following commands:
+```
+$ cd <path_to_your_app>
+// Repeat this command to remove all appropriate modules and ui-components
+$ yarm remove BlackBerry-Dynamics-for-React-Native-<name>
+$ cd ios  
+$ pod install  
+$ cd .. 
+```
+- install modules and ui-components from BlackBerry_Dynamics_SDK_for_React_Native with updated dependencies version by using following commands:
+```
+$ yarn add <path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/modules/BlackBerry-Dynamics-for-React-Native-Base
+// Repeat this command for all appropriate modules and ui-components
+$ yarn add <path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/modules/<name>
+$ cd ios  
+$ pod install  
+$ cd .. 
 ```
 
 ## Installation

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,10 @@ const updatePodsCommand = '\t\tsystem("node ../node_modules/BlackBerry-Dynamics-
   '/scripts/updatePods.js")\n';
 
 const podPlatformPatternVersion = /platform :ios, '([0-9\.]+)'/;
-const podPlatformVersion = 'platform :ios, \'14.0\'';
+const podPlatformVersion = 'platform :ios, \'15.0\'';
 
 const bbdPodCommand = 'pod \'BlackBerryDynamics\', ' +
-  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/11.0.1.137/BlackBerryDynamics-11.0.1.137.podspec\'\n';
+  ':podspec => \'https://software.download.blackberry.com/repository/framework/dynamics/ios/11.1.0.62/BlackBerryDynamics-11.1.0.62.podspec\'\n';
 
 const bbdPodTemplate = /pod 'BlackBerryDynamics', (:podspec|:path) => '(.+)'/;
 

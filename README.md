@@ -1,5 +1,5 @@
 # BlackBerry Dynamics SDK for React Native
-This page provides an overview on how to use the BlackBerry Dynamics SDK for React Native. For details on BlackBerry Dynamics please see https://www.blackberry.com/dynamics
+This page provides an overview on how to use the BlackBerry Dynamics SDK for React Native. For details on BlackBerry Dynamics please see https://docs.blackberry.com/en/endpoint-management/blackberry-dynamics
 
 # Supportability
 #### Development environment
@@ -18,20 +18,31 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
  - 0.68.x (0.68.2 is latest supported)
 #### iOS
  - Xcode 12+
- - iOS 14+
+ - iOS 14+ (for BlackBerry Dynamics SDK for iOS v11.1)
+ - iOS 15+ (for BlackBerry Dynamics SDK for iOS v11.2)
  - cocoapods 1.10.2+
 #### Android
  - Java 8 (for React Native version < 0.68.0)
  - Java 11 (for React Native version >= 0.68.0)
- - Android 9+, API 28+
+ - Android 9+, API 28+ (for BlackBerry Dynamics SDK for Android v11.1)
+ - Android 10+, API 29+ (for BlackBerry Dynamics SDK for Android v11.2)
  - NDK 20.1.5948944 (for React Native version < 0.66.0)
  - NDK 21.4.7075529 (for React Native version >= 0.66.0)
 #### BlackBerry Dynamics
- - BlackBerry Dynamics SDK for iOS v11.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/).
- - BlackBerry Dynamics SDK for Android v11.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/).
+Dynamics SDK for iOS and Android are now installed as part of the [Base](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base) module using CocoaPods & Gradle.  
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for Android and iOS.  
+To integrate **11.2** version see "Using other released version" [instructions](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency) for both iOS and Android platforms in [BlackBerry-Dynamics-for-React-Native-Base](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency).
+
+BlackBerry Dynamics SDK for iOS
+ - BlackBerry Dynamics SDK for iOS v11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_1).
+ - BlackBerry Dynamics SDK for iOS v11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_2).
+
+ BlackBerry Dynamics SDK for Android
+ - BlackBerry Dynamics SDK for Android v11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_1).
+ - BlackBerry Dynamics SDK for Android v11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2).
 #### BlackBerry Dynamics Launcher
- - BlackBerry Dynamics Launcher library for iOS v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios).
- - BlackBerry Dynamics Launcher library for Android v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android).
+ - BlackBerry Dynamics Launcher library for iOS v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios/3_5).
+ - BlackBerry Dynamics Launcher library for Android v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android/3_5).
 
 # Features
 #### Integration with BlackBerry Dynamics

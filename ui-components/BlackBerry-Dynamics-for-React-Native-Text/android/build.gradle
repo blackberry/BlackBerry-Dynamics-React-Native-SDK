@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:11.0.1.140'
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:11.0.1.140'
-   	implementation "com.facebook.react:react-native:+"
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:11.1.0.62'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:11.1.0.62'
+    implementation "com.facebook.react:react-native:+"
 }
