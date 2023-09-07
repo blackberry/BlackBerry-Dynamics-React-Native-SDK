@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Helper class to interact with GDService and GDServiceClient.
@@ -61,6 +64,8 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
     private static RNBbdServiceHelper instance = null;
     private Promise promise = null;
     private ReactApplicationContext reactContext = null;
+
+    private List<AppBasedService> providedServices = new ArrayList<AppBasedService>();
     private String serviceId = null;
     private String serviceVersion = null;
 
@@ -70,6 +75,16 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
         }
 
         return instance;
+    }
+
+    private class AppBasedService {
+        String serviceId;
+        String serviceVersion;
+
+        AppBasedService(String service, String version) {
+            this.serviceId = service;
+            this.serviceVersion = version;
+        }
     }
 
     /**
@@ -103,6 +118,16 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
     public void setRNContext(final ReactApplicationContext reactContext) {
         this.reactContext = reactContext;
         RNBbdServiceSpoolHelper.getInstance().setRNContext(reactContext);
+    }
+
+    /**
+     * Sets service to proceed with.
+     *
+     * @param serviceId serviceId to proceed with.
+     * @param serviceVersion serviceVersion to proceed with.
+     */
+    public void setService(final String serviceId, final String serviceVersion) {
+        providedServices.add(new AppBasedService(serviceId, serviceVersion));
     }
 
     /**
@@ -187,34 +212,35 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
                 RNBbdServiceSpoolHelper.getInstance().proceedSimpleReceive(service, version, attachments);
                 return;
             }
-            if (serviceId.equals(service) && serviceVersion.equals(version)) {
 
-                final JSONObject resultObject = new JSONObject();
+            providedServices.forEach((AppBasedService providedService) -> {
+                if (providedService.serviceId.equals(service) && providedService.serviceVersion.equals(version)) {
+                    final JSONObject resultObject = new JSONObject();
 
-                try {
-                    resultObject.put(APP_KINETICS_APPLICATION_NAME_KEY, application);
-                    resultObject.put(APP_KINETICS_SERVICE_NAME_KEY, service);
-                    resultObject.put(APP_KINETICS_VERSION_KEY, version);
-                    resultObject.put(APP_KINETICS_METHOD_KEY, method);
+                    try {
+                        resultObject.put(APP_KINETICS_APPLICATION_NAME_KEY, application);
+                        resultObject.put(APP_KINETICS_SERVICE_NAME_KEY, service);
+                        resultObject.put(APP_KINETICS_VERSION_KEY, version);
+                        resultObject.put(APP_KINETICS_METHOD_KEY, method);
 
-                    if (attachments != null) {
-                        resultObject.put(APP_KINETICS_ATTACHMENT_KEY, attachments);
+                        if (attachments != null) {
+                            resultObject.put(APP_KINETICS_ATTACHMENT_KEY, attachments);
+                        }
+
+                        if (params != null) {
+                            resultObject.put(APP_KINETICS_PARAMETERS_KEY, params);
+                        }
+
+                        if (reactContext != null) {
+                            reactContext
+                                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit("onReceivedMessage", convertJsonToMap(resultObject));
+                        }
+                    } catch (final JSONException exception) {
+                        // Should not get here
                     }
-
-                    if (params != null) {
-                        resultObject.put(APP_KINETICS_PARAMETERS_KEY, params);
-                    }
-
-                    if (reactContext != null) {
-                        reactContext
-                                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                .emit("onReceivedMessage", convertJsonToMap(resultObject));
-                    }
-                } catch (final JSONException exception) {
-                    // Should not get here
                 }
-
-            }
+            });
         } catch (final NullPointerException nullPointerException) {
             if (reactContext != null) {
                 reactContext
