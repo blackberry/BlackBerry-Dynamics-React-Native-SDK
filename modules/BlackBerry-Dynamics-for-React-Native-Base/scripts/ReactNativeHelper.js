@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,11 @@ const shell = require('shelljs'),
   fs = require('fs'),
   path = require('path'),
   isWindows = process.platform === 'win32',
-  constants = require('./constants');
+  constants = require('./constants'),
+  { pipe, replace, addContentTo } = require('./utils');
+
+const MIN_RN_VERSION_SUPPORTED = 70;
+const DIGITAL_RADIX = 10;
 
 class ReactNativeHelper {
   constructor(projectRoot) {
@@ -50,51 +54,45 @@ class ReactNativeHelper {
     this.addUpdatePodsToPodfile();
   }
 
+  getRnVersion() {
+    return parseInt(this.packageJson.dependencies['react-native'].split('.')[1], DIGITAL_RADIX);
+  }
+
   addUpdatePodsToPodfile() {
-    const rnVersionInt = parseInt(this.packageJson.dependencies['react-native'].split('.')[1], 10);
-
-    if (rnVersionInt < 62) {
+    if (this.getRnVersion() < MIN_RN_VERSION_SUPPORTED) {
       return;
     }
 
-    const podfilePath = path.join(this.projectRoot, 'ios', 'Podfile'),
-      postInstall = 'post_install do |installer|';
-    let podfileContent = fs.readFileSync(podfilePath, 'utf-8');
+    const podfilePath = path.join(this.projectRoot, 'ios', 'Podfile');
+    const podfileContent = fs.readFileSync(podfilePath, 'utf-8');
 
-    if (!podfileContent.includes(postInstall) || podfileContent.includes(constants.updatePodsCommand)) {
+    const isBaseAdded = 
+      !podfileContent.includes(constants.postInstall) ||
+      podfileContent.includes(constants.updatePodsCommand);
+
+    if (isBaseAdded) {
       return;
     }
 
-    const addContentToPodFile = function({afterWhere, content, fileContent}) {
-      if (afterWhere === undefined) {
-        return content + fileContent;
-      }
+    const newPodFileContent = pipe(
+      replace(constants.podPlatformPatternVersion, constants.podPlatformVersion),
+      replace(
+        constants.podPlatformPatternVersionSupported,
+        constants.podPlatformVersion
+      ),
+      replace(constants.enabledFlipper, constants.disabledFlipper),
+      replace(constants.enabledFlipperNewSyntax, constants.disabledFlipperNewSyntax),
+      replace(constants.enabledFlipperNewSyntaxRn71x, constants.disabledFlipperNewSyntaxRn71x),
+      addContentTo({
+        afterWhere: constants.postInstall,
+        content: constants.updatePodsCommand,
+      }),
+      addContentTo({
+        content: constants.bbdPodCommand,
+      })
+    )(podfileContent);
 
-      const postInstallIndex = fileContent.indexOf(afterWhere) + 1,
-        beforePostInstall = fileContent.substring(0, postInstallIndex + afterWhere.length),
-        afterPostInstall = fileContent.substring(postInstallIndex + afterWhere.length + 1, fileContent.length);
-
-      return beforePostInstall + content + afterPostInstall;
-    };
-
-    podfileContent = podfileContent.replace(constants.podPlatformPatternVersion, constants.podPlatformVersion);
-
-    if (!podfileContent.includes(constants.disabledFlipper)) {
-      podfileContent = podfileContent.replace(constants.enabledFlipper, constants.disabledFlipper);
-    }
-
-    podfileContent = addContentToPodFile({
-      afterWhere: postInstall,
-      content: constants.updatePodsCommand,
-      fileContent: podfileContent
-    });
-
-    podfileContent = addContentToPodFile({
-      content: constants.bbdPodCommand,
-      fileContent: podfileContent
-    });
-
-    fs.writeFileSync(podfilePath, podfileContent, 'utf-8');
+    fs.writeFileSync(podfilePath, newPodFileContent, 'utf-8');
   }
 }
 

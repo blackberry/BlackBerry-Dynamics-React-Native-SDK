@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Networking API of react-native (Java part)
  * from https://github.com/facebook/react-native/blob/0.61-stable/ReactAndroid/src/main/java/com/facebook/react/modules/network/NetworkingModule.java
  *
@@ -21,6 +21,7 @@ import com.blackberry.bbd.apache.core.http.ContentType;
 import com.blackberry.bbd.apache.http.entity.mime.FormBodyPartBuilder;
 import com.blackberry.bbd.apache.http.entity.mime.MultipartEntityBuilder;
 import com.blackberry.bbd.apache.core.util.CharsetUtils;
+import com.blackberry.bbd.reactnative.networking.core.ResponseUtil;
 
 import com.blackberry.bbd.reactnative.networking.core.GDHttpRequestDelegate;
 import com.blackberry.bbd.reactnative.networking.core.content.FileBody;
@@ -45,7 +46,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.facebook.react.modules.network.ForwardingCookieHandler;
-import com.facebook.react.modules.network.ResponseUtil;
 import com.facebook.react.modules.network.ProgressiveStringDecoder;
 
 import com.good.gd.apache.commons.codec.binary.Base64;

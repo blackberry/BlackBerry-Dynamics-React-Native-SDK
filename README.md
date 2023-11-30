@@ -4,45 +4,54 @@ This page provides an overview on how to use the BlackBerry Dynamics SDK for Rea
 # Supportability
 #### Development environment
  - Mac OS
- - Windows 10 (Android only)
+ - Windows 10, 11 (Android only)
 #### Node.js
  - 12.x (for React Native version < 0.68.0)
- - 14.x (for React Native version >= 0.68.0)
+ - 18.x
+#### Ruby
+ - 2.7.5 (for React Native version >=0.70.x)
+**React Native official [documenation](https://reactnative.dev/docs/0.70/environment-setup)**.
+React Native uses a .ruby-version file to make sure that your version of Ruby is aligned with what is needed. Currently, macOS 13.2 is shipped with Ruby 2.6.10, which is not what is required by this version of React Native (2.7.5). Our suggestion is to install a Ruby version manager and to install the proper version of Ruby in your system.
 #### Package manager
  - yarn
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 #### iOS
  - Xcode 12+
  - iOS 14+ (for BlackBerry Dynamics SDK for iOS v11.1)
- - iOS 15+ (for BlackBerry Dynamics SDK for iOS v11.2)
+ - iOS 15+ (for BlackBerry Dynamics SDK for iOS v11.2, v12.0)
  - cocoapods 1.10.2+
 #### Android
  - Java 8 (for React Native version < 0.68.0)
  - Java 11 (for React Native version >= 0.68.0)
  - Android 9+, API 28+ (for BlackBerry Dynamics SDK for Android v11.1)
- - Android 10+, API 29+ (for BlackBerry Dynamics SDK for Android v11.2)
+ - Android 10+, API 29+ (for BlackBerry Dynamics SDK for Android v11.2, v12.0)
  - NDK 20.1.5948944 (for React Native version < 0.66.0)
  - NDK 21.4.7075529 (for React Native version >= 0.66.0)
 #### BlackBerry Dynamics
 Dynamics SDK for iOS and Android are now installed as part of the [Base](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base) module using CocoaPods & Gradle.  
-By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for Android and iOS.  
-To integrate **11.2** version see "Using other released version" [instructions](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency) for both iOS and Android platforms in [BlackBerry-Dynamics-for-React-Native-Base](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency).
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **12.0** version of BlackBerry Dynamics SDK for Android (12.0.1.79) and iOS (12.0.1.79).  
+Currently, the **other** supported versions are 11.1 and 11.2.  
+To integrate **11.1** or **11.2** version see "Using other released version" [instructions](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency) for both iOS and Android platforms in [BlackBerry-Dynamics-for-React-Native-Base](https://github.com/blackberry/BlackBerry-Dynamics-React-Native-SDK/tree/master/modules/BlackBerry-Dynamics-for-React-Native-Base#dynamics-sdk-dependency).
 
 BlackBerry Dynamics SDK for iOS
  - BlackBerry Dynamics SDK for iOS v11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_1).
  - BlackBerry Dynamics SDK for iOS v11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_2).
+ - BlackBerry Dynamics SDK for iOS v12.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/12_0).
 
  BlackBerry Dynamics SDK for Android
  - BlackBerry Dynamics SDK for Android v11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_1).
  - BlackBerry Dynamics SDK for Android v11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2).
+ - BlackBerry Dynamics SDK for Android v12.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/12_0).
 #### BlackBerry Dynamics Launcher
- - BlackBerry Dynamics Launcher library for iOS v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios/3_5).
- - BlackBerry Dynamics Launcher library for Android v3.5, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android/3_5).
+ - BlackBerry Dynamics Launcher library for iOS v12.0, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-ios/12_0).
+ - BlackBerry Dynamics Launcher library for Android v12.0, check details [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-launcher-framework-for-android/12_0).
 
 # Features
 #### Integration with BlackBerry Dynamics
@@ -77,23 +86,86 @@ To implement some ICC capabilities in a Dynamics React Native application `Black
 #### Launcher integration
 `BlackBerry-Dynamics-for-React-Native-Launcher` provides Launcher integration in Dynamics React Native application.
 
-#### Android SafetyNet
-BlackBerry UEM version 12.10 and later supports [SafetyNet](https://developers.google.com/android/reference/com/google/android/gms/safetynet/SafetyNet) attestation for BlackBerry Dynamics apps. You can use SafetyNet to extend BlackBerry's root and exploit detection by adding checks for device tampering and application integrity. For more information about SafetyNet attestation, implementation considerations, and instructions for enabling the feature, see the [BlackBerry UEM Configuration Guide](https://docs.blackberry.com/en/endpoint-management/blackberry-uem/current/installation-configuration/configuration). This chapter details considerations for developers who want to enable SafetyNet support for their BlackBerry Dynamics apps.
-###### Adding the GDSafetyNet library to the app project
-The BlackBerry Dynamics SDK for Android version 5.0 and later includes a GDSafetyNet library. To support SafetyNet, add this library to the app project dependencies along with the main GDLibrary.
+#### Android Play Integrity attestation
+BlackBerry UEM version 12.18 and later supports Play Integrity attestation for BlackBerry Dynamics apps. BlackBerry UEM version 12.17 and earlier supports [SafetyNet](https://developers.google.com/android/reference/com/google/android/gms/safetynet/SafetyNet) attestation for BlackBerry Dynamics apps. For information on SafetyNet attestation, refer to previous versions of the [SDK documentation](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_1/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps).
 
-The GDSafetyNet library includes all of the client-side source code that is required to support SafetyNet. No additional app code is required. The GDSafetyNet library requires Google Play Services 11.0 or later to use device SafetyNet APIs. Verify that your BlackBerry Dynamics app is dependent on only a single version of Google Play Services.
+You can use Play Integrity to extend BlackBerry root and exploit detection and to enhance app security and integrity. For more information about Play Integrity attestation, implementation considerations, and instructions for enabling the feature, see the [BlackBerry UEM documentation](https://docs.blackberry.com/en/endpoint-management/blackberry-uem/12_17/administration/device-features-it-policies/managing-attestation). This chapter details considerations for developers who want to enable Play Integrity support for their BlackBerry Dynamics apps.
+
+To support Play Integrity, you must complete the [Play Integrity prerequisites](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps/prerequisites-for-play-integrity-attestation), add a [new library component to the app project](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps/Adding-the-GDSafetyNet-library-to-the-app-project), and [update the BlackBerry Dynamics application policy file](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps/Updating-the-BlackBerry-Dynamics-application-policy-file).
+##### Prerequisites for Play Integrity attestation
+Play Integrity attestation is dependent on configurations made within the [Google Play console](https://play.google.com/console/). Use the following steps to configure Play Integrity attestation for your apps:
+ - In the Google Play console, select the app you want to configure for Play Integrity attestation, then click Setup > App Integrity.
+ - On the Integrity API tab, in the Device Integrity section, ensure that the checkboxes for MEETS_BASIC_INTEGRITY and MEETS_STRONG_INTEGRITY are enabled.
+ - On the App Signing tab, make note of the SHA-256 certificate fingerprint for the App signing key certificate and the Upload key certificate. These certificate fingerprints are used when you configure your [BlackBerry Dynamics application policy file](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps/Updating-the-BlackBerry-Dynamics-application-policy-file).
+> After completeing the task:
+> - For more information on the Google Play Console, see the [Google Play console documentation](https://support.google.com/googleplay/android-developer/answer/6112435?hl=en&ref_topic=3450769&sjid=349614303780083206-NA).
+> - For more information on device integrity, see the [Android developer documentation](https://developer.android.com/google/play/integrity/verdict#device-integrity-field).
+##### Adding the GDSafetyNet library to the app project
+The BlackBerry Dynamics SDK for Android version 5.0 and later includes a GDSafetyNet library. To support Play Integrity, you must add this library to the app project dependencies along with the main GDLibrary.
+
+The GDSafetyNet library includes all of the client-side source code that is required to support Play Integrity. No additional app code is required. The GDSafetyNet library requires Google Play Services 11.0 or later to use device Play Integrity APIs. Verify that your BlackBerry Dynamics app is dependent on only a single version of Google Play Services.
+
+If your app does not use Google Play Services, you can add the following to the build.gradle file:
+```
+implementation ('com.blackberry.blackberrydynamics:android_handheld_gd_safetynet:$DYNAMICS_SDK_VERSION')
+```
+If your app uses the Google Play Services SDK, you can add the following to the build.gradle file (where xx.x.x is the specific play-services version):
 ```
 implementation 'com.google.android.gms:play-services-safetynet:xx.x.x'
-implementation 'com.blackberry.blackberrydynamics:android_handheld_gd_safetynet:+'
+implementation("com.blackberry.blackberrydynamics:android_handheld_gd_safetynet:$DYNAMICS_SDK_VERSION") {
+        transitive = false;
+}
 ```
 It can be added in `BlackBerry-Dynamics-for-React-Native-Base/android/gd.gradle` before Base module is added to the application.
-###### Completing SafetyNet registration
-You must [obtain an API key from Google](https://developer.android.com/training/safetynet/attestation#add-api-key) and add it to the app’s AndroidManifest.xml file in the <application> element:
+##### Updating the BlackBerry Dynamics application policy file
+During a Play Integrity attestation process, BlackBerry UEM uses the app response to verify that it is communicating with the official version of the app. You must provide this information in the application policy file.
+
+In order to configure Play Integrity, you will need to provide a Play App signing key. You have two options for a Play app signing key: you can use the Google Play generated app signing key or upload your own private app signing key. For information on finding your app signing keys in your Google Play Console, see "Prerequisites for Play Integrity attestation". The digest hash in your application policy file must correspond to your Play app signing key in your Google Play Console.
+
+Example:
 ```
-<meta-data android:name="com.blackberry.attestation.ApiKey" android:value="YOUR_API_KEY" />
+<?xml version="1.0" encoding="utf-8"?>
+<apd:AppPolicyDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:apd="urn:AppPolicySchema1.good.com" 
+    xsi:schemaLocation="urn:AppPolicySchema1.good.com AppPolicySchema.xsd" >
+    <pview>
+        <pview>
+            <sendto client="None" />
+            <desc>Play Integrity Attestation Supported</desc>
+            <pe ref="apkCertificateDigestSha256"/>
+            <pe ref="apkPackageName" />
+            <pe ref="Description" />
+        </pview>
+    </pview>
+    <setting name="apkCertificateDigestSha256">
+        <hidden>
+            <key>blackberry.appMetadata.android.apkCertificateDigestSha256</key>
+            <value>DD:83:CA:47:09:FA:C5:33:75:FE:F4:A1:B5:FB:F4:A8:E8:C2:7A:DF:AF:24:
+0D:7B:E3:BA:BD:FB:A9:2B:F9:D6</value>
+    </hidden>
+    </setting>
+    <setting name="apkPackageName">
+        <hidden>
+            <key>blackberry.appMetadata.android.apkPackageName</key>
+            <value>com.good.gd.example.services.greetings.client</value>
+        </hidden>
+    </setting>
+    <setting name="Description" >
+        <text>
+            <key>snet</key>
+            <label>Play Integrity</label>
+            <value>Play Integrity</value>
+        </text>
+    </setting>
+</apd:AppPolicyDefinition>
 ```
-More details can be found [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/10_0/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps).
+The app is uniquely identified by the combination of the official package name (in the example above, blackberry.appMetadata.android.apkPackageName) and the digest hash of the official signing key (in the example above, blackberry.appMetadata.android.apkCertificateDigestSha256).
+
+After you update the application policy file, coordinate with the BlackBerry UEM administrator to upload the app to UEM (see [Deploying your BlackBerry Dynamics app](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/lqi1489679309982)) and to upload the application policy file in the management console (see [Manage settings for a BlackBerry Dynamics app](https://docs.blackberry.com/en/endpoint-management/blackberry-uem/12_14/administration/blackberry-dynamics/vvq1471962941016) in the UEM Administration Guide). Before the administrator uploads the application policy file, verify that the Android app package ID has been specified or that the [app source file has been uploaded](https://docs.blackberry.com/en/endpoint-management/blackberry-uem/12_14/administration/blackberry-dynamics/Adding-Dynamics-apps/zjx1471960344735/cfn1476451456557); both settings are configured in the app entitlement settings (Android tab) in the management console.
+
+UEM validates the format of the input package name and digest hash. If you update the application policy file and upload the app again, it can take up to 24 hours for the change to synchronize to all UEM instances. When the app is uploaded again, it is removed from the current list of apps that are enabled for attestation and must be added again.
+
+More details about testing the app can be found [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2/blackberry-dynamics-sdk-android-devguide/Implementing-SafetyNet-attestation-for-BlackBerry-Dynamics-apps/Testing-the-app).
 
 # Package contents
 #### Modules
@@ -151,7 +223,7 @@ To integrate BlackBerry Dynamics into a new React Native application please foll
 
 ### Integrate into existing React Native application
 To integrate BlackBerry Dynamics into existing React Native application:
- - Check you are using `0.66.x` or higher version of React Native.
+ - Check you are using `0.70.x` or higher version of React Native.
 
       - [React Native Upgrade Helper](https://react-native-community.github.io/upgrade-helper/) may be used to upgrade your application prior to integrating BlackBerry Dynamics. Confirm the application builds and works correctly after upgrade.
 
@@ -181,6 +253,10 @@ To integrate BlackBerry Dynamics into existing React Native application:
 Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on iOS in debug configuration as it disables some BlackBerry Dynamics functionality related to secure networking.
 Flipper is disabled on iOS by default. If your Dynamics React Native application on iOS does not use Secure Connectivity feature (`BlackBerry-Dynamics-for-React-Native-Networking` module) you can enable Flipper by uncommenting `use_flipper!()` line in `Podfile` of your application.
 
+### Flipper is disabled on Android
+Flipper cannot be used together with BlackBerry Dynamics SDK for React Native on Android in debug configuration as it disables some BlackBerry Dynamics functionality related to secure networking.
+Flipper is disabled on Android by default. If your Dynamics React Native application on Android does not use Secure Connectivity feature (`BlackBerry-Dynamics-for-React-Native-Networking` module) you can enable Flipper by uncommenting `initializeFlipper(this, getReactNativeHost().getReactInstanceManager());` line in `MainApplication.java` for ReactNative less than 71 version or uncommenting `ReactNativeFlipper.initializeFlipper(this, getReactNativeHost().getReactInstanceManager());` line in `MainApplication.java` for ReactNative greater than or equal to 71 version of your application.
+
 ## Known issues
 ### Conflict between default and secure SQLite library on iOS
 BlackBerry Dynamcis SDK for iOS uses secure *SQLite* library to provide secure DB connection and management.
@@ -204,3 +280,32 @@ To resolve the conflict **`sqlite3`** dependency should be removed in *<app>/nod
 Apps targeting Android 12 and higher are required to specify an explicit value for `android:exported` when the corresponding component has an intent filter defined. More details can be found [here](https://developer.android.com/guide/topics/manifest/activity-element#exported).
 React Native `0.68` and higher supports Android 12+ by default by setting appropriate setting in AndroidManifest.xml.
 For React Native versions `<= 0.67` setting `android:exported` should be set manually.
+
+## Known React-Native issues
+###  React Native Build Failed for iOS for Xcode 14.3 (14E222b)
+There is a known react-native [issue](https://github.com/facebook/react-native/issues/36739#issuecomment-1495818734) with XCode 14.3 (14E222b) which is fixed in 0.71.6, 0.70.8 and 0.69.9 
+### Metro server error on `0.72.0`, `0.72.1` React Native versions
+There is an issue with loading Metro server on `0.72.0` and `0.72.1` versions when the error message is displayed during app load in Metro server: "Cannot read properties of undefined (reading 'addHelper')". The issue can be fixed by adding the following devDependency to the project:
+`$ yarn add @babel/traverse@7.22.8 --dev`
+
+### Issue with `activesupport` CocoaPods dependency on React Native versions `< 0.72.6`
+There is an issue with `activesupport` Ruby gem when creating new React Native project with version `< 0.72.6`:
+```
+✖ Installing CocoaPods dependencies (this may take a few minutes)
+error /Users/uvarl/AwesomeProject/vendor/bundle/ruby/2.7.0/gems/activesupport-7.1.1/lib/active_support/core_ext/array/conversions.rb:108:in `<class:Array>': undefined method `deprecator' for ActiveSupport:Module (NoMethodError)
+```
+##### Workaround
+Create/update Gemfile in the root of your project and add this dependency:
+```
+gem 'activesupport', '~> 7.0.8'
+```
+Run following commands:
+```
+$ bundle update activesupport
+$ bundle exec pod install
+```
+> NOTE: Same issue can occur when running Dynamics React Native sample apps. Please make sure that version `7.0.8` of `activesupport` Ruby gem is installed locally:
+```
+gem uninstall activesupport --version 7.x.x
+gem install activesupport --version 7.0.8
+```

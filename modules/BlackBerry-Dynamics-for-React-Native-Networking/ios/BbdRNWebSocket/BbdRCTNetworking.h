@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original WebSocket API of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Network
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
  *
@@ -35,7 +35,7 @@
  * Allows RCTNetworking instances to be initialized with handlers.
  * The handlers will be requested via the bridge's moduleForName method when required.
  */
-- (instancetype)initWithHandlersProvider:(NSArray<id<RCTURLRequestHandler>> * (^)(void))getHandlers;
+- (instancetype)initWithHandlersProvider:(NSArray<id<RCTURLRequestHandler>> * (^)(RCTModuleRegistry *))getHandlers;
 
 /**
  * Does a handler exist for the specified request?

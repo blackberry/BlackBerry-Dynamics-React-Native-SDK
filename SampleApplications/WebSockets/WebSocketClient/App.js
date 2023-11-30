@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@ export default class App extends Component {
   componentDidMount() {}
 
   handleNewWebSocketConnection() {
+    this.setState({ connectionStatus: 'connecting' });
     this.webSocketClient = new WebSocket(this.state.webSocketServerUrl);
     this.webSocketClient.binaryType = 'blob';
 
@@ -88,6 +89,9 @@ export default class App extends Component {
     };
 
     this.webSocketClient.onerror = (e) => {
+      if (this.state.connectionStatus === 'connecting') {
+        this.setState({ connectionStatus: 'closed' });
+      }
       alert(`WS error: ${e.message}`);
     };
 
@@ -100,7 +104,9 @@ export default class App extends Component {
   handleWebServerConnection() {
     if (this.state.connectionStatus === 'connected') {
       this.webSocketClient.close();
-    } else {
+      this.webSocketClient = null;
+    } else if (this.state.connectionStatus !== 'connecting') 
+    {
       this.handleNewWebSocketConnection();
     }
   }

@@ -1,6 +1,6 @@
 # BlackBerry-Dynamics-for-React-Native-WebView
 
-Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](https://github.com/react-native-webview/react-native-webview) and allows to access to private/corporate network resources through BlackBerry Dynamics SDK. The JavaScript API remains unchanged.
+Secures `<WebView />` UI component provided by [react-native-webview@13.3.1](https://github.com/react-native-webview/react-native-webview) and allows to access to private/corporate network resources through BlackBerry Dynamics SDK. The JavaScript API remains unchanged.
 
 > **NOTE:** on Android `BBWebView` library is used under the hood.
 
@@ -12,11 +12,13 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
 - [x] Android
 
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 
 #### Supported on iOS and Android
  - HTTP redirection
@@ -30,9 +32,12 @@ Secures `<WebView />` UI component provided by [react-native-webview@10.8.3](htt
  #### Supported on iOS and not supported on Android
  - AutoZSO
 
-#### Not supported on iOS and Android
- - HTTP authentication (Basic, Digest, NTLM, Kerberos, Client Cert)
+#### Supported on Android and not supported on iOS
  - File download
+
+#### Not supported on iOS and Android
+ - New architecture (fabric)
+ - HTTP authentication (Basic, Digest, NTLM, Kerberos, Client Cert)
  - URL schemes `mailto:`, `geo:`, `tel:`
  - Secured HTTP cache
  - WebSocket
@@ -65,13 +70,46 @@ import { WebView } from 'BlackBerry-Dynamics-for-React-Native-WebView';
 
 // ...
 class MyWebComponent extends Component {
+  // ...
+  webView = {
+    canGoBack: false,
+    canGoForward: false,
+    ref: null
+  }
+
+  // ...
+
   render() {
     return <WebView source={{ uri: 'https://reactnative.dev/' }} />;
   }
 }
 ```
 
-For more, read the [API Reference](https://github.com/react-native-community/react-native-webview/blob/v10.8.3/docs/Reference.md) and [Guide](https://github.com/react-native-community/react-native-webview/blob/v10.8.3/docs/Guide.md) of original `WebView` component.
+#### Secure file download on Android 
+
+```javascript
+// ...
+import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
+// ...
+
+// add this handler on button click
+async openDownloadsFolder() {
+  // programatically open Downloads screen
+  this.webView.ref.openDownloadsFolder();
+
+  // get path to secure Download folder within secure container
+  const bbDownloadsFolderPath = await this.webView.ref.getDownloadsDirectoryPath();
+  // read downloaded files using FS module
+  const bbDownloadsFolder = await FS.readDir(bbDownloadsFolderPath);
+  bbDownloadsFolder.map(item => {
+    console.log('Downloaded file:\n');
+    console.log(item);
+    console.log('\n');
+  });
+}
+```
+
+For more, read the [API Reference](https://github.com/react-native-community/react-native-webview/blob/v13.3.1/docs/Reference.md) and [Guide](https://github.com/react-native-community/react-native-webview/blob/v13.3.1/docs/Guide.md) of original `WebView` component.
 
 ## Uninstallation
     $ cd <appFolder>

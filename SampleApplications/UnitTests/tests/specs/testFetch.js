@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -598,7 +598,7 @@ export default function() {
 
       it('Fetch: response type: blob', async function() {
         const method = 'GET';
-        const url = 'https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg';
+        const url = 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Test_rillke2.jpg';
 
         const response = await fetch(url, {
           method

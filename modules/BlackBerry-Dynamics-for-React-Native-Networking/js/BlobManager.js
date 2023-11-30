@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Blob API of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Blob/BlobManager.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Blob/BlobManager.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -12,16 +12,12 @@
  * @format
  */
 
-'use strict';
-
 const Blob = require('./Blob');
 const BlobRegistry = require('./BlobRegistry');
 
-import { NativeModules } from 'react-native';
-
-const BlobModule = NativeModules.RNReactNativeBbdBlob;
-
 import type {BlobData, BlobOptions, BlobCollector} from './BlobTypes';
+import NativeBlobModule from './NativeBlobModule';
+import invariant from 'invariant';
 
 /*eslint-disable no-bitwise */
 /*eslint-disable eqeqeq */
@@ -60,7 +56,7 @@ class BlobManager {
   /**
    * If the native blob module is available.
    */
-  static isAvailable = !!BlobModule;
+  static isAvailable: boolean = !!NativeBlobModule;
 
   /**
    * Create blob from existing array of blobs.
@@ -69,6 +65,8 @@ class BlobManager {
     parts: Array<Blob | string>,
     options?: BlobOptions,
   ): Blob {
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
     const blobId = uuidv4();
     const items = parts.map(part => {
       if (
@@ -99,7 +97,7 @@ class BlobManager {
       }
     }, 0);
 
-    BlobModule.createFromParts(items, blobId);
+    NativeBlobModule.createFromParts(items, blobId);
 
     return BlobManager.createFromOptions({
       blobId,
@@ -134,11 +132,13 @@ class BlobManager {
    * Deallocate resources for a blob.
    */
   static release(blobId: string): void {
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
     BlobRegistry.unregister(blobId);
     if (BlobRegistry.has(blobId)) {
       return;
     }
-    BlobModule.release(blobId);
+    NativeBlobModule.release(blobId);
   }
 
   /**
@@ -146,7 +146,9 @@ class BlobManager {
    * requests and responses.
    */
   static addNetworkingHandler(): void {
-    BlobModule.addNetworkingHandler();
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
+    NativeBlobModule.addNetworkingHandler();
   }
 
   /**
@@ -154,7 +156,9 @@ class BlobManager {
    * messages.
    */
   static addWebSocketHandler(socketId: number): void {
-    BlobModule.addWebSocketHandler(socketId);
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
+    NativeBlobModule.addWebSocketHandler(socketId);
   }
 
   /**
@@ -162,14 +166,18 @@ class BlobManager {
    * binary messages.
    */
   static removeWebSocketHandler(socketId: number): void {
-    BlobModule.removeWebSocketHandler(socketId);
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
+    NativeBlobModule.removeWebSocketHandler(socketId);
   }
 
   /**
    * Send a blob message to a websocket.
    */
   static sendOverSocket(blob: Blob, socketId: number): void {
-    BlobModule.sendOverSocket(blob.data, socketId);
+    invariant(NativeBlobModule, 'NativeBlobModule is available.');
+
+    NativeBlobModule.sendOverSocket(blob.data, socketId);
   }
 }
 

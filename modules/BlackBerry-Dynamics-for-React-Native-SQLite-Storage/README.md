@@ -1,6 +1,6 @@
 # BlackBerry-Dynamics-for-React-Native-SQLite-Storage
 
-`BlackBerry-Dynamics-for-React-Native-SQLite-Storage` secures SQLite database management and is based on the [react-native-sqlite-storage](https://github.com/andpor/react-native-sqlite-storage) 3rd party module.
+`BlackBerry-Dynamics-for-React-Native-SQLite-Storage` secures SQLite database management and is based on the [react-native-sqlite-storage](https://github.com/andpor/react-native-sqlite-storage) (`v6.0.1`) 3rd party module.
 
 The JavaScript API of this module remains the same however the SQLite database is created in the Dynamics secure container and is managed by secure SQLite API. 
 
@@ -8,11 +8,17 @@ For more details please refer to [com.good.gd.database](https://developer.blackb
 
 ## Supportability
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
+
+#### Platforms
+ - iOS
+ - Android
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-SQLite-Storage` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -26,9 +32,9 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
     $ cd ios
     $ pod install
     $ cd ..
-    $ react-native run-ios
+    $ npx react-native run-ios
 ###### Android
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## Usage
 ```javascript
@@ -107,3 +113,8 @@ const db = openDatabase({name : "testDB", createFromLocation : "/data/mydbfile.s
     $ cd ios
     $ pod install
     $ cd ..
+
+## Known issues
+
+#### WAL is not supported
+[Write-Ahead Logging](https://www.sqlite.org/wal.html) is not supported.

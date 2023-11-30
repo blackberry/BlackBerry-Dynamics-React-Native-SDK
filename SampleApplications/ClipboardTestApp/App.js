@@ -1,11 +1,13 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original Clipboard module example
+ * from https://github.com/react-native-clipboard/clipboard/blob/v1.11.1/example/App.tsx
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,99 +16,195 @@
  * limitations under the License.
  */
 
-import React, { Component } from 'react';
+import React, {useEffect, useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Button,
+  TextInput,
+  Alert,
+  SafeAreaView,
+  Platform,
+  Image,
+} from 'react-native';
+import Clipboard, {
+  useClipboard,
+} from 'BlackBerry-Dynamics-for-React-Native-Clipboard';
 
-import { Platform, StyleSheet, View, Text, TextInput, Button } from 'react-native';
-// import TextInput from 'BlackBerry-Dynamics-for-React-Native-TextInput';
-// import Text from 'BlackBerry-Dynamics-for-React-Native-Text';
-import Clipboard from 'BlackBerry-Dynamics-for-React-Native-Clipboard';
+// Small icon of a plus for demo purposes
+const TEST_IMAGE =
+  'iVBORw0KGgoAAAANSUhEUgAAADMAAAAzCAYAAAA6oTAqAAAAEXRFWHRTb2Z0d2FyZQBwbmdjcnVzaEB1SfMAAABQSURBVGje7dSxCQBACARB+2/ab8BEeQNhFi6WSYzYLYudDQYGBgYGBgYGBgYGBgYGBgZmcvDqYGBgmhivGQYGBgYGBgYGBgYGBgYGBgbmQw+P/eMrC5UTVAAAAABJRU5ErkJggg==';
 
-type Props = {};
-export default class App extends Component<Props> {
-  constructor(props) {
-    super(props);
-    this.state = {
-      clipboardText: "",
-      textInputText: ""
-    };
-  }
+const changeListener = () => {
+  console.info('Clipboard changed!');
+};
 
-  get_Text_From_Clipboard = async () => {
-    var textHolder = await Clipboard.getString();
-    console.log('getting value from clipboard: ' + textHolder)
-    this.setState({
-      clipboardText: textHolder
-    })
-  }
+const App = () => {
+  const [userInputText, setUserInputText] = useState('');
+  const [textFromClipboard, setTextFromClipboard] = useClipboard();
+  const [isURL, setIsURL] = useState(false); // iOS only
+  const [isNumber, setIsNumber] = useState(false); // iOS only
+  const [imageIos, setImageIos] = useState(null); // iOS only
+  const [imageAndroid, setImageAndroid] = useState(''); // Android only
 
-  set_Text_Into_Clipboard = async () => {
-    console.log('setting value to clipboard: ' + this.state.textInputText)
-    await Clipboard.setString(this.state.textInputText);
-  }
+  const checkStringType = async () => {
+    const checkClipboardHasURL = await Clipboard.hasURL();
+    const checkClipboardHasNumber = await Clipboard.hasNumber();
+    setIsURL(checkClipboardHasURL);
+    setIsNumber(checkClipboardHasNumber);
+  };
 
-  render() {
-    return (
-      <View style={styles.MainContainer}>
+  const pasteImageAndroid = async () => {
+    const base64 = await Clipboard.getImage();
+    setImageAndroid(base64);
+  };
 
+  useEffect(() => {
+    checkStringType();
+  }, [textFromClipboard]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios' || Platform.OS === 'android') {
+      const listener = Clipboard.addListener(changeListener);
+
+      return () => {
+        listener.remove();
+      };
+    }
+  }, []);
+
+  const writeToClipboard = async () => {
+    setTextFromClipboard(userInputText);
+    Alert.alert(`Copied to clipboard: ${userInputText}`);
+  };
+
+  const getTextFromClipboard = async () => {
+    const content = await Clipboard.getString();
+    setTextFromClipboard(content);
+    Alert.alert(`Clipboard text: ${content}`);
+  };
+
+  const writeImageToClipboard = async () => {
+    Clipboard.setImage(TEST_IMAGE);
+    Alert.alert('Copied Image to clipboard');
+  };
+
+  const getImage = async () => {
+    if (await Clipboard.hasImage()) {
+      const imgFromCb = await Clipboard.getImagePNG();
+      setImageIos(imgFromCb);
+    } else {
+      console.warn('No image in clipboard');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>Clipboard Module</Text>
+      <View style={styles.main}>
+        <Text style={styles.boldText}>Clipboard Contents (string): </Text>
+        <Text style={styles.clipboardContent}>{textFromClipboard}</Text>
+        {Platform.OS === 'ios' && (
+          <>
+            <Text style={styles.boldText}>Content is URL (boolean): </Text>
+            <Text style={styles.clipboardContent}>{JSON.stringify(isURL)}</Text>
+            <Text style={styles.boldText}>Content is NUMBER (boolean): </Text>
+            <Text style={styles.clipboardContent}>
+              {JSON.stringify(isNumber)}
+            </Text>
+            <Text style={styles.boldText}>Content is IMAGE (img): </Text>
+            {imageIos && (
+              <Image source={{uri: imageIos}} style={styles.imageContent} />
+            )}
+          </>
+        )}
+        <View style={styles.separator} />
         <TextInput
-          placeholder="Enter Text Here"
-          style={styles.textInputStyle}
-          underlineColorAndroid='transparent'
-          onChangeText={value => this.setState({textInputText: value})}
+          selectTextOnFocus={true}
+          style={styles.textInput}
+          onChangeText={input => setUserInputText(input)}
+          value={userInputText}
+          placeholder="Type here..."
         />
-
-        <View>
-          <Button
-            title="PASTE THE COPIED TEXT"
-            onPress={this.get_Text_From_Clipboard}
-          />
-        </View>
-
-        <View>
-          <Button
-            title="COPY TEXTINPUT TEXT INTO CLIPBOARD"
-            onPress={this.set_Text_Into_Clipboard}
-          />
-        </View>
-
-        <Text style={{ fontSize: 20 }}>{this.state.clipboardText}</Text>
-
+        <Button onPress={writeToClipboard} title="Write text to Clipboard" />
+        <Button
+          onPress={getTextFromClipboard}
+          title="Paste text from Clipboard"
+        />
+        {Platform.OS === 'ios' && (
+          <>
+            <Button
+              onPress={writeImageToClipboard}
+              title="Write Image to Clipboard"
+            />
+            <Button onPress={getImage} title="Get Image from clipboard" />
+          </>
+        )}
+        {Platform.OS === 'android' && (
+          <View style={styles.imageButtonAndroid}>
+            <Button
+              onPress={pasteImageAndroid}
+              title="Paste image from Android Clipboard"
+            />
+            <View style={styles.separator} />
+            {imageAndroid === '' ? null : (
+              <Image style={styles.imageAndroid} source={{uri: imageAndroid}} />
+            )}
+          </View>
+        )}
       </View>
-    );
-  }
-}
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-  MainContainer:
-    {
-      paddingTop: (Platform.OS === 'ios') ? 20 : 0,
-      flex: 1,
-      padding: 20,
-      paddingBottom: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#fff'
-    },
-    textInputStyle: {
-      textAlign: 'center',
-      height: 41,
-      width: '92%',
-      borderWidth: 1,
-      borderColor: '#AA00FF',
-      borderRadius: 8,
-      marginBottom: 20,
-      color: '#000'
-    },
-    button: {
-      width: '92%',
-      paddingTop: 12,
-      paddingBottom: 12,
-      backgroundColor: '#AA00FF',
-      borderRadius: 5,
-      marginBottom: 20
-    },
-    TextStyle: {
-      color: '#fff',
-      textAlign: 'center',
-    }
+  container: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  main: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  header: {
+    fontWeight: '700',
+    fontSize: 30,
+    marginBottom: 10,
+  },
+  boldText: {
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: 'gray',
+    width: '80%',
+    marginVertical: 20,
+  },
+  textInput: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    width: '80%',
+    paddingHorizontal: 80,
+    paddingVertical: 8,
+    marginBottom: 16,
+  },
+  clipboardContent: {
+    marginBottom: 20,
+  },
+  imageContent: {
+    width: 40,
+    height: 40,
+  },
+  imageAndroid: {
+    height: 160,
+    width: 160,
+  },
+  imageButtonAndroid: {
+    marginTop: 10,
+  },
 });
+
+export default App;

@@ -54,18 +54,10 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
     private static final String FILE_TRANSFER_SERVICE_VERSION = "1.0.0.0";
     private static final String FILE_TRANSFER_METHOD = "transferFile";
 
-    private static final String APP_KINETICS_APPLICATION_NAME_KEY = "applicationId";
-    private static final String APP_KINETICS_SERVICE_NAME_KEY = "serviceId";
-    private static final String APP_KINETICS_VERSION_KEY = "serviceVersion";
-    private static final String APP_KINETICS_METHOD_KEY = "serviceMethod";
-    private static final String APP_KINETICS_PARAMETERS_KEY = "parameters";
-    private static final String APP_KINETICS_ATTACHMENT_KEY = "attachments";
-
     private static RNBbdServiceHelper instance = null;
     private Promise promise = null;
     private ReactApplicationContext reactContext = null;
 
-    private List<AppBasedService> providedServices = new ArrayList<AppBasedService>();
     private String serviceId = null;
     private String serviceVersion = null;
 
@@ -75,16 +67,6 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
         }
 
         return instance;
-    }
-
-    private class AppBasedService {
-        String serviceId;
-        String serviceVersion;
-
-        AppBasedService(String service, String version) {
-            this.serviceId = service;
-            this.serviceVersion = version;
-        }
     }
 
     /**
@@ -118,16 +100,6 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
     public void setRNContext(final ReactApplicationContext reactContext) {
         this.reactContext = reactContext;
         RNBbdServiceSpoolHelper.getInstance().setRNContext(reactContext);
-    }
-
-    /**
-     * Sets service to proceed with.
-     *
-     * @param serviceId serviceId to proceed with.
-     * @param serviceVersion serviceVersion to proceed with.
-     */
-    public void setService(final String serviceId, final String serviceVersion) {
-        providedServices.add(new AppBasedService(serviceId, serviceVersion));
     }
 
     /**
@@ -210,37 +182,9 @@ public class RNBbdServiceHelper implements GDServiceListener, GDServiceClientLis
                     FILE_TRANSFER_SERVICE_VERSION.equals(version) &&
                     FILE_TRANSFER_METHOD.equals(method)) {
                 RNBbdServiceSpoolHelper.getInstance().proceedSimpleReceive(service, version, attachments);
-                return;
+            } else {
+                RNBbdServiceSpoolHelper.getInstance().provideServicesWhenReady(application, service, version, method, params, attachments);
             }
-
-            providedServices.forEach((AppBasedService providedService) -> {
-                if (providedService.serviceId.equals(service) && providedService.serviceVersion.equals(version)) {
-                    final JSONObject resultObject = new JSONObject();
-
-                    try {
-                        resultObject.put(APP_KINETICS_APPLICATION_NAME_KEY, application);
-                        resultObject.put(APP_KINETICS_SERVICE_NAME_KEY, service);
-                        resultObject.put(APP_KINETICS_VERSION_KEY, version);
-                        resultObject.put(APP_KINETICS_METHOD_KEY, method);
-
-                        if (attachments != null) {
-                            resultObject.put(APP_KINETICS_ATTACHMENT_KEY, attachments);
-                        }
-
-                        if (params != null) {
-                            resultObject.put(APP_KINETICS_PARAMETERS_KEY, params);
-                        }
-
-                        if (reactContext != null) {
-                            reactContext
-                                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                    .emit("onReceivedMessage", convertJsonToMap(resultObject));
-                        }
-                    } catch (final JSONException exception) {
-                        // Should not get here
-                    }
-                }
-            });
         } catch (final NullPointerException nullPointerException) {
             if (reactContext != null) {
                 reactContext

@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original WebSocket API of react-native
- * from https://github.com/facebook/react-native/tree/0.61-stable/Libraries/Blob
+ * from https://github.com/facebook/react-native/tree/0.70-stable/Libraries/Blob
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -13,15 +13,18 @@
 
 #import <mutex>
 
+#import <FBReactNativeSpec/FBReactNativeSpec.h>
 #import <React/RCTConvert.h>
 #import "BbdRCTNetworking.h"
 #import <React/RCTUtils.h>
 #import "BbdRNWebSocket.h"
+
+#import "BbdRCTBlobPlugins.h"
 #import "BbdRCTBlobCollector.h"
 
 static NSString *const kBlobURIScheme = @"blob";
 
-@interface BbdRCTBlobManager () <BbdRCTNetworkingRequestHandler, BbdRCTNetworkingResponseHandler, BbdRNWebSocketContentHandler>
+@interface BbdRCTBlobManager () <BbdRCTNetworkingRequestHandler, BbdRCTNetworkingResponseHandler, BbdRNWebSocketContentHandler, NativeBlobModuleSpec>
 
 @end
 
@@ -38,12 +41,11 @@ static NSString *const kBlobURIScheme = @"blob";
 RCT_EXPORT_MODULE(RNReactNativeBbdBlob)
 
 @synthesize bridge = _bridge;
+@synthesize moduleRegistry = _moduleRegistry;
 @synthesize methodQueue = _methodQueue;
 
-- (void)setBridge:(RCTBridge *)bridge
+- (void)initialize
 {
-  _bridge = bridge;
-
   std::lock_guard<std::mutex> lock(_blobsMutex);
   _blobs = [NSMutableDictionary new];
 
@@ -140,31 +142,39 @@ RCT_EXPORT_MODULE(RNReactNativeBbdBlob)
 
 RCT_EXPORT_METHOD(addNetworkingHandler)
 {
-  dispatch_async(_bridge.bbdNetworkingMobule.methodQueue, ^{
-    [self->_bridge.bbdNetworkingMobule addRequestHandler:self];
-    [self->_bridge.bbdNetworkingMobule addResponseHandler:self];
+    BbdRCTNetworking *const networking = [_moduleRegistry moduleForName:"BbdRCTNetworking"];
+
+  // TODO(T63516227): Why can methodQueue be nil here?
+  // We don't want to do anything when methodQueue is nil.
+  if (!networking.methodQueue) {
+    return;
+  }
+
+  dispatch_async(networking.methodQueue, ^{
+    [networking addRequestHandler:self];
+    [networking addResponseHandler:self];
   });
 }
 
-RCT_EXPORT_METHOD(addWebSocketHandler:(nonnull NSNumber *)socketID)
+RCT_EXPORT_METHOD(addWebSocketHandler:(double)socketID)
 {
-  dispatch_async(_bridge.bbdWebSocketModule.methodQueue, ^{
-    [self->_bridge.bbdWebSocketModule setContentHandler:self forSocketID:socketID];
+  dispatch_async(((BbdRNWebSocketModule *)[_moduleRegistry moduleForName:"BbdRNWebSocketModule"]).methodQueue, ^{
+    [[self->_moduleRegistry moduleForName:"BbdRNWebSocketModule"] setContentHandler:self forSocketID:[NSNumber numberWithDouble:socketID]];
   });
 }
 
-RCT_EXPORT_METHOD(removeWebSocketHandler:(nonnull NSNumber *)socketID)
+RCT_EXPORT_METHOD(removeWebSocketHandler:(double)socketID)
 {
-  dispatch_async(_bridge.bbdWebSocketModule.methodQueue, ^{
-    [self->_bridge.bbdWebSocketModule setContentHandler:nil forSocketID:socketID];
+  dispatch_async(((BbdRNWebSocketModule *)[_moduleRegistry moduleForName:"BbdRNWebSocketModule"]).methodQueue, ^{
+    [[self->_moduleRegistry moduleForName:"BbdRNWebSocketModule"] setContentHandler:nil forSocketID:[NSNumber numberWithDouble:socketID]];
   });
 }
 
 // @lint-ignore FBOBJCUNTYPEDCOLLECTION1
-RCT_EXPORT_METHOD(sendOverSocket:(NSDictionary *)blob socketID:(nonnull NSNumber *)socketID)
+RCT_EXPORT_METHOD(sendOverSocket:(NSDictionary *)blob socketID:(double)socketID)
 {
-  dispatch_async(_bridge.bbdWebSocketModule.methodQueue, ^{
-    [self->_bridge.bbdWebSocketModule sendData:[self resolve:blob] forSocketID:socketID];
+  dispatch_async(((BbdRNWebSocketModule *)[_moduleRegistry moduleForName:"BbdRNWebSocketModule"]).methodQueue, ^{
+    [[self->_moduleRegistry moduleForName:"BbdRNWebSocketModule"] sendData:[self resolve:blob] forSocketID:[NSNumber numberWithDouble:socketID]];
   });
 }
 
@@ -256,7 +266,7 @@ RCT_EXPORT_METHOD(release:(NSString *)blobId)
   NSDictionary *blob = [RCTConvert NSDictionary:data[@"blob"]];
 
   NSString *contentType = @"application/octet-stream";
-  NSString *blobType = [RCTConvert NSString:blob[@"type"]];
+  NSString *blobType = [RCTConvert NSString:RCTNilIfNull(blob[@"type"])];
   if (blobType != nil && blobType.length > 0) {
     contentType = blob[@"type"];
   }
@@ -302,4 +312,13 @@ RCT_EXPORT_METHOD(release:(NSString *)blobId)
   };
 }
 
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params
+{
+  return std::make_shared<facebook::react::NativeBlobModuleSpecJSI>(params);
+}
+
 @end
+
+Class BbdRCTBlobManagerCls(void) {
+  return BbdRCTBlobManager.class;
+}

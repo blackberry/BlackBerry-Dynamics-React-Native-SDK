@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
   * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ public class BbdRNLauncherModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
   private Activity activity = null;
+  private static final long ACTIVITY_WAIT_INTERVAL = 100L;
+  private static final int ACTIVITY_WAIT_TRIES = 20;
 
   public BbdRNLauncherModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -48,6 +50,8 @@ public class BbdRNLauncherModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void getActivityName(final Promise promise) {
+    // Fixed issue GD-63687- getCurrentActivity() returns null sometimes and is available little late
+    waitForActivity();
     activity = getCurrentActivity();
     BbdLauncher.getInstance().setProvider(activity);
     BBDLifeCycle.getInstance().initLauncher();
@@ -83,6 +87,23 @@ public class BbdRNLauncherModule extends ReactContextBaseJavaModule {
       }
 
     });
+  }
+
+  private void waitForActivity() {
+    for (int tries = 0; tries < ACTIVITY_WAIT_TRIES && !isActivityReady(); tries++) {
+        sleep(ACTIVITY_WAIT_INTERVAL);
+    }
+  }
+
+  private boolean isActivityReady() {
+    return getReactApplicationContext().hasCurrentActivity();
+  }
+
+  private static void sleep(long ms) {
+    try {
+        Thread.sleep(ms);
+    } catch (InterruptedException e) {
+    }
   }
 
 }

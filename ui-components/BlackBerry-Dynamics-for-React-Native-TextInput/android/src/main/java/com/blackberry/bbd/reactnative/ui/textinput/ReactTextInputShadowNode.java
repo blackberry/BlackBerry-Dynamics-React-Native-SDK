@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native
+ * from https://github.com/facebook/react-native/tree/0.70-stable/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -28,7 +28,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIViewOperationQueue;
 import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.views.text.ReactBaseTextShadowNode;
-import com.facebook.react.views.text.ReactTextUpdate;
 import com.facebook.react.views.text.ReactTextViewManagerCallback;
 import com.facebook.react.views.view.MeasureUtil;
 import com.facebook.yoga.YogaMeasureFunction;

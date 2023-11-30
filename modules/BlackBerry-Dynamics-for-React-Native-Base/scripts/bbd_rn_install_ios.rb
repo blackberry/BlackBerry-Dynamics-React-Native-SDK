@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+# Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,7 +90,7 @@ class BbdRNProject
     @rn_project_path = projectRoot = ENV['PROJECT_ROOT'] || ENV['INIT_CWD'] || Dir.pwd
     rn_project_json = JSON.load File.open "#{@rn_project_path}/package.json"
     rn_app_json = JSON.load File.open "#{@rn_project_path}/app.json"
-    @product_name = rn_app_json['name']
+    @product_name = rn_app_json['name'].gsub(/[[:space:]]/, "")
     @rn_version = rn_project_json['dependencies']['react-native']
     @development_tools_json_path = "#{@rn_project_path}/ios/#{@product_name}/Resources/development-tools-info.json"
     @xcodeproj = Xcodeproj::Project.open("#{@rn_project_path}/ios/#{@product_name}.xcodeproj")

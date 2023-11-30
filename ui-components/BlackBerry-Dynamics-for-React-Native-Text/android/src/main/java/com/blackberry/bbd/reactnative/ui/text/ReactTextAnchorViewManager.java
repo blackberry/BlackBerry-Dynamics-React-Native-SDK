@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Text UI component for react-native
- * from https://github.com/facebook/react-native/tree/0.61-stable/ReactAndroid/src/main/java/com/facebook/react/views/text
+ * from https://github.com/facebook/react-native/tree/0.70-stable/ReactAndroid/src/main/java/com/facebook/react/views/text
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and its affiliates.
  *
  * <p>This source code is licensed under the MIT license found in the LICENSE file in the root
  * directory of this source tree.
@@ -11,10 +11,15 @@
 
 package com.blackberry.bbd.reactnative.ui.text;
 
+import android.os.Build;
+import android.text.Layout;
 import android.text.Spannable;
 import android.text.TextUtils;
+import android.text.util.Linkify;
 import android.view.Gravity;
 import android.view.View;
+import androidx.annotation.Nullable;
+import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.PixelUtil;
@@ -26,7 +31,6 @@ import com.facebook.react.uimanager.annotations.ReactPropGroup;
 import com.facebook.react.views.text.DefaultStyleValuesUtil;
 import com.facebook.react.views.text.ReactBaseTextShadowNode;
 import com.facebook.yoga.YogaConstants;
-import javax.annotation.Nullable;
 
 /**
  * Abstract class for anchor {@code <Text>}-ish spannable views, such as {@link TextView} or {@link
@@ -40,30 +44,41 @@ import javax.annotation.Nullable;
 public abstract class ReactTextAnchorViewManager<T extends View, C extends ReactBaseTextShadowNode>
         extends BaseViewManager<T, C> {
 
-    private static final int[] SPACING_TYPES = {
-            Spacing.ALL, Spacing.LEFT, Spacing.RIGHT, Spacing.TOP, Spacing.BOTTOM,
-    };
+  private static final int[] SPACING_TYPES = {
+    Spacing.ALL, Spacing.LEFT, Spacing.RIGHT, Spacing.TOP, Spacing.BOTTOM,
+  };
+  private static final String TAG = "ReactTextAnchorViewManager";
 
-    // maxLines can only be set in master view (block), doesn't really make sense to set in a span
-    @ReactProp(name = ViewProps.NUMBER_OF_LINES, defaultInt = ViewDefaults.NUMBER_OF_LINES)
-    public void setNumberOfLines(ReactTextView view, int numberOfLines) {
-        view.setNumberOfLines(numberOfLines);
-    }
+  @ReactProp(name = "accessible")
+  public void setAccessible(ReactTextView view, boolean accessible) {
+    view.setFocusable(accessible);
+  }
 
-    @ReactProp(name = ViewProps.ELLIPSIZE_MODE)
-    public void setEllipsizeMode(ReactTextView view, @Nullable String ellipsizeMode) {
-        if (ellipsizeMode == null || ellipsizeMode.equals("tail")) {
-            view.setEllipsizeLocation(TextUtils.TruncateAt.END);
-        } else if (ellipsizeMode.equals("head")) {
-            view.setEllipsizeLocation(TextUtils.TruncateAt.START);
-        } else if (ellipsizeMode.equals("middle")) {
-            view.setEllipsizeLocation(TextUtils.TruncateAt.MIDDLE);
-        } else if (ellipsizeMode.equals("clip")) {
-            view.setEllipsizeLocation(null);
-        } else {
-            throw new JSApplicationIllegalArgumentException("Invalid ellipsizeMode: " + ellipsizeMode);
-        }
+  // maxLines can only be set in master view (block), doesn't really make sense to set in a span
+  @ReactProp(name = ViewProps.NUMBER_OF_LINES, defaultInt = ViewDefaults.NUMBER_OF_LINES)
+  public void setNumberOfLines(ReactTextView view, int numberOfLines) {
+    view.setNumberOfLines(numberOfLines);
+  }
+
+  @ReactProp(name = ViewProps.ELLIPSIZE_MODE)
+  public void setEllipsizeMode(ReactTextView view, @Nullable String ellipsizeMode) {
+    if (ellipsizeMode == null || ellipsizeMode.equals("tail")) {
+      view.setEllipsizeLocation(TextUtils.TruncateAt.END);
+    } else if (ellipsizeMode.equals("head")) {
+      view.setEllipsizeLocation(TextUtils.TruncateAt.START);
+    } else if (ellipsizeMode.equals("middle")) {
+      view.setEllipsizeLocation(TextUtils.TruncateAt.MIDDLE);
+    } else if (ellipsizeMode.equals("clip")) {
+      view.setEllipsizeLocation(null);
+    } else {
+      throw new JSApplicationIllegalArgumentException("Invalid ellipsizeMode: " + ellipsizeMode);
     }
+  }
+
+  @ReactProp(name = ViewProps.ADJUSTS_FONT_SIZE_TO_FIT)
+  public void setAdjustFontSizeToFit(ReactTextView view, boolean adjustsFontSizeToFit) {
+    view.setAdjustFontSizeToFit(adjustsFontSizeToFit);
+  }
 
     @ReactProp(name = ViewProps.TEXT_ALIGN_VERTICAL)
     public void setTextAlignVertical(ReactTextView view, @Nullable String textAlignVertical) {
@@ -96,20 +111,37 @@ public abstract class ReactTextAnchorViewManager<T extends View, C extends React
         }
     }
 
-    @ReactPropGroup(
-            names = {
-                    ViewProps.BORDER_RADIUS,
-                    ViewProps.BORDER_TOP_LEFT_RADIUS,
-                    ViewProps.BORDER_TOP_RIGHT_RADIUS,
-                    ViewProps.BORDER_BOTTOM_RIGHT_RADIUS,
-                    ViewProps.BORDER_BOTTOM_LEFT_RADIUS
-            },
-            defaultFloat = YogaConstants.UNDEFINED
-    )
-    public void setBorderRadius(ReactTextView view, int index, float borderRadius) {
-        if (!YogaConstants.isUndefined(borderRadius)) {
-            borderRadius = PixelUtil.toPixelFromDIP(borderRadius);
-        }
+  @ReactProp(name = "android_hyphenationFrequency")
+  public void setAndroidHyphenationFrequency(ReactTextView view, @Nullable String frequency) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      FLog.w(TAG, "android_hyphenationFrequency only available since android 23");
+      return;
+    }
+    if (frequency == null || frequency.equals("none")) {
+      view.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE);
+    } else if (frequency.equals("full")) {
+      view.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_FULL);
+    } else if (frequency.equals("normal")) {
+      view.setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL);
+    } else {
+      throw new JSApplicationIllegalArgumentException(
+          "Invalid android_hyphenationFrequency: " + frequency);
+    }
+  }
+
+  @ReactPropGroup(
+      names = {
+        ViewProps.BORDER_RADIUS,
+        ViewProps.BORDER_TOP_LEFT_RADIUS,
+        ViewProps.BORDER_TOP_RIGHT_RADIUS,
+        ViewProps.BORDER_BOTTOM_RIGHT_RADIUS,
+        ViewProps.BORDER_BOTTOM_LEFT_RADIUS
+      },
+      defaultFloat = YogaConstants.UNDEFINED)
+  public void setBorderRadius(ReactTextView view, int index, float borderRadius) {
+    if (!YogaConstants.isUndefined(borderRadius)) {
+      borderRadius = PixelUtil.toPixelFromDIP(borderRadius);
+    }
 
         if (index == 0) {
             view.setBorderRadius(borderRadius);
@@ -123,48 +155,73 @@ public abstract class ReactTextAnchorViewManager<T extends View, C extends React
         view.setBorderStyle(borderStyle);
     }
 
-    @ReactPropGroup(
-            names = {
-                    ViewProps.BORDER_WIDTH,
-                    ViewProps.BORDER_LEFT_WIDTH,
-                    ViewProps.BORDER_RIGHT_WIDTH,
-                    ViewProps.BORDER_TOP_WIDTH,
-                    ViewProps.BORDER_BOTTOM_WIDTH,
-            },
-            defaultFloat = YogaConstants.UNDEFINED
-    )
-    public void setBorderWidth(ReactTextView view, int index, float width) {
-        if (!YogaConstants.isUndefined(width)) {
-            width = PixelUtil.toPixelFromDIP(width);
-        }
-        view.setBorderWidth(SPACING_TYPES[index], width);
+  @ReactPropGroup(
+      names = {
+        ViewProps.BORDER_WIDTH,
+        ViewProps.BORDER_LEFT_WIDTH,
+        ViewProps.BORDER_RIGHT_WIDTH,
+        ViewProps.BORDER_TOP_WIDTH,
+        ViewProps.BORDER_BOTTOM_WIDTH,
+      },
+      defaultFloat = YogaConstants.UNDEFINED)
+  public void setBorderWidth(ReactTextView view, int index, float width) {
+    if (!YogaConstants.isUndefined(width)) {
+      width = PixelUtil.toPixelFromDIP(width);
     }
+    view.setBorderWidth(SPACING_TYPES[index], width);
+  }
 
-    @ReactPropGroup(
-            names = {
-                    "borderColor",
-                    "borderLeftColor",
-                    "borderRightColor",
-                    "borderTopColor",
-                    "borderBottomColor"
-            },
-            customType = "Color"
-    )
-    public void setBorderColor(ReactTextView view, int index, Integer color) {
-        float rgbComponent =
-                color == null ? YogaConstants.UNDEFINED : (float) ((int) color & 0x00FFFFFF);
-        float alphaComponent = color == null ? YogaConstants.UNDEFINED : (float) ((int) color >>> 24);
-        view.setBorderColor(SPACING_TYPES[index], rgbComponent, alphaComponent);
-    }
+  @ReactPropGroup(
+      names = {
+        "borderColor",
+        "borderLeftColor",
+        "borderRightColor",
+        "borderTopColor",
+        "borderBottomColor"
+      },
+      customType = "Color")
+  public void setBorderColor(ReactTextView view, int index, Integer color) {
+    float rgbComponent =
+        color == null ? YogaConstants.UNDEFINED : (float) ((int) color & 0x00FFFFFF);
+    float alphaComponent = color == null ? YogaConstants.UNDEFINED : (float) ((int) color >>> 24);
+    view.setBorderColor(SPACING_TYPES[index], rgbComponent, alphaComponent);
+  }
 
     @ReactProp(name = ViewProps.INCLUDE_FONT_PADDING, defaultBoolean = true)
     public void setIncludeFontPadding(ReactTextView view, boolean includepad) {
         view.setIncludeFontPadding(includepad);
     }
 
-    @ReactProp(name = "disabled", defaultBoolean = false)
-    public void setDisabled(ReactTextView view, boolean disabled) {
-        view.setEnabled(!disabled);
-    }
-}
+  @ReactProp(name = "disabled", defaultBoolean = false)
+  public void setDisabled(ReactTextView view, boolean disabled) {
+    view.setEnabled(!disabled);
+  }
 
+  @ReactProp(name = "dataDetectorType")
+  public void setDataDetectorType(ReactTextView view, @Nullable String type) {
+    if (type != null) {
+      switch (type) {
+        case "phoneNumber":
+          view.setLinkifyMask(Linkify.PHONE_NUMBERS);
+          return;
+        case "link":
+          view.setLinkifyMask(Linkify.WEB_URLS);
+          return;
+        case "email":
+          view.setLinkifyMask(Linkify.EMAIL_ADDRESSES);
+          return;
+        case "all":
+          view.setLinkifyMask(Linkify.ALL);
+          return;
+      }
+    }
+
+    // "none" case, default, and null type are equivalent.
+    view.setLinkifyMask(0);
+  }
+
+  @ReactProp(name = "onInlineViewLayout")
+  public void setNotifyOnInlineViewLayout(ReactTextView view, boolean notifyOnInlineViewLayout) {
+    view.setNotifyOnInlineViewLayout(notifyOnInlineViewLayout);
+  }
+}

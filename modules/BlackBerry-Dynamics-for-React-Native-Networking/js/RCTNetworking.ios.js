@@ -1,37 +1,85 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Networking module of react-native (JavaScript part)
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/RCTNetworking.ios.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Network/RCTNetworking.ios.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
+ * @flow strict-local
  * @format
- * @flow
  */
 
 'use strict';
 
-import { NativeEventEmitter } from 'react-native/index';
-
-import convertRequestBody from './convertRequestBody';
-
+import RCTDeviceEventEmitter from 'react-native/Libraries/EventEmitter/RCTDeviceEventEmitter';
 import NativeNetworkingIOS from './NativeNetworkingIOS';
-import type {NativeResponseType} from './XMLHttpRequest';
-import type {RequestBody} from './convertRequestBody';
+import {type NativeResponseType} from './XMLHttpRequest';
+import convertRequestBody, {type RequestBody} from './convertRequestBody';
+import type {EventSubscription} from 'react-native/Libraries/vendor/emitter/EventEmitter';
 
-class BbdRCTNetworking extends NativeEventEmitter {
-  constructor() {
-    super(NativeNetworkingIOS);
-  }
+type RCTNetworkingEventDefinitions = $ReadOnly<{
+  didSendNetworkData: [
+    [
+      number, // requestId
+      number, // progress
+      number, // total
+    ],
+  ],
+  didReceiveNetworkResponse: [
+    [
+      number, // requestId
+      number, // status
+      ?{[string]: string}, // responseHeaders
+      ?string, // responseURL
+    ],
+  ],
+  didReceiveNetworkData: [
+    [
+      number, // requestId
+      string, // response
+    ],
+  ],
+  didReceiveNetworkIncrementalData: [
+    [
+      number, // requestId
+      string, // responseText
+      number, // progress
+      number, // total
+    ],
+  ],
+  didReceiveNetworkDataProgress: [
+    [
+      number, // requestId
+      number, // loaded
+      number, // total
+    ],
+  ],
+  didCompleteNetworkResponse: [
+    [
+      number, // requestId
+      string, // error
+      boolean, // timeOutError
+    ],
+  ],
+}>;
+
+const BbdRCTNetworking = {
+  addListener<K: $Keys<RCTNetworkingEventDefinitions>>(
+    eventType: K,
+    listener: (...$ElementType<RCTNetworkingEventDefinitions, K>) => mixed,
+    context?: mixed,
+  ): EventSubscription {
+    return RCTDeviceEventEmitter.addListener(eventType, listener, context);
+  },
 
   sendRequest(
     method: string,
     trackingName: string,
     url: string,
-    headers: Object,
+    headers: {...},
     data: RequestBody,
     responseType: NativeResponseType,
     incrementalUpdates: boolean,
@@ -53,15 +101,15 @@ class BbdRCTNetworking extends NativeEventEmitter {
       },
       callback,
     );
-  }
+  },
 
   abortRequest(requestId: number) {
     NativeNetworkingIOS.abortRequest(requestId);
-  }
+  },
 
   clearCookies(callback: (result: boolean) => void) {
     NativeNetworkingIOS.clearCookies(callback);
-  }
-}
+  },
+};
 
-module.exports = (new BbdRCTNetworking(): BbdRCTNetworking);
+module.exports = BbdRCTNetworking;

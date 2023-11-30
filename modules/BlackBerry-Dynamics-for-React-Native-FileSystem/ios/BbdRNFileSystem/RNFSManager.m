@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+// Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -72,26 +72,27 @@ RCT_EXPORT_METHOD(readDir:(NSString *)dirPath
   NSError *error = nil;
 
   NSArray *contents = [fileManager contentsOfDirectoryAtPath:dirPath error:&error];
-
-  contents = [contents rnfs_mapObjectsUsingBlock:^id(NSString *obj, NSUInteger idx) {
+  NSMutableArray *tagetContents = [[NSMutableArray alloc] init];
+  for (NSString *obj in contents) {
     NSString *path = [dirPath stringByAppendingPathComponent:obj];
     NSDictionary *attributes = [fileManager attributesOfItemAtPath:path error:nil];
-
-    return @{
-             @"ctime": [self dateToTimeIntervalNumber:(NSDate *)[attributes objectForKey:NSFileCreationDate]],
-             @"mtime": [self dateToTimeIntervalNumber:(NSDate *)[attributes objectForKey:NSFileModificationDate]],
-             @"name": obj,
-             @"path": path,
-             @"size": [attributes objectForKey:NSFileSize],
-             @"type": [attributes objectForKey:NSFileType]
-             };
-  }];
+    if(attributes != nil) {
+        [tagetContents addObject:@{
+            @"ctime": [self dateToTimeIntervalNumber:(NSDate *)[attributes objectForKey:NSFileCreationDate]],
+            @"mtime": [self dateToTimeIntervalNumber:(NSDate *)[attributes objectForKey:NSFileModificationDate]],
+            @"name": obj,
+            @"path": path,
+            @"size": [attributes objectForKey:NSFileSize],
+            @"type": [attributes objectForKey:NSFileType]
+            }];
+    }
+  }
 
   if (error) {
     return [self reject:reject withError:error];
   }
 
-  resolve(contents);
+  resolve(tagetContents);
 }
 
 RCT_EXPORT_METHOD(exists:(NSString *)filepath
@@ -827,7 +828,7 @@ RCT_EXPORT_METHOD(copyAssetsFileIOS: (NSString *) imageUri
         imageOptions.resizeMode = PHImageRequestOptionsResizeModeNone;
     } else {
         targetSize = CGSizeApplyAffineTransform(size, CGAffineTransformMakeScale(scale, scale));
-        imageOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
+        imageOptions.resizeMode = PHImageRequestOptionsResizeModeExact;
     }
 
     PHImageContentMode contentMode = PHImageContentModeAspectFill;
@@ -899,7 +900,15 @@ RCT_EXPORT_METHOD(copyAssetsVideoIOS: (NSString *) imageUri
       NSLog(@"Final URL %@",url);
       NSData *videoData = [NSData dataWithContentsOfURL:url];
 
-      BOOL writeResult = [videoData writeToFile:destination options:NSDataWritingAtomic error:&error];
+      BOOL writeResult = false;
+
+      if (@available(iOS 9.0, *)) {
+          NSURL *destinationUrl = [NSURL fileURLWithPath:destination relativeToURL:nil];
+          writeResult = [[GDFileManager defaultManager] copyItemAtURL:url toURL:destinationUrl error:&error];
+      } else {
+          NSData *videoData = [NSData dataWithContentsOfURL:url];
+          writeResult = [videoData writeToFile:destination options:NSDataWritingAtomic error:&error];
+      }
 
       if(writeResult) {
         NSLog(@"video success");

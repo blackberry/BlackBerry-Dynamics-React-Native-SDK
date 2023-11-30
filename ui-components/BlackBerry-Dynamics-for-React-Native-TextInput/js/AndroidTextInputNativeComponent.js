@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Components/TextInput/
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -12,9 +12,7 @@
  * @format
  */
 
-'use strict';
-
-import {ViewPropTypes as ViewProps} from 'deprecated-react-native-prop-types';
+import type {ViewProps} from '../View/ViewPropTypes';
 import type {
   BubblingEventHandler,
   DirectEventHandler,
@@ -23,14 +21,18 @@ import type {
   Int32,
   WithDefault,
 } from 'react-native/Libraries/Types/CodegenTypes';
-import type {HostComponent} from 'react-native/Libraries/Renderer/shims/ReactNativeTypes';
-import type {TextStyleProp, ViewStyleProp} from 'react-native/Libraries/StyleSheet/StyleSheet';
-import type {ColorValue} from 'react-native/Libraries/StyleSheet/StyleSheetTypes';
-import requireNativeComponent from 'react-native/Libraries/ReactNative/requireNativeComponent';
+import type {
+  HostComponent,
+  PartialViewConfig,
+} from 'react-native/Libraries/Renderer/shims/ReactNativeTypes';
+import type {
+  TextStyleProp,
+  ViewStyleProp,
+  ColorValue,
+} from 'react-native/Libraries/StyleSheet/StyleSheet';
 import codegenNativeCommands from 'react-native/Libraries/Utilities/codegenNativeCommands';
 import type {TextInputNativeCommands} from 'react-native/Libraries/Components/TextInput/TextInputNativeCommands';
-import * as React from 'react';
-const ReactNativeViewConfigRegistry = require('react-native/Libraries/Renderer/shims/ReactNativeViewConfigRegistry');
+import * as NativeComponentRegistry from 'react-native/Libraries/NativeComponent/NativeComponentRegistry';
 
 export type KeyboardType =
   // Cross Platform
@@ -40,10 +42,10 @@ export type KeyboardType =
   | 'phone-pad'
   | 'number-pad'
   | 'decimal-pad'
+  | 'url'
   // iOS-only
   | 'ascii-capable'
   | 'numbers-and-punctuation'
-  | 'url'
   | 'name-phone-pad'
   | 'twitter'
   | 'web-search'
@@ -77,42 +79,90 @@ export type NativeProps = $ReadOnly<{|
    * Android props after this
    */
   /**
-   * Determines which content to suggest on auto complete, e.g.`username`.
-   * To disable auto complete, use `off`.
+   * Specifies autocomplete hints for the system, so it can provide autofill. On Android, the system will always attempt to offer autofill by using heuristics to identify the type of content.
+   * To disable autocomplete, set `autoComplete` to `off`.
    *
    * *Android Only*
    *
-   * The following values work on Android only:
+   * Possible values for `autoComplete` are:
    *
-   * - `username`
-   * - `password`
-   * - `email`
-   * - `name`
-   * - `tel`
-   * - `street-address`
-   * - `postal-code`
-   * - `cc-number`
+   * - `birthdate-day`
+   * - `birthdate-full`
+   * - `birthdate-month`
+   * - `birthdate-year`
    * - `cc-csc`
    * - `cc-exp`
+   * - `cc-exp-day`
    * - `cc-exp-month`
    * - `cc-exp-year`
+   * - `cc-number`
+   * - `email`
+   * - `gender`
+   * - `name`
+   * - `name-family`
+   * - `name-given`
+   * - `name-middle`
+   * - `name-middle-initial`
+   * - `name-prefix`
+   * - `name-suffix`
+   * - `password`
+   * - `password-new`
+   * - `postal-address`
+   * - `postal-address-country`
+   * - `postal-address-extended`
+   * - `postal-address-extended-postal-code`
+   * - `postal-address-locality`
+   * - `postal-address-region`
+   * - `postal-code`
+   * - `street-address`
+   * - `sms-otp`
+   * - `tel`
+   * - `tel-country-code`
+   * - `tel-national`
+   * - `tel-device`
+   * - `username`
+   * - `username-new`
    * - `off`
    *
    * @platform android
    */
-  autoCompleteType?: WithDefault<
+  autoComplete?: WithDefault<
+    | 'birthdate-day'
+    | 'birthdate-full'
+    | 'birthdate-month'
+    | 'birthdate-year'
     | 'cc-csc'
     | 'cc-exp'
+    | 'cc-exp-day'
     | 'cc-exp-month'
     | 'cc-exp-year'
     | 'cc-number'
     | 'email'
+    | 'gender'
     | 'name'
+    | 'name-family'
+    | 'name-given'
+    | 'name-middle'
+    | 'name-middle-initial'
+    | 'name-prefix'
+    | 'name-suffix'
     | 'password'
+    | 'password-new'
+    | 'postal-address'
+    | 'postal-address-country'
+    | 'postal-address-extended'
+    | 'postal-address-extended-postal-code'
+    | 'postal-address-locality'
+    | 'postal-address-region'
     | 'postal-code'
     | 'street-address'
+    | 'sms-otp'
     | 'tel'
+    | 'tel-country-code'
+    | 'tel-national'
+    | 'tel-device'
     | 'username'
+    | 'username-new'
     | 'off',
     'off',
   >,
@@ -186,7 +236,6 @@ export type NativeProps = $ReadOnly<{|
   /**
    * When `false`, it will prevent the soft keyboard from showing when the field is focused.
    * Defaults to `true`.
-   * @platform android
    */
   showSoftInputOnFocus?: ?boolean,
 
@@ -248,6 +297,7 @@ export type NativeProps = $ReadOnly<{|
    * - `decimal-pad`
    * - `email-address`
    * - `phone-pad`
+   * - `url`
    *
    * *Android Only*
    *
@@ -418,7 +468,7 @@ export type NativeProps = $ReadOnly<{|
   /**
    * The string that will be rendered before text input has been entered.
    */
-  placeholder?: ?string,
+  placeholder?: ?Stringish,
 
   /**
    * The text color of the placeholder string.
@@ -666,15 +716,10 @@ export const __INTERNAL_VIEW_CONFIG: PartialViewConfig = {
   },
 };
 
-let AndroidTextInputNativeComponent;
-if (global.RN$Bridgeless) {
-  ReactNativeViewConfigRegistry.register('AndroidInputTextBbd', () => __INTERNAL_VIEW_CONFIG);
-  AndroidTextInputNativeComponent = 'AndroidInputTextBbd';
-} else {
-  AndroidTextInputNativeComponent = requireNativeComponent<NativeProps>(
-    'AndroidInputTextBbd',
-  );
-}
+let AndroidTextInputNativeComponent = NativeComponentRegistry.get<NativeProps>(
+  'AndroidInputTextBbd',
+  () => __INTERNAL_VIEW_CONFIG,
+);
 
 // flowlint-next-line unclear-type:off
 export default ((AndroidTextInputNativeComponent: any): HostComponent<NativeProps>);

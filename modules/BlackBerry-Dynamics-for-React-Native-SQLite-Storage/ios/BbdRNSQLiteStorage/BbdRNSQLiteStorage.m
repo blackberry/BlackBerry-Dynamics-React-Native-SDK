@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original react-native-sqlite-storage module for react-native
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original react-native-sqlite-storage module (version 6.0.1) for react-native
  * from https://github.com/andpor/react-native-sqlite-storage/
  *
  * SQLite.m
@@ -108,6 +108,14 @@ RCT_EXPORT_MODULE(RNReactNativeBbdStorage);
                 [appDBPaths setObject: libs forKey:@"nosync"];
             }
         }
+	    NSString *groupName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"AppGroupName"];
+	    NSURL *groupURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:groupName];
+	    if (groupURL != NULL)
+	    {
+	      NSString* shared = groupURL.path;
+	      RCTLog(@"Detected Shared path: %@", shared);
+	      [appDBPaths setObject: shared forKey:@"shared"];
+	    }
     }
     return self;
 }

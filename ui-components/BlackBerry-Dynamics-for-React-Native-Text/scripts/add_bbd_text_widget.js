@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,12 +70,12 @@
   }
 
   function addBbdTextWidget (filePath, widget, insertBefore) {
-    var fileContent = fs.readFileSync(filePath, 'utf-8');
-
-    if (fileContent.indexOf(bbdTextWidgetName) >= 0) {return;}
-
-    fileContent = fileContent.replace(insertBefore, widget + insertBefore);
-    fs.writeFileSync(filePath, fileContent, 'utf-8');
+    if (fs.existsSync(filePath)){
+      var fileContent = fs.readFileSync(filePath, 'utf-8');
+      if (fileContent.indexOf(bbdTextWidgetName) >= 0) {return;}
+      fileContent = fileContent.replace(insertBefore, widget + insertBefore);
+      fs.writeFileSync(filePath, fileContent, 'utf-8');
   }
+}
 
 })();

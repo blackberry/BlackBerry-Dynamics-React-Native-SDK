@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original WebSocket API of react-native
- * from https://github.com/facebook/react-native/tree/0.63-stable/Libraries/WebSocket
+ * from https://github.com/facebook/react-native/tree/0.70-stable/Libraries/WebSocket
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c)  Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,10 +11,8 @@
  * @format
  */
 
-'use strict';
 
-import { NativeEventEmitter } from 'react-native/index';
-
+import NativeEventEmitter from 'react-native/Libraries/EventEmitter/NativeEventEmitter';
 import NativeWebSocketModule from './NativeWebSocketModule';
 const Platform = require('react-native/Libraries/Utilities/Platform');
 const base64 = require('base64-js');
@@ -24,8 +22,8 @@ const originalRCTWebSocketSend = NativeWebSocketModule.send;
 const originalRCTWebSocketSendBinary = NativeWebSocketModule.sendBinary;
 const originalRCTWebSocketClose = NativeWebSocketModule.close;
 
-let eventEmitter: NativeEventEmitter;
-let subscriptions: Array<EventSubscription>;
+let eventEmitter;
+let subscriptions;
 
 let closeCallback;
 let sendCallback;

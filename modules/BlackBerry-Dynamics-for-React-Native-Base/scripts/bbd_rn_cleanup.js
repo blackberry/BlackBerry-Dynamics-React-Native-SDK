@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,9 @@
     podfileContent = podfileContent
       .replace(constants.updatePodsCommand, '')
       .replace(constants.bbdPodTemplate, '')
-      .replace(constants.disabledFlipper, constants.enabledFlipper);
+      .replace(constants.disabledFlipper, constants.enabledFlipper)
+      .replace(constants.disabledFlipperNewSyntax, constants.enabledFlipperNewSyntax)
+      .replace(constants.disabledFlipperNewSyntaxRn71x, constants.enabledFlipperNewSyntaxRn71x);
 
     fs.writeFileSync(podfilePath, podfileContent, 'utf-8');
   }

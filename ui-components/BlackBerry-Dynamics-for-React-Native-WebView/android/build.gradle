@@ -14,61 +14,105 @@
  * limitations under the License.
  */
 
+import java.nio.file.Paths
+
 buildscript {
-    ext.getExtOrDefault = {name ->
-        return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['ReactNativeWebView_' + name]
+    ext.safeExtGet = {prop ->
+        rootProject.ext.has(prop) ? rootProject.ext.get(prop) : project.properties['ReactNativeWebView_' + prop]
     }
-
-    // The Android Gradle plugin is only required when opening the android folder stand-alone.
-    // This avoids unnecessary downloads and potential conflicts when the library is included as a
-    // module dependency in an application project.
-    if (project == rootProject) {
-        repositories {
-            google()
-            mavenCentral()
-        }
-
-        dependencies {
-            classpath("com.android.tools.build:gradle:4.2.2")
-            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}")
-        }
-    } else {
-        repositories {
-            mavenCentral()
-        }
-
-        dependencies {
-            classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${getExtOrDefault('kotlinVersion')}")
-        }
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${safeExtGet('kotlinVersion')}")
+        classpath("com.android.tools.build:gradle:7.0.4")
     }
 }
 
-def getExtOrIntegerDefault(name) {
-    return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['ReactNativeWebView_' + name]).toInteger()
+def getExtOrIntegerDefault(prop) {
+  return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : (project.properties['ReactNativeWebView_' + prop]).toInteger()
 }
 
-apply plugin: "com.android.library"
+static def findNodeModulePath(baseDir, packageName) {
+    def basePath = baseDir.toPath().normalize()
+    // Node's module resolution algorithm searches up to the root directory,
+    // after which the base path will be null
+    while (basePath) {
+        def candidatePath = Paths.get(basePath.toString(), "node_modules", packageName)
+        if (candidatePath.toFile().exists()) {
+            return candidatePath.toString()
+        }
+        basePath = basePath.getParent()
+    }
+    return null
+}
+
+def isNewArchitectureEnabled() {
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+
+apply plugin: 'com.android.library'
+if (isNewArchitectureEnabled()) {
+    apply plugin: 'com.facebook.react'
+}
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
+        minSdkVersion getExtOrIntegerDefault('minSdkVersion')
+        targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
+    }
+
+    sourceSets {
+        main {
+            if (isNewArchitectureEnabled()) {
+                java.srcDirs += ['src/newarch']
+            } else {
+                java.srcDirs += ['src/oldarch']
+            }
+        }
     }
 }
 
-def kotlin_version = getExtOrDefault('kotlinVersion')
+def reactNativePath = findNodeModulePath(projectDir, "react-native")
+def codegenPath = findNodeModulePath(projectDir, "@react-native/codegen")
+if (codegenPath == null) {
+  // Compat for 0.71 and lower (to be removed)
+  codegenPath = findNodeModulePath(projectDir, "react-native-codegen")
+}
+
+repositories {
+    maven {
+        url "${reactNativePath}/android"
+    }
+    google()
+    mavenCentral()
+}
 
 dependencies {
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:11.1.0.62'
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:11.1.0.62'
-    implementation 'com.blackberry.blackberrydynamics:android_webview:11.1.0.62'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:12.0.1.79'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:12.0.1.79'
+    implementation 'com.blackberry.blackberrydynamics:android_webview:12.0.1.79'
     implementation project(path: ':BlackBerry-Dynamics-for-React-Native-Base')
     implementation "com.facebook.react:react-native:+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${safeExtGet('kotlinVersion')}"
+    implementation "androidx.webkit:webkit:${safeExtGet('webkitVersion')}"
     implementation 'org.brotli:dec:0.1.2'// 'br' content-encoding
     implementation group: 'org.apache.commons', name: 'commons-pool2', version: '2.6.2'
-    implementation 'androidx.webkit:webkit:1.4.0'
+}
+
+if (isNewArchitectureEnabled()) {
+    react {
+        jsRootDir = file("../src/")
+        libraryName = "rncwebview"
+        codegenJavaPackageName = "com.reactnativecommunity.webview"
+        codegenDir = new File(codegenPath)
+        reactNativeDir = new File(reactNativePath)
+    }
 }

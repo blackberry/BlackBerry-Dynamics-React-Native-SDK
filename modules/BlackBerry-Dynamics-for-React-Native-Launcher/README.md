@@ -5,15 +5,18 @@ For more details please refer to [Dynamics Launcher library on Android](https://
 
 ## Supportability
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
+
 #### BlackBerry Dynamics Launcher library for iOS
- - 3.4.0.324
+ - 12.0.0.378
 #### BlackBerry Dynamics Launcher library for Android
- - 3.4.0.228
+ - 12.0.0.253
 
 ## Preconditions
 #### Install Base module
@@ -40,9 +43,9 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
     $ pod install
     $ cd ..
     $ yarn integrate-launcher
-    $ react-native run-ios
+    $ npx react-native run-ios
 ###### Android
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## Uninstallation
     $ cd <appFolder>
@@ -56,9 +59,14 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
 ## API
 #### Integrate Launcher
 BlackBerry Dynamics Launcher can be integrated by just importing `BlackBerry-Dynamics-for-React-Native-Launcher` module.
+
 **Example of usage**
+
+> NOTE: TypeScript may remove module imports that aren't used in any expression. In this case, the Launcher icon won't appear on Android platform. The most universal workaround is to reference the module in any way.
 ```typescript
-import Launcher from 'BlackBerry-Dynamics-for-React-Native-Launcher'; // Launcher icon will appear on the screen
+import Launcher from 'BlackBerry-Dynamics-for-React-Native-Launcher';
+// OPTIONAL: add this line for Typescript project that doesn't use `Launcher` API
+Launcher; 
 ```
 #### show(): Promise<void>
 Shows Launcher icon.

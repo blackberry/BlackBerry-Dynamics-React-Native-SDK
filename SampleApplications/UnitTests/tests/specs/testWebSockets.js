@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,7 @@ export default function() {
           done();
         });
 
-        webSocket.addEventListener('error', function (event) {
+        webSocket.addEventListener('error', function (error) {
           expect(error.message).toBe(true);
           done();
         });
@@ -337,7 +337,7 @@ export default function() {
           done();
         });
 
-        webSocket.addEventListener('error', function (event) {
+        webSocket.addEventListener('error', function (error) {
           expect(error.message).toBe(true);
           done();
         });
@@ -379,7 +379,7 @@ export default function() {
           done();
         });
 
-        webSocket.addEventListener('error', function (event) {
+        webSocket.addEventListener('error', function (error) {
           expect(error.message).toBe(true);
           done();
         });
@@ -506,8 +506,6 @@ export default function() {
           expect(type).toBe('message');
           expect(data).toBeDefined();
           expect(data instanceof Blob).toBe(true);
-          const textMessage = await DataConverter.readBlobAsText(data);
-          expect(textMessage).toBe(dataString);
 
           expect(timeStamp).toBeDefined();
           expect(typeof timeStamp).toBe('number');
@@ -516,7 +514,11 @@ export default function() {
           expect(date.getMonth()).toBe(currentMonth);
           expect(date.getFullYear()).toBe(currentYear);
 
-          isConditionChecked = true;
+          if (data && (data instanceof Blob) && data.data) {
+            const textMessage = await DataConverter.readBlobAsText(data);
+            expect(textMessage).toBe(dataString);
+            isConditionChecked = true;
+          }
           webSocket.close();
         };
 
@@ -664,7 +666,7 @@ export default function() {
       it('WebSocket: get image as Blob by fetch, send and receive it as Blob', async function(done) {
         const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
-        const imageUrl = 'https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg';
+        const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/3/3b/Test_rillke2.jpg';
         let isConditionChecked = false;
 
         const response = await fetch(imageUrl, {
@@ -800,7 +802,7 @@ export default function() {
         const url = 'wss://javascript.info/article/websocket/chat/ws';
         const method = 'GET';
         const htmlUrl = 'https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API';
-
+        let isConditionChecked = false;
         const response = await fetch(htmlUrl, {
           method
         });
@@ -830,26 +832,30 @@ export default function() {
           expect(type).toBe('message');
           expect(data).toBeDefined();
           expect(data instanceof Blob).toBe(true);
-          const textMessage = await DataConverter.readBlobAsText(data);
-          if (convertedBlobToText.length > MAXMESSAGELENGTH) {
-            expect(data.size).toBe(MAXMESSAGELENGTH);
-            expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
-          } else {
-            expect(data.size).toBe(expectedBlobSize);
-            expect(textMessage).toBe(convertedBlobToText);
-          }
-
           expect(timeStamp).toBeDefined();
           expect(typeof timeStamp).toBe('number');
+
           const date = new Date(timeStamp);
           expect(date.getDate()).toBe(currentDay);
           expect(date.getMonth()).toBe(currentMonth);
           expect(date.getFullYear()).toBe(currentYear);
 
+          if (data && (data instanceof Blob) && data.data) {
+            const textMessage = await DataConverter.readBlobAsText(data);
+            if (convertedBlobToText.length > MAXMESSAGELENGTH) {
+              expect(data.size).toBe(MAXMESSAGELENGTH);
+              expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
+            } else {
+              expect(data.size).toBe(expectedBlobSize);
+              expect(textMessage).toBe(convertedBlobToText);
+            }
+            isConditionChecked = true;
+          }
           webSocket.close();
         };
 
         webSocket.onclose = function(event) {
+          expect(isConditionChecked).toBe(true);
           done();
         };
 
@@ -906,14 +912,6 @@ export default function() {
               expect(type).toBe('message');
               expect(data).toBeDefined();
               expect(data instanceof Blob).toBe(true);
-              const textMessage = await DataConverter.readBlobAsText(data);
-              if (convertedBlobToText.length > MAXMESSAGELENGTH) {
-                expect(data.size).toBe(MAXMESSAGELENGTH);
-                expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
-              } else {
-                expect(data.size).toBe(expectedBlobSize);
-                expect(textMessage).toBe(convertedBlobToText);
-              }
 
               expect(timeStamp).toBeDefined();
               expect(typeof timeStamp).toBe('number');
@@ -922,7 +920,17 @@ export default function() {
               expect(date.getMonth()).toBe(currentMonth);
               expect(date.getFullYear()).toBe(currentYear);
 
-              isConditionChecked = true;
+              if (data && (data instanceof Blob) && data.data) {
+                const textMessage = await DataConverter.readBlobAsText(data);
+                if (convertedBlobToText.length > MAXMESSAGELENGTH) {
+                  expect(data.size).toBe(MAXMESSAGELENGTH);
+                  expect(textMessage).toBe(convertedBlobToText.slice(0, MAXMESSAGELENGTH));
+                } else {
+                  expect(data.size).toBe(expectedBlobSize);
+                  expect(textMessage).toBe(convertedBlobToText);
+                }
+                isConditionChecked = true;
+              }
               webSocket.close();
             };
 

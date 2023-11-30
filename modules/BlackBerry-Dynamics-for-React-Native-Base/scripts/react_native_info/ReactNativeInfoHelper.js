@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,23 +20,24 @@ const execSync = require('child_process').execSync,
   path = require('path'),
   reactNativeInfoJson = require('./development-tools-info.json');
 
-const RN_INFO_KEYS = {
-  os: 'OS:',
-  node: 'Node:',
-  yarn: 'Yarn:',
-  npm: 'npm:',
-  watchman: 'Watchman:',
-  androidStudio: 'Android Studio:',
-  xcode: 'Xcode:',
-  iosSdk: {
-    platforms: 'Platforms:'
-  },
-  androidSdk: {
-    apiLevels: 'API Levels:',
-    buildTools: 'Build Tools:',
-    systemImages: 'System Images:'
-  }
-};
+const RN_INFO_CMD = 'npx react-native info',
+  RN_INFO_KEYS = {
+    os: 'OS:',
+    node: 'Node:',
+    yarn: 'Yarn:',
+    npm: 'npm:',
+    watchman: 'Watchman:',
+    androidStudio: 'Android Studio:',
+    xcode: 'Xcode:',
+    iosSdk: {
+      platforms: 'Platforms:'
+    },
+    androidSdk: {
+      apiLevels: 'API Levels:',
+      buildTools: 'Build Tools:',
+      systemImages: 'System Images:'
+    }
+  };
 
 class ReactNativeInfoHelper {
   constructor(projectRoot) {
@@ -148,17 +149,9 @@ class ReactNativeInfoHelper {
 }
 
 class ReactNativeInfo extends ReactNativeInfoHelper {
-  constructor(projectRoot, packageManager) {
+  constructor(projectRoot) {
     super(projectRoot);
-    this.rnInfoCmd = packageManager === 'npm' ?
-      `npx "${path.join(
-        projectRoot, 'node_modules', 'react-native', 'node_modules', '@react-native-community', 'cli', 'build', 'bin.js'
-      )}" info`
-      :
-      `npx "${path.join(
-        projectRoot, 'node_modules', '@react-native-community', 'cli', 'build', 'bin.js'
-      )}" info`;
-    this.reactNativeInfoCmdResult = execSync(this.rnInfoCmd).toString();
+    this.reactNativeInfoCmdResult = execSync(RN_INFO_CMD).toString();
     this.versionRegExp = /\d+(\.\d+){0,5}/;
   }
 
@@ -175,16 +168,26 @@ class ReactNativeInfo extends ReactNativeInfoHelper {
   }
 
   getIOSSDKInfo() {
+    const platformsString = this.getValueByKeyFromCmdResult(RN_INFO_KEYS.iosSdk.platforms);
+
     return {
-      platforms: this.getValueByKeyFromCmdResult(RN_INFO_KEYS.iosSdk.platforms).split(', ')
+      platforms: platformsString ?
+        platformsString.split(', ') : this.getListByKeyFromCmdResult(RN_INFO_KEYS.iosSdk.platforms)
     };
   }
 
   getAndroidSDKInfo() {
+    const apiLevelsString = this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.apiLevels),
+      buildToolsString = this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.buildTools),
+      systemImagesString = this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.systemImages);
+
     return {
-      apiLevels: this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.apiLevels).split(', '),
-      buildTools: this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.buildTools).split(', '),
-      systemImages: this.getValueByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.systemImages).split(', ')
+      apiLevels: apiLevelsString ?
+        apiLevelsString.split(', ') : this.getListByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.apiLevels),
+      buildTools: buildToolsString ?
+        buildToolsString.split(', ') : this.getListByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.buildTools),
+      systemImages: systemImagesString ?
+        systemImagesString.split(', ') : this.getListByKeyFromCmdResult(RN_INFO_KEYS.androidSdk.systemImages)
     };
   }
 
@@ -205,13 +208,23 @@ class ReactNativeInfo extends ReactNativeInfoHelper {
     }
     const endRowIndex = this.reactNativeInfoCmdResult.indexOf('\n', startRowIndex);
 
-    return this.reactNativeInfoCmdResult.substring(startRowIndex + key.length, endRowIndex).trim();;
+    return this.reactNativeInfoCmdResult.substring(startRowIndex + key.length, endRowIndex).trim();
   }
 
-  getVersionByKeyFromCmdResult(key) {
-    const regExpResult = this.versionRegExp.exec(this.getRowByKeyFromCmdResult(key));
+  getListByKeyFromCmdResult(key) {
+    const listRegExp = new RegExp(`${key}\\n(?<entries>(\\s*-\\s*.*)*)`, 'gm'),
+      regExpResult = listRegExp.exec(this.reactNativeInfoCmdResult);
 
-    return regExpResult ? regExpResult[0] : 'Not Available';
+    return regExpResult ?
+      regExpResult.groups.entries.replaceAll(/[ \t]+-[ \t]+/gm, '').replaceAll('"', '').split('\n') : [];
+  }
+
+  // For info results from RN CLI < 0.72
+  getVersionByKeyFromCmdResult(key) {
+    const versionRegExp = new RegExp(`${key}\\s*\\n*(version:\\s*)?(?<version>\\d+(\\.\\d+){0,5})`, 'gm'),
+      regExpResult = versionRegExp.exec(this.reactNativeInfoCmdResult);
+
+    return regExpResult ? regExpResult.groups.version : 'Not Available';
   }
 
   getReactNativeInfo() {

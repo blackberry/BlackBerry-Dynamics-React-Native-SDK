@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original react-native-sqlite-storage module for react-native
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original react-native-sqlite-storage module (version 6.0.1) for react-native
  * from https://github.com/andpor/react-native-sqlite-storage/
  *
  * sqlite.ios.core.js
@@ -17,8 +17,8 @@
  * See http://opensource.org/licenses/alphabetical for full text.
  */
 
-var NativeModules = require('react-native').NativeModules;
-var DB_STATE_INIT, DB_STATE_OPEN, READ_ONLY_REGEX, SQLiteFactory, SQLitePlugin, SQLitePluginTransaction, argsArray, dblocations, newSQLError, root, txLocks;
+var NativeModules = require("react-native").NativeModules;
+var DB_STATE_INIT, DB_STATE_OPEN, READ_ONLY_REGEX, SQLiteFactory, SQLitePlugin, SQLitePluginTransaction, argsArray, dblocations, newSQLError, txLocks;
 
 var plugin = {};
 
@@ -57,6 +57,7 @@ newSQLError = function(error, code) {
 let nextTick = setImmediate ||  function(fun) {
   setTimeout(fun, 0);
 };
+
 if (global.window) {
   nextTick = window.setImmediate || function(fun) {
     window.setTimeout(fun, 0);
@@ -87,29 +88,43 @@ argsArray = function(fun) {
 
 plugin.exec = function(method, options, success, error) {
   if (plugin.sqlitePlugin.DEBUG){
-    console.log('SQLite.' + method + '(' + JSON.stringify(options) + ')');
+    plugin.log("SQLite." + method + "(" + JSON.stringify(options) + ")");
   }
   NativeModules["RNReactNativeBbdStorage"][method](options,success,error);
 };
 
+plugin.log = function(...messages) {
+  if (plugin.sqlitePlugin.DEBUG) {
+    console.log(...messages)
+  }
+}
+
+plugin.warn = function(...messages) {
+  console.warn(...messages)
+}
+
+plugin.error = function(...messages) {
+  console.error(...messages)
+}
+
 SQLitePlugin = function(openargs, openSuccess, openError) {
   var dbname;
-  if (!(openargs && openargs['name'])) {
+  if (!(openargs && openargs["name"])) {
     throw newSQLError("Cannot create a SQLitePlugin db instance without a db name");
   }
   dbname = openargs.name;
-  if (typeof dbname !== 'string') {
-    throw newSQLError('sqlite plugin database name must be a string');
+  if (typeof dbname !== "string") {
+    throw newSQLError("sqlite plugin database name must be a string");
   }
   this.openargs = openargs;
   this.dbname = dbname;
   this.openSuccess = openSuccess;
   this.openError = openError;
   this.openSuccess || (this.openSuccess = function() {
-    console.log("DB opened: " + dbname);
+    plugin.log("DB opened: " + dbname);
   });
   this.openError || (this.openError = function(e) {
-    console.log(e.message);
+    plugin.log(e.message);
   });
   this.open(this.openSuccess, this.openError);
 };
@@ -132,16 +147,16 @@ SQLitePlugin.prototype.addTransaction = function(t) {
     this.startNextTransaction();
   } else {
     if (this.dbname in this.openDBs) {
-      console.log('new transaction is waiting for open operation');
+      plugin.log("new transaction is waiting for open operation");
     } else {
-      console.log('database is closed, new transaction is [stuck] waiting until db is opened again!');
+      plugin.log("database is closed, new transaction is [stuck] waiting until db is opened again!");
     }
   }
 };
 
 SQLitePlugin.prototype.transaction = function(fn, error, success) {
   if (!this.openDBs[this.dbname]) {
-    error(newSQLError('database not open'));
+    error(newSQLError("database not open"));
     return;
   }
   this.addTransaction(new SQLitePluginTransaction(this, fn, error, success, true, false));
@@ -149,7 +164,7 @@ SQLitePlugin.prototype.transaction = function(fn, error, success) {
 
 SQLitePlugin.prototype.readTransaction = function(fn, error, success) {
   if (!this.openDBs[this.dbname]) {
-    error(newSQLError('database not open'));
+    error(newSQLError("database not open"));
     return;
   }
   this.addTransaction(new SQLitePluginTransaction(this, fn, error, success, false, true));
@@ -162,12 +177,12 @@ SQLitePlugin.prototype.startNextTransaction = function() {
     return function() {
       var txLock;
       if (!(_this.dbname in _this.openDBs) || _this.openDBs[_this.dbname] !== DB_STATE_OPEN) {
-        console.log('cannot start next transaction: database not open');
+        plugin.log("cannot start next transaction: database not open");
         return;
       }
       txLock = txLocks[self.dbname];
       if (!txLock) {
-        console.log('cannot start next transaction: database connection is lost');
+        plugin.log("cannot start next transaction: database connection is lost");
       } else if (txLock.queue.length > 0 && !txLock.inProgress) {
         txLock.inProgress = true;
         txLock.queue.shift().start();
@@ -183,7 +198,7 @@ SQLitePlugin.prototype.abortAllPendingTransactions = function() {
     ref = txLock.queue;
     for (j = 0, len1 = ref.length; j < len1; j++) {
       tx = ref[j];
-      tx.abortFromQ(newSQLError('Invalid database handle'));
+      tx.abortFromQ(newSQLError("Invalid database handle"));
     }
     txLock.queue = [];
     txLock.inProgress = false;
@@ -193,14 +208,14 @@ SQLitePlugin.prototype.abortAllPendingTransactions = function() {
 SQLitePlugin.prototype.sqlBatch = function(sqlStatements, success, error) {
   var batchList, j, len1, myfn, st;
   if (!sqlStatements || sqlStatements.constructor !== Array) {
-    throw newSQLError('sqlBatch expects an array');
+    throw newSQLError("sqlBatch expects an array");
   }
   batchList = [];
   for (j = 0, len1 = sqlStatements.length; j < len1; j++) {
     st = sqlStatements[j];
     if (st.constructor === Array) {
       if (st.length === 0) {
-        throw newSQLError('sqlBatch array element of zero (0) length');
+        throw newSQLError("sqlBatch array element of zero (0) length");
       }
       batchList.push({
         sql: st[0],
@@ -231,7 +246,7 @@ SQLitePlugin.prototype.sqlBatch = function(sqlStatements, success, error) {
     if (!!error) {
       return error(e);
     } else {
-      console.log("Error handler not provided: ",e);
+      plugin.log("Error handler not provided: ",e);
     }
   };
 
@@ -243,19 +258,19 @@ SQLitePlugin.prototype.open = function(success, error) {
   var openerrorcb, opensuccesscb;
 
   if (this.dbname in this.openDBs && this.openDBs[this.dbname] === DB_STATE_OPEN) {
-    console.log('database already open: ' + this.dbname);
+    plugin.log("database already open: " + this.dbname);
     nextTick((function(_this) {
       return function() {
         success(_this);
       };
     })(this));
   } else {
-    console.log('OPEN database: ' + this.dbname);
+    plugin.log("OPEN database: " + this.dbname);
     opensuccesscb = (function(_this) {
       return function() {
         var txLock;
         if (!_this.openDBs[_this.dbname]) {
-          console.log('database was closed during open operation');
+          plugin.log("database was closed during open operation");
         }
         if (_this.dbname in _this.openDBs) {
           _this.openDBs[_this.dbname] = DB_STATE_OPEN;
@@ -271,9 +286,9 @@ SQLitePlugin.prototype.open = function(success, error) {
     })(this);
     openerrorcb = (function(_this) {
       return function() {
-        console.log('OPEN database: ' + _this.dbname + ' failed, aborting any pending transactions');
+        plugin.log("OPEN database: " + _this.dbname + " failed, aborting any pending transactions");
         if (!!error) {
-          error(newSQLError('Could not open database'));
+          error(newSQLError("Could not open database"));
         }
         delete _this.openDBs[_this.dbname];
         _this.abortAllPendingTransactions();
@@ -287,16 +302,16 @@ SQLitePlugin.prototype.open = function(success, error) {
 SQLitePlugin.prototype.close = function(success, error) {
   if (this.dbname in this.openDBs) {
     if (txLocks[this.dbname] && txLocks[this.dbname].inProgress) {
-      console.log('cannot close: transaction is in progress');
-      error(newSQLError('database cannot be closed while a transaction is in progress'));
+      plugin.log("cannot close: transaction is in progress");
+      error(newSQLError("database cannot be closed while a transaction is in progress"));
       return;
     }
-    console.log('CLOSE database: ' + this.dbname);
+    plugin.log("CLOSE database: " + this.dbname);
     delete this.openDBs[this.dbname];
     if (txLocks[this.dbname]) {
-      console.log('closing db with transaction queue length: ' + txLocks[this.dbname].queue.length);
+      plugin.log("closing db with transaction queue length: " + txLocks[this.dbname].queue.length);
     } else {
-      console.log('closing db with no transaction lock state');
+      plugin.log("closing db with no transaction lock state");
     }
     let mysuccess = function(t, r) {
       if (!!success) {
@@ -307,13 +322,13 @@ SQLitePlugin.prototype.close = function(success, error) {
       if (!!error) {
         return error(e);
       } else {
-        console.log("Error handler not provided: ",e);
+        plugin.log("Error handler not provided: ",e);
       }
     };
     plugin.exec("close",{path: this.dbname}, mysuccess, myerror);
   } else {
-    var err = 'cannot close: database is not open';
-    console.log(err);
+    var err = "cannot close: database is not open";
+    plugin.log(err);
     if (error) {
       nextTick(function() {
         return error(err);
@@ -325,11 +340,11 @@ SQLitePlugin.prototype.close = function(success, error) {
 SQLitePlugin.prototype.attach = function(dbNameToAttach, dbAlias, success, error) {
   if (this.dbname in this.openDBs) {
     if (txLocks[this.dbname] && txLocks[this.dbname].inProgress) {
-      console.log('cannot attach: transaction is in progress');
-      error(newSQLError('database cannot be attached while a transaction is in progress'));
+      plugin.log("cannot attach: transaction is in progress");
+      error(newSQLError("database cannot be attached while a transaction is in progress"));
       return;
     }
-    console.log('ATTACH database ' + dbNameToAttach + ' to ' + this.dbname + ' with alias ' + dbAlias);
+    plugin.log("ATTACH database " + dbNameToAttach + " to " + this.dbname + " with alias " + dbAlias);
 
     let mysuccess = function(t, r) {
       if (!!success) {
@@ -340,12 +355,12 @@ SQLitePlugin.prototype.attach = function(dbNameToAttach, dbAlias, success, error
       if (!!error) {
         return error(e);
       } else {
-        console.log("Error handler not provided: ",e);
+        plugin.log("Error handler not provided: ",e);
       }
     };
     plugin.exec("attach",{path: this.dbname, dbName: dbNameToAttach, dbAlias}, mysuccess, myerror);
   } else {
-    let err = 'cannot attach: database is not open';
+    let err = "cannot attach: database is not open";
     if (error) {
       nextTick(function() {
         return error(err);
@@ -357,11 +372,11 @@ SQLitePlugin.prototype.attach = function(dbNameToAttach, dbAlias, success, error
 SQLitePlugin.prototype.detach = function(dbAlias, success, error) {
   if (this.dbname in this.openDBs) {
     if (txLocks[this.dbname] && txLocks[this.dbname].inProgress) {
-      console.log('cannot attach: transaction is in progress');
-      error(newSQLError('database cannot be attached while a transaction is in progress'));
+      plugin.log("cannot attach: transaction is in progress");
+      error(newSQLError("database cannot be attached while a transaction is in progress"));
       return;
     }
-    console.log('DETACH database ' + dbAlias + ' from ' + this.dbname);
+    plugin.log("DETACH database " + dbAlias + " from " + this.dbname);
 
     let mysuccess = function(t, r) {
       if (!!success) {
@@ -369,17 +384,17 @@ SQLitePlugin.prototype.detach = function(dbAlias, success, error) {
       }
     };
     let myerror = function(e) {
-      console.log('ERR', e);
+      plugin.log("ERR", e);
       if (!!error) {
         return error(e);
       } else {
-        console.log("Error handler not provided: ",e);
+        plugin.log("Error handler not provided: ",e);
       }
     };
-    this.executeSql('DETACH DATABASE ' + dbAlias, [], mysuccess, myerror)
+    this.executeSql("DETACH DATABASE " + dbAlias, [], mysuccess, myerror)
   } else {
-    var err = 'cannot attach: database is not open';
-    console.log(err);
+    var err = "cannot attach: database is not open";
+    plugin.log(err);
     if (error) {
       nextTick(function() {
         return error(err);
@@ -399,7 +414,7 @@ SQLitePlugin.prototype.executeSql = function(statement, params, success, error) 
     if (!!error) {
       return error(e);
     } else {
-      console.log("Error handler not provided: ",e);
+      plugin.log("Error handler not provided: ",e);
     }
   };
   myfn = function(tx) {
@@ -458,16 +473,16 @@ SQLitePluginTransaction.prototype.executeSql = function(sql, values, success, er
   var that = this;
   if (that.finalized) {
     throw {
-      message: 'InvalidStateError: DOM Exception 11: This transaction is already finalized. Transactions are committed' +
-      ' after its success or failure handlers are called. If you are using a Promise to handle callbacks, be aware that' +
-      ' implementations following the A+ standard adhere to run-to-completion semantics and so Promise resolution occurs' +
-      ' on a subsequent tick and therefore after the transaction commits.',
+      message: "InvalidStateError: DOM Exception 11: This transaction is already finalized. Transactions are committed" +
+      " after its success or failure handlers are called. If you are using a Promise to handle callbacks, be aware that" +
+      " implementations following the A+ standard adhere to run-to-completion semantics and so Promise resolution occurs" +
+      " on a subsequent tick and therefore after the transaction commits.",
       code: 11
     };
   }
   if (that.readOnly && READ_ONLY_REGEX.test(sql)) {
     that.handleStatementFailure(error, {
-      message: 'invalid sql for a read-only transaction'
+      message: "invalid sql for a read-only transaction"
     });
     return;
   }
@@ -480,7 +495,7 @@ SQLitePluginTransaction.prototype.executeSql = function(sql, values, success, er
     if (!!error) {
       return error(e);
     } else {
-      console.log("Error handler not provided: ",e);
+      plugin.log("Error handler not provided: ",e);
     }
   };
   that.addStatement(sql, values, mysuccess, myerror);
@@ -488,24 +503,24 @@ SQLitePluginTransaction.prototype.executeSql = function(sql, values, success, er
 
 SQLitePluginTransaction.prototype.addStatement = function(sql, values, success, error) {
   var j, len1, params, sqlStatement, t, v;
-  sqlStatement = typeof sql === 'string' ? sql : sql.toString();
+  sqlStatement = typeof sql === "string" ? sql : sql.toString();
   params = [];
   if (!!values && values.constructor === Array) {
     for (j = 0, len1 = values.length; j < len1; j++) {
       v = values[j];
       t = typeof v;
-      if (v === null || v === void 0 || t === 'number' || t === 'string'){
+      if (v === null || v === void 0 || t === "number" || t === "string"){
         params.push(v);
-      } else if (t === 'boolean') {
+      } else if (t === "boolean") {
         //Convert true -> 1 / false -> 0
         params.push(~~v);
       }
-      else if (t !== 'function') {
+      else if (t !== "function") {
         params.push(v.toString());
-        console.warn('addStatement - parameter of type <'+t+'> converted to string using toString()')
+        plugin.warn("addStatement - parameter of type <"+t+"> converted to string using toString()")
       } else {
-        let errorMsg = 'Unsupported parameter type <'+t+'> found in addStatement()';
-        console.error(errorMsg);
+        let errorMsg = "Unsupported parameter type <"+t+"> found in addStatement()";
+        plugin.error(errorMsg);
         error(newSQLError(errorMsg));
         return;
       }
@@ -520,13 +535,13 @@ SQLitePluginTransaction.prototype.addStatement = function(sql, values, success, 
 };
 
 SQLitePluginTransaction.prototype.handleStatementSuccess = function(handler, response) {
-  // console.log('handler response:',response,response.rows);
+  // plugin.log("handler response:",response,response.rows);
   var payload, rows;
   if (!handler) {
     return;
   }
   rows = response.rows || [];
-  // console.log('handler rows now:',rows);
+  // plugin.log("handler rows now:",rows);
   payload = {
     rows: {
       item: function(i) {
@@ -544,7 +559,7 @@ SQLitePluginTransaction.prototype.handleStatementSuccess = function(handler, res
     rowsAffected: response.rowsAffected || 0,
     insertId: response.insertId || void 0
   };
-  // console.log('handler response payload:',payload);
+  // plugin.log("handler response payload:",payload);
   handler(this, payload);
 };
 
@@ -577,7 +592,7 @@ SQLitePluginTransaction.prototype.run = function() {
         } catch (err) {
           let errorMsg = JSON.stringify(err);
           if(errorMsg === "{}") errorMsg = err.toString();
-          console.log("warning - exception while invoking a callback: " + errorMsg);
+          plugin.log("warning - exception while invoking a callback: " + errorMsg);
         }
 
         if (!didSucceed) {
@@ -615,7 +630,7 @@ SQLitePluginTransaction.prototype.run = function() {
 
   let mysuccess = function(result) {
     var j, last, q, r, res, type;
-    if (result.length == 0){
+    if (result.length === 0){
       return;
     }
     last = result.length - 1;
@@ -633,7 +648,7 @@ SQLitePluginTransaction.prototype.run = function() {
   };
 
   var myerror = function(error) {
-    console.log("batch execution error: ",error);
+    plugin.log("batch execution error: ",error);
   };
 
   plugin.exec("backgroundExecuteSqlBatch",{
@@ -709,15 +724,16 @@ SQLitePluginTransaction.prototype.abortFromQ = function(sqlerror) {
 };
 
 dblocations = {
-  'default' : 'nosync',
-  'Documents' : 'docs',
-  'Library' : 'libs'
+  "default" : "nosync",
+  "Documents" : "docs",
+  "Library" : "libs",
+  "Shared" : "shared"
 };
 
 SQLiteFactory = function(){};
 
 SQLiteFactory.prototype.DEBUG = function(debug) {
-  console.log("Setting debug to:",debug);
+  plugin.log("Setting debug to:",debug);
   plugin.sqlitePlugin.DEBUG = debug;
 };
 
@@ -738,7 +754,7 @@ SQLiteFactory.prototype.openDatabase = argsArray(function(args) {
   if (first.constructor === String) {
     openargs = {
       name: first,
-      dblocation : dblocations['default']
+      dblocation : dblocations["default"]
     };
     if (args.length >= 5) {
       okcb = args[4];
@@ -750,7 +766,7 @@ SQLiteFactory.prototype.openDatabase = argsArray(function(args) {
     openargs = first;
     readOnly = !!openargs.readOnly;
     if (!readOnly && (!openargs.location || openargs.location.constructor !== String || !dblocations.hasOwnProperty(openargs.location))) {
-      openargs.dblocation = dblocations['default'];
+      openargs.dblocation = dblocations["default"];
     } else {
       openargs.dblocation = dblocations[openargs.location];
     }
@@ -758,7 +774,7 @@ SQLiteFactory.prototype.openDatabase = argsArray(function(args) {
     if (!!openargs.createFromLocation) {
       if (openargs.createFromLocation === 1) {
         openargs.assetFilename = "1";
-      } else if (typeof openargs.createFromLocation == 'string'){
+      } else if (typeof openargs.createFromLocation === "string"){
         openargs.assetFilename = openargs.createFromLocation;
       }
     }
@@ -783,7 +799,7 @@ SQLiteFactory.prototype.openDatabase = argsArray(function(args) {
 });
 
 SQLiteFactory.prototype.echoTest = function(success, error) {
-  let inputTestValue = 'test-string';
+  let inputTestValue = "test-string";
   let mysuccess = function(testValue) {
     if (testValue === inputTestValue) {
       return success();
@@ -802,14 +818,14 @@ SQLiteFactory.prototype.deleteDatabase = function(first,success, error) {
   var args = {};
   if (first.constructor === String) {
     args.path = first;
-    args.dblocation = dblocations['default'];
+    args.dblocation = dblocations["default"];
   } else {
-    if (!(first && first['name'])) {
+    if (!(first && first["name"])) {
       throw new Error("Please specify db name via name property");
     }
     args.path = first.name;
     if (!first.location || first.location.constructor !== String || !dblocations.hasOwnProperty(first.location)) {
-      args.dblocation = dblocations['default'];
+      args.dblocation = dblocations["default"];
     } else {
       args.dblocation = dblocations[first.location];
     }
@@ -821,11 +837,12 @@ SQLiteFactory.prototype.deleteDatabase = function(first,success, error) {
       return success(r);
     }
   };
+
   let myerror = function(e) {
     if (!!error) {
       return error(e);
     } else {
-      console.log("deleteDatabase error handler not provided: ",e);
+      plugin.log("deleteDatabase error handler not provided: ",e);
     }
   };
 
@@ -835,7 +852,8 @@ SQLiteFactory.prototype.deleteDatabase = function(first,success, error) {
 plugin.sqlitePlugin = {
   SQLiteFactory : SQLiteFactory,
   SQLitePluginTransaction : SQLitePluginTransaction,
-  SQLitePlugin : SQLitePlugin
+  SQLitePlugin : SQLitePlugin,
+  log: plugin.log
 };
 
 module.exports = plugin.sqlitePlugin;

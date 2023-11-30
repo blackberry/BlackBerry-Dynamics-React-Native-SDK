@@ -2,12 +2,15 @@
 `BlackBerry-Dynamics-for-React-Native-TextInput` enables Data Leakage Prevention (DLP) within `<TextInput />` UI component for Android platform. More details about DLP on Android can be found [here](https://developer.blackberry.com/devzone/files/blackberry-dynamics/android/namespacecom_1_1good_1_1gd_1_1widget.html).
 > NOTE: on iOS platform DLP is supported by default via Dynamics runtime after `BlackBerry-Dynamics-for-React-Native-Base` module is installed and linked. More details about DLP on iOS can be found [here](https://developer.blackberry.com/devzone/files/blackberry-dynamics/ios/interface_g_di_o_s.html).
 
-# Supportability
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+## Supportability
+#### React Native
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-TextInput` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -21,9 +24,9 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
     $ cd ios
     $ pod install
     $ cd ..
-    $ react-native run-ios
+    $ npx react-native run-ios
 ###### Android
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## react-native-elements support
 

@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native
+ * from https://github.com/facebook/react-native/tree/0.70-stable/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -17,7 +17,6 @@ import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionWrapper;
 import androidx.annotation.Nullable;
 import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
 
 /**
@@ -64,9 +63,12 @@ class ReactEditTextInputConnectionWrapper extends InputConnectionWrapper {
   private @Nullable String mKey = null;
 
   public ReactEditTextInputConnectionWrapper(
-      InputConnection target, final ReactContext reactContext, final ReactEditText editText) {
+      InputConnection target,
+      final ReactContext reactContext,
+      final ReactEditText editText,
+      EventDispatcher eventDispatcher) {
     super(target, false);
-    mEventDispatcher = reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
+    mEventDispatcher = eventDispatcher;
     mEditText = editText;
   }
 
@@ -133,10 +135,13 @@ class ReactEditTextInputConnectionWrapper extends InputConnectionWrapper {
   @Override
   public boolean sendKeyEvent(KeyEvent event) {
     if (event.getAction() == KeyEvent.ACTION_DOWN) {
+      boolean isNumberKey = event.getUnicodeChar() < 58 && event.getUnicodeChar() > 47;
       if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
         dispatchKeyEvent(BACKSPACE_KEY_VALUE);
       } else if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
         dispatchKeyEvent(ENTER_KEY_VALUE);
+      } else if (isNumberKey) {
+        dispatchKeyEvent(String.valueOf(event.getNumber()));
       }
     }
     return super.sendKeyEvent(event);

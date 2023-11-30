@@ -1,17 +1,17 @@
 /**
  * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original WebSocket API of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Network
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
-
 #import <mutex>
 
+#import <FBReactNativeSpec/FBReactNativeSpec.h>
 #import <React/RCTAssert.h>
 #import <React/RCTConvert.h>
 #import <React/RCTEventDispatcher.h>
@@ -22,11 +22,13 @@
 
 #import <React/RCTHTTPRequestHandler.h>
 
+#import "BbdRCTNetworkPlugins.h"
+
 typedef RCTURLRequestCancellationBlock (^RCTHTTPQueryResult)(NSError *error, NSDictionary<NSString *, id> *result);
 
 NSString *const BbdRCTNetworkingPHUploadHackScheme = @"ph-upload";
 
-@interface BbdRCTNetworking ()
+@interface BbdRCTNetworking ()  <NativeNetworkingIOSSpec>
 
 - (RCTURLRequestCancellationBlock)processDataForHTTPQuery:(NSDictionary<NSString *, id> *)data
                                                  callback:(RCTHTTPQueryResult)callback;
@@ -150,18 +152,28 @@ static NSString *RCTGenerateFormBoundary()
   NSMutableDictionary<NSNumber *, BbdRCTNetworkTask *> *_tasksByRequestID;
   std::mutex _handlersLock;
   NSArray<id<RCTURLRequestHandler>> *_handlers;
-  NSArray<id<RCTURLRequestHandler>> * (^_handlersProvider)(void);
+  NSArray<id<RCTURLRequestHandler>> * (^_handlersProvider)(RCTModuleRegistry *);
   NSMutableArray<id<BbdRCTNetworkingRequestHandler>> *_requestHandlers;
   NSMutableArray<id<BbdRCTNetworkingResponseHandler>> *_responseHandlers;
 }
 
 @synthesize methodQueue = _methodQueue;
 
-RCT_EXPORT_MODULE(BbdRCTNetworking)
+RCT_EXPORT_MODULE()
 
-- (instancetype)initWithHandlersProvider:(NSArray<id<RCTURLRequestHandler>> * (^)(void))getHandlers
++ (BOOL)requiresMainQueueSetup
 {
-  if (self = [super init]) {
+  return YES;
+}
+
+- (instancetype)init
+{
+  return [super initWithDisabledObservation];
+}
+
+- (instancetype)initWithHandlersProvider:(NSArray<id<RCTURLRequestHandler>> * (^)(RCTModuleRegistry *moduleRegistry))getHandlers
+{
+  if (self = [super initWithDisabledObservation]) {
     _handlersProvider = getHandlers;
   }
   return self;
@@ -169,6 +181,10 @@ RCT_EXPORT_MODULE(BbdRCTNetworking)
 
 - (void)invalidate
 {
+  [super invalidate];
+
+  std::lock_guard<std::mutex> lock(_handlersLock);
+
   for (NSNumber *requestID in _tasksByRequestID) {
     [_tasksByRequestID[requestID] cancel];
   }
@@ -193,37 +209,13 @@ RCT_EXPORT_MODULE(BbdRCTNetworking)
   if (!request.URL) {
     return nil;
   }
-
-  {
-    std::lock_guard<std::mutex> lock(_handlersLock);
-
-    if (!_handlers) {
-      if (_handlersProvider) {
-        _handlers = _handlersProvider();
-      } else {
-        _handlers = [self.bridge modulesConformingToProtocol:@protocol(RCTURLRequestHandler)];
-      }
-
-      // Get handlers, sorted in reverse priority order (highest priority first)
-      _handlers = [_handlers sortedArrayUsingComparator:^NSComparisonResult(id<RCTURLRequestHandler> a, id<RCTURLRequestHandler> b) {
-        float priorityA = [a respondsToSelector:@selector(handlerPriority)] ? [a handlerPriority] : 0;
-        float priorityB = [b respondsToSelector:@selector(handlerPriority)] ? [b handlerPriority] : 0;
-        if (priorityA > priorityB) {
-          return NSOrderedAscending;
-        } else if (priorityA < priorityB) {
-          return NSOrderedDescending;
-        } else {
-          return NSOrderedSame;
-        }
-      }];
-    }
-  }
+  NSArray<id<RCTURLRequestHandler>> *handlers = [self prioritizedHandlers];
 
   if (RCT_DEBUG) {
     // Check for handler conflicts
     float previousPriority = 0;
     id<RCTURLRequestHandler> previousHandler = nil;
-    for (id<RCTURLRequestHandler> handler in _handlers) {
+    for (id<RCTURLRequestHandler> handler in handlers) {
       float priority = [handler respondsToSelector:@selector(handlerPriority)] ? [handler handlerPriority] : 0;
       if (previousHandler && priority < previousPriority) {
         return previousHandler;
@@ -246,12 +238,37 @@ RCT_EXPORT_MODULE(BbdRCTNetworking)
   }
 
   // Normal code path
-  for (id<RCTURLRequestHandler> handler in _handlers) {
+  for (id<RCTURLRequestHandler> handler in handlers) {
     if ([handler canHandleRequest:request]) {
       return handler;
     }
   }
   return nil;
+}
+
+- (NSArray<id<RCTURLRequestHandler>> *)prioritizedHandlers
+{
+  std::lock_guard<std::mutex> lock(_handlersLock);
+  if (_handlers) {
+    return _handlers;
+  }
+  NSArray<id<RCTURLRequestHandler>> *newHandlers = _handlersProvider
+    ? _handlersProvider(self.moduleRegistry)
+    : [self.bridge modulesConformingToProtocol:@protocol(RCTURLRequestHandler)];
+  // Get handlers, sorted in reverse priority order (highest priority first)
+  newHandlers = [newHandlers sortedArrayUsingComparator:^NSComparisonResult(id<RCTURLRequestHandler> a, id<RCTURLRequestHandler> b) {
+    float priorityA = [a respondsToSelector:@selector(handlerPriority)] ? [a handlerPriority] : 0;
+    float priorityB = [b respondsToSelector:@selector(handlerPriority)] ? [b handlerPriority] : 0;
+    if (priorityA > priorityB) {
+      return NSOrderedAscending;
+    } else if (priorityA < priorityB) {
+      return NSOrderedDescending;
+    } else {
+      return NSOrderedSame;
+    }
+  }];
+  _handlers = newHandlers;
+  return newHandlers;
 }
 
 - (NSDictionary<NSString *, id> *)stripNullsInRequestHeaders:(NSDictionary<NSString *, id> *)headers
@@ -671,15 +688,26 @@ RCT_EXPORT_MODULE(BbdRCTNetworking)
 
 #pragma mark - JS API
 
-RCT_EXPORT_METHOD(sendRequest:(NSDictionary *)query
-                  responseSender:(RCTResponseSenderBlock)responseSender)
+RCT_EXPORT_METHOD(sendRequest:(JS::NativeNetworkingIOS::SpecSendRequestQuery &)query
+                  callback:(RCTResponseSenderBlock)responseSender)
 {
+  NSDictionary *queryDict = @{
+    @"method": query.method(),
+    @"url": query.url(),
+    @"data": query.data(),
+    @"headers": query.headers(),
+    @"responseType": query.responseType(),
+    @"incrementalUpdates": @(query.incrementalUpdates()),
+    @"timeout": @(query.timeout()),
+    @"withCredentials": @(query.withCredentials()),
+  };
+
   // TODO: buildRequest returns a cancellation block, but there's currently
   // no way to invoke it, if, for example the request is cancelled while
   // loading a large file to build the request body
-  [self buildRequest:query completionBlock:^(NSURLRequest *request) {
-    NSString *responseType = [RCTConvert NSString:query[@"responseType"]];
-    BOOL incrementalUpdates = [RCTConvert BOOL:query[@"incrementalUpdates"]];
+  [self buildRequest:queryDict completionBlock:^(NSURLRequest *request) {
+    NSString *responseType = [RCTConvert NSString:queryDict[@"responseType"]];
+    BOOL incrementalUpdates = [RCTConvert BOOL:queryDict[@"incrementalUpdates"]];
     [self sendRequest:request
          responseType:responseType
    incrementalUpdates:incrementalUpdates
@@ -687,10 +715,10 @@ RCT_EXPORT_METHOD(sendRequest:(NSDictionary *)query
   }];
 }
 
-RCT_EXPORT_METHOD(abortRequest:(nonnull NSNumber *)requestID)
+RCT_EXPORT_METHOD(abortRequest:(double)requestID)
 {
-  [_tasksByRequestID[requestID] cancel];
-  [_tasksByRequestID removeObjectForKey:requestID];
+  [_tasksByRequestID[[NSNumber numberWithDouble:requestID]] cancel];
+  [_tasksByRequestID removeObjectForKey:[NSNumber numberWithDouble:requestID]];
 }
 
 RCT_EXPORT_METHOD(clearCookies:(RCTResponseSenderBlock)responseSender)
@@ -707,6 +735,11 @@ RCT_EXPORT_METHOD(clearCookies:(RCTResponseSenderBlock)responseSender)
   responseSender(@[@YES]);
 }
 
+- (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:(const facebook::react::ObjCTurboModule::InitParams &)params
+{
+  return std::make_shared<facebook::react::NativeNetworkingIOSSpecJSI>(params);
+}
+
 @end
 
 @implementation RCTBridge (BbdRCTNetworking)
@@ -717,3 +750,7 @@ RCT_EXPORT_METHOD(clearCookies:(RCTResponseSenderBlock)responseSender)
 }
 
 @end
+
+Class BbdRCTNetworkingCls(void) {
+  return BbdRCTNetworking.class;
+}

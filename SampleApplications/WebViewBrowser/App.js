@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
  
 import React, {Component} from 'react';
-import { View, StyleSheet, SafeAreaView, Button, TextInput, Platform, TouchableHighlight, Modal, Text } from 'react-native';
+import { View, StyleSheet, SafeAreaView, Button, TextInput, Platform, Modal, Text } from 'react-native';
 import { WebView } from 'BlackBerry-Dynamics-for-React-Native-WebView';
+import FS from 'BlackBerry-Dynamics-for-React-Native-FileSystem';
 
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      url: 'https://www.google.com',
+      url: 'https://google.com',
       modalVisible: false,
       permissions: []
     };
@@ -107,6 +108,18 @@ export default class App extends Component {
     });
   }
 
+  async openDownloadsFolder() {
+    this.webView.ref.openDownloadsFolder();
+
+    const bbDownloadsFolderPath = await this.webView.ref.getDownloadsDirectoryPath();
+    const bbDownloadsFolder = await FS.readDir(bbDownloadsFolderPath);
+    bbDownloadsFolder.map(item => {
+      console.log('Downloaded file:\n');
+      console.log(item);
+      console.log('\n');
+    });
+  }
+
   render() {
     return (
       <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
@@ -141,6 +154,14 @@ export default class App extends Component {
             style={styles.button}
             accessibilityLabel="StopLoading button"
           />
+          {Platform.OS === 'android' && (
+            <Button
+              onPress={() => {this.openDownloadsFolder()}}
+              title="&#8681;"
+              style={styles.button}
+              accessibilityLabel="Open Downloads folder button"
+            />
+          )}
         </View>
         <WebView
           ref={(webView) => {this.webView.ref = webView;}}

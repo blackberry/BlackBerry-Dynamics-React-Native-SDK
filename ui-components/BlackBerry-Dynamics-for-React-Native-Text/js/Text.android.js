@@ -1,295 +1,231 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Text UI component for react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Text/Text.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Text/Text.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+* Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
+ * @flow strict-local
  * @format
  */
 
-'use strict';
+import type {PressEvent} from 'react-native/Libraries/Types/CoreEventTypes';
 
-const DeprecatedTextPropTypes = require('deprecated-react-native-prop-types').TextPropTypes;
-const React = require('react');
-const ReactNativeViewAttributes = require('react-native/Libraries/Components/View/ReactNativeViewAttributes');
-const TextAncestor = require('react-native/Libraries/Text/TextAncestor');
-const Touchable = require('react-native/Libraries/Components/Touchable/Touchable');
-const UIManager = require('react-native/Libraries/ReactNative/UIManager');
+import Platform from 'react-native/Libraries/Utilities/Platform';
+import * as PressabilityDebug from 'react-native/Libraries/Pressability/PressabilityDebug';
+import usePressability from 'react-native/Libraries/Pressability/usePressability';
+import StyleSheet from 'react-native/Libraries/StyleSheet/StyleSheet';
+import processColor from 'react-native/Libraries/StyleSheet/processColor';
 
-const createReactNativeComponentClass = require('react-native/Libraries/Renderer/shims/createReactNativeComponentClass');
-const nullthrows = require('nullthrows');
-const processColor = require('react-native/Libraries/StyleSheet/processColor');
+const  TextAncestor = require('react-native/Libraries/Text/TextAncestor');
+import {NativeText, NativeVirtualText} from './TextNativeComponent';
+import {type TextProps} from 'react-native/Libraries/Text/TextProps';
 
-import type {PressEvent} from 'CoreEventTypes';
-import type {NativeComponent} from 'ReactNative';
-import type {PressRetentionOffset, TextProps} from 'TextProps';
-
-type ResponseHandlers = $ReadOnly<{|
-  onStartShouldSetResponder: () => boolean,
-  onResponderGrant: (event: PressEvent, dispatchID: string) => void,
-  onResponderMove: (event: PressEvent) => void,
-  onResponderRelease: (event: PressEvent) => void,
-  onResponderTerminate: (event: PressEvent) => void,
-  onResponderTerminationRequest: () => boolean,
-|}>;
-
-type Props = $ReadOnly<{|
-  ...TextProps,
-  forwardedRef: ?React.Ref<'AndroidTextBbd' | 'AndroidVirtualTextBbd'>,
-|}>;
-
-type State = {|
-  touchable: {|
-    touchState: ?string,
-    responderID: ?number,
-  |},
-  isHighlighted: boolean,
-  createResponderHandlers: () => ResponseHandlers,
-  responseHandlers: ?ResponseHandlers,
-|};
-
-const PRESS_RECT_OFFSET = {top: 20, left: 20, right: 20, bottom: 30};
-
-const viewConfig = {
-  validAttributes: {
-    ...ReactNativeViewAttributes.UIView,
-    isHighlighted: true,
-    numberOfLines: true,
-    ellipsizeMode: true,
-    allowFontScaling: true,
-    maxFontSizeMultiplier: true,
-    disabled: true,
-    selectable: true,
-    selectionColor: true,
-    adjustsFontSizeToFit: true,
-    minimumFontScale: true,
-    textBreakStrategy: true,
-    onTextLayout: true,
-  },
-  directEventTypes: {
-    topTextLayout: {
-      registrationName: 'onTextLayout',
-    },
-  },
-  uiViewClassName: 'AndroidTextBbd',
-};
+import * as React from 'react';
+import {useContext, useMemo, useState} from 'react';
 
 /**
- * A React component for displaying text.
+ * Text is the fundamental component for displaying text.
  *
- * See https://facebook.github.io/react-native/docs/text.html
+ * @see https://reactnative.dev/docs/text
  */
-class TouchableText extends React.Component<Props, State> {
-  static defaultProps = {
-    accessible: true,
-    allowFontScaling: true,
-    ellipsizeMode: 'tail',
-  };
+const Text: React.AbstractComponent<
+  TextProps,
+  React.ElementRef<typeof NativeText | typeof NativeVirtualText>,
+> = React.forwardRef((props: TextProps, forwardedRef) => {
+  const {
+    accessible,
+    allowFontScaling,
+    ellipsizeMode,
+    onLongPress,
+    onPress,
+    onPressIn,
+    onPressOut,
+    onResponderGrant,
+    onResponderMove,
+    onResponderRelease,
+    onResponderTerminate,
+    onResponderTerminationRequest,
+    onStartShouldSetResponder,
+    pressRetentionOffset,
+    suppressHighlighting,
+    ...restProps
+  } = props;
 
-  touchableGetPressRectOffset: ?() => PressRetentionOffset;
-  touchableHandleActivePressIn: ?() => void;
-  touchableHandleActivePressOut: ?() => void;
-  touchableHandleLongPress: ?(event: PressEvent) => void;
-  touchableHandlePress: ?(event: PressEvent) => void;
-  touchableHandleResponderGrant: ?(
-    event: PressEvent,
-    dispatchID: string,
-  ) => void;
-  touchableHandleResponderMove: ?(event: PressEvent) => void;
-  touchableHandleResponderRelease: ?(event: PressEvent) => void;
-  touchableHandleResponderTerminate: ?(event: PressEvent) => void;
-  touchableHandleResponderTerminationRequest: ?() => boolean;
+  const [isHighlighted, setHighlighted] = useState(false);
 
-  state = {
-    ...Touchable.Mixin.touchableGetInitialState(),
-    isHighlighted: false,
-    createResponderHandlers: this._createResponseHandlers.bind(this),
-    responseHandlers: null,
-  };
+  const _disabled =
+    restProps.disabled != null
+      ? restProps.disabled
+      : props.accessibilityState?.disabled;
+  const _accessibilityState =
+    _disabled !== props.accessibilityState?.disabled
+      ? {...props.accessibilityState, disabled: _disabled}
+      : props.accessibilityState;
 
-  static getDerivedStateFromProps(
-    nextProps: Props,
-    prevState: State,
-  ): $Shape<State> | null {
-    return prevState.responseHandlers == null && isTouchable(nextProps)
-      ? {
-          responseHandlers: prevState.createResponderHandlers(),
-        }
-      : null;
+  const isPressable =
+    (onPress != null ||
+      onLongPress != null ||
+      onStartShouldSetResponder != null) &&
+    _disabled !== true;
+
+  const initialized = useLazyInitialization(isPressable);
+  const config = useMemo(
+    () =>
+      initialized
+        ? {
+            disabled: !isPressable,
+            pressRectOffset: pressRetentionOffset,
+            onLongPress,
+            onPress,
+            onPressIn(event: PressEvent) {
+              setHighlighted(!suppressHighlighting);
+              onPressIn?.(event);
+            },
+            onPressOut(event: PressEvent) {
+              setHighlighted(false);
+              onPressOut?.(event);
+            },
+            onResponderTerminationRequest_DEPRECATED:
+              onResponderTerminationRequest,
+            onStartShouldSetResponder_DEPRECATED: onStartShouldSetResponder,
+          }
+        : null,
+    [
+      initialized,
+      isPressable,
+      pressRetentionOffset,
+      onLongPress,
+      onPress,
+      onPressIn,
+      onPressOut,
+      onResponderTerminationRequest,
+      onStartShouldSetResponder,
+      suppressHighlighting,
+    ],
+  );
+
+  const eventHandlers = usePressability(config);
+  const eventHandlersForText = useMemo(
+    () =>
+      eventHandlers == null
+        ? null
+        : {
+            onResponderGrant(event: PressEvent) {
+              eventHandlers.onResponderGrant(event);
+              if (onResponderGrant != null) {
+                onResponderGrant(event);
+              }
+            },
+            onResponderMove(event: PressEvent) {
+              eventHandlers.onResponderMove(event);
+              if (onResponderMove != null) {
+                onResponderMove(event);
+              }
+            },
+            onResponderRelease(event: PressEvent) {
+              eventHandlers.onResponderRelease(event);
+              if (onResponderRelease != null) {
+                onResponderRelease(event);
+              }
+            },
+            onResponderTerminate(event: PressEvent) {
+              eventHandlers.onResponderTerminate(event);
+              if (onResponderTerminate != null) {
+                onResponderTerminate(event);
+              }
+            },
+            onClick: eventHandlers.onClick,
+            onResponderTerminationRequest:
+              eventHandlers.onResponderTerminationRequest,
+            onStartShouldSetResponder: eventHandlers.onStartShouldSetResponder,
+          },
+    [
+      eventHandlers,
+      onResponderGrant,
+      onResponderMove,
+      onResponderRelease,
+      onResponderTerminate,
+    ],
+  );
+
+  // TODO: Move this processing to the view configuration.
+  const selectionColor =
+    restProps.selectionColor == null
+      ? null
+      : processColor(restProps.selectionColor);
+
+  let style = restProps.style;
+  if (__DEV__) {
+    if (PressabilityDebug.isEnabled() && onPress != null) {
+      style = StyleSheet.compose(restProps.style, {
+        color: 'magenta',
+      });
+    }
   }
 
-  static viewConfig = viewConfig;
-
-  render(): React.Node {
-    let props = this.props;
-    if (isTouchable(props)) {
-      props = {
-        ...props,
-        ...this.state.responseHandlers,
-        isHighlighted: this.state.isHighlighted,
-      };
-    }
-    if (props.selectionColor != null) {
-      props = {
-        ...props,
-        selectionColor: processColor(props.selectionColor),
-      };
-    }
-    if (__DEV__) {
-      if (Touchable.TOUCH_TARGET_DEBUG && props.onPress != null) {
-        props = {
-          ...props,
-          style: [props.style, {color: 'magenta'}],
-        };
-      }
-    }
-    return (
-      <TextAncestor.Consumer>
-        {hasTextAncestor =>
-          hasTextAncestor ? (
-            <AndroidVirtualTextBbd {...props} ref={props.forwardedRef} />
-          ) : (
-            <TextAncestor.Provider value={true}>
-              <AndroidTextBbd {...props} ref={props.forwardedRef} />
-            </TextAncestor.Provider>
-          )
-        }
-      </TextAncestor.Consumer>
+  let numberOfLines = restProps.numberOfLines;
+  if (numberOfLines != null && !(numberOfLines >= 0)) {
+    console.error(
+      `'numberOfLines' in <Text> must be a non-negative number, received: ${numberOfLines}. The value will be set to 0.`,
     );
+    numberOfLines = 0;
   }
 
-  _createResponseHandlers(): ResponseHandlers {
-    return {
-      onStartShouldSetResponder: (): boolean => {
-        const {onStartShouldSetResponder} = this.props;
-        const shouldSetResponder =
-          (onStartShouldSetResponder == null
-            ? false
-            : onStartShouldSetResponder()) || isTouchable(this.props);
+  const hasTextAncestor = useContext(TextAncestor);
 
-        if (shouldSetResponder) {
-          this._attachTouchHandlers();
-        }
-        return shouldSetResponder;
-      },
-      onResponderGrant: (event: PressEvent, dispatchID: string): void => {
-        nullthrows(this.touchableHandleResponderGrant)(event, dispatchID);
-        if (this.props.onResponderGrant != null) {
-          this.props.onResponderGrant.call(this, event, dispatchID);
-        }
-      },
-      onResponderMove: (event: PressEvent): void => {
-        nullthrows(this.touchableHandleResponderMove)(event);
-        if (this.props.onResponderMove != null) {
-          this.props.onResponderMove.call(this, event);
-        }
-      },
-      onResponderRelease: (event: PressEvent): void => {
-        nullthrows(this.touchableHandleResponderRelease)(event);
-        if (this.props.onResponderRelease != null) {
-          this.props.onResponderRelease.call(this, event);
-        }
-      },
-      onResponderTerminate: (event: PressEvent): void => {
-        nullthrows(this.touchableHandleResponderTerminate)(event);
-        if (this.props.onResponderTerminate != null) {
-          this.props.onResponderTerminate.call(this, event);
-        }
-      },
-      onResponderTerminationRequest: (): boolean => {
-        const {onResponderTerminationRequest} = this.props;
-        if (!nullthrows(this.touchableHandleResponderTerminationRequest)()) {
-          return false;
-        }
-        if (onResponderTerminationRequest == null) {
-          return true;
-        }
-        return onResponderTerminationRequest();
-      },
-    };
-  }
+  const _accessible = Platform.select({
+    ios: accessible !== false,
+    default: accessible,
+  });
 
-  /**
-   * Lazily attaches Touchable.Mixin handlers.
-   */
-  _attachTouchHandlers(): void {
-    if (this.touchableGetPressRectOffset != null) {
-      return;
-    }
-    for (const key in Touchable.Mixin) {
-      if (typeof Touchable.Mixin[key] === 'function') {
-        (this: any)[key] = Touchable.Mixin[key].bind(this);
-      }
-    }
-    this.touchableHandleActivePressIn = (): void => {
-      if (!this.props.suppressHighlighting && isTouchable(this.props)) {
-        this.setState({isHighlighted: true});
-      }
-    };
-    this.touchableHandleActivePressOut = (): void => {
-      if (!this.props.suppressHighlighting && isTouchable(this.props)) {
-        this.setState({isHighlighted: false});
-      }
-    };
-    this.touchableHandlePress = (event: PressEvent): void => {
-      if (this.props.onPress != null) {
-        this.props.onPress(event);
-      }
-    };
-    this.touchableHandleLongPress = (event: PressEvent): void => {
-      if (this.props.onLongPress != null) {
-        this.props.onLongPress(event);
-      }
-    };
-    this.touchableGetPressRectOffset = (): PressRetentionOffset =>
-      this.props.pressRetentionOffset == null
-        ? PRESS_RECT_OFFSET
-        : this.props.pressRetentionOffset;
+  return hasTextAncestor ? (
+    <NativeVirtualText
+      {...restProps}
+      {...eventHandlersForText}
+      isHighlighted={isHighlighted}
+      isPressable={isPressable}
+      numberOfLines={numberOfLines}
+      selectionColor={selectionColor}
+      style={style}
+      ref={forwardedRef}
+    />
+  ) : (
+    <TextAncestor.Provider value={true}>
+      <NativeText
+        {...restProps}
+        {...eventHandlersForText}
+        disabled={_disabled}
+        accessible={_accessible}
+        accessibilityState={_accessibilityState}
+        allowFontScaling={allowFontScaling !== false}
+        ellipsizeMode={ellipsizeMode ?? 'tail'}
+        isHighlighted={isHighlighted}
+        numberOfLines={numberOfLines}
+        selectionColor={selectionColor}
+        style={style}
+        ref={forwardedRef}
+      />
+    </TextAncestor.Provider>
+  );
+});
+
+Text.displayName = 'Text';
+
+/**
+ * Returns false until the first time `newValue` is true, after which this will
+ * always return true. This is necessary to lazily initialize `Pressability` so
+ * we do not eagerly create one for every pressable `Text` component.
+ */
+function useLazyInitialization(newValue: boolean): boolean {
+  const [oldValue, setValue] = useState(newValue);
+  if (!oldValue && newValue) {
+    setValue(newValue);
   }
+  return oldValue;
 }
 
-const isTouchable = (props: Props): boolean =>
-  props.onPress != null ||
-  props.onLongPress != null ||
-  props.onStartShouldSetResponder != null;
-
-const AndroidTextBbd = createReactNativeComponentClass(
-  viewConfig.uiViewClassName,
-  () => viewConfig,
-);
-
-const AndroidVirtualTextBbd =
-  UIManager.getViewManagerConfig('AndroidVirtualTextBbd') == null
-    ? AndroidTextBbd
-    : createReactNativeComponentClass('AndroidVirtualTextBbd', () => ({
-        validAttributes: {
-          ...ReactNativeViewAttributes.UIView,
-          isHighlighted: true,
-          maxFontSizeMultiplier: true,
-        },
-        uiViewClassName: 'AndroidVirtualTextBbd',
-      }));
-
-const Text = (
-  props: TextProps,
-  forwardedRef: ?React.Ref<'AndroidTextBbd' | 'AndroidVirtualTextBbd'>,
-) => {
-  return <TouchableText {...props} forwardedRef={forwardedRef} />;
-};
-const TextToExport = React.forwardRef(Text);
-TextToExport.displayName = 'Text';
-
-// TODO: Deprecate this.
-/* $FlowFixMe(>=0.89.0 site=react_native_fb) This comment suppresses an error
- * found when Flow v0.89 was deployed. To see the error, delete this comment
- * and run Flow. */
-TextToExport.propTypes = DeprecatedTextPropTypes;
-
-module.exports = ((TextToExport: $FlowFixMe): Class<
-  NativeComponent<TextProps>,
->);
+module.exports = Text;

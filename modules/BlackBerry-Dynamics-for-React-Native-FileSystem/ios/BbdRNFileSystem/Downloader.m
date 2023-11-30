@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,12 +160,22 @@
     NSLog(@"RNFS download: unable to move tempfile to destination. %@, %@", error, error.userInfo);
   }
 
+  // When numerous downloads are called the sessions are not always invalidated and cleared by iOS14.
+  // This leads to error 28 – no space left on device so we manually flush and invalidate to free up space
+  if(session != nil){
+    [session flushWithCompletionHandler:^{
+      [session finishTasksAndInvalidate];
+    }];
+  }
+
   return _params.completeCallback(_statusCode, _bytesWritten);
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error
 {
-  if (error && error.code != NSURLErrorCancelled) {
+  if (error) {
+    NSLog(@"RNFS download: didCompleteWithError %@, %@", error, error.userInfo);
+    if (error.code != NSURLErrorCancelled) {
       _resumeData = error.userInfo[NSURLSessionDownloadTaskResumeData];
       if (_resumeData != nil) {
         if (_params.resumableCallback) {
@@ -174,6 +184,7 @@
       } else {
           _params.errorCallback(error);
       }
+    }
   }
 }
 
