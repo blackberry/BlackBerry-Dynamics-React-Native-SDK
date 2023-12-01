@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,16 +85,22 @@ export default class HomeScreen extends Component {
       const copyDestPath = `${RNFS.DocumentDirectoryPath}${importPath}`;
 
       RNFS.mkdir(`${RNFS.DocumentDirectoryPath}${importDirectory}`).finally(() => {
-        RNFS.unlink(copyDestPath).finally(() => {
-          RNFS.copyFileAssets(assetsPath, copyDestPath)
-            .then(() => {
-              // success
-              console.log('RNFS.copyFileAssets() succesfully finished');
-            })
-            .catch(error => {
-              console.log('RNFS.copyFileAssets() failed: ', error);
-            });
-        });
+        RNFS.unlink(copyDestPath)
+          .catch(error => {
+            // DEVNOTE: this is expected that .db files don't exist on first app launch
+            if (error.message !== 'File does not exist') {
+              console.error(error.message);
+            }
+          })
+          .finally(() => {
+            RNFS.copyFileAssets(assetsPath, copyDestPath)
+              .then(() => {
+                console.log('RNFS.copyFileAssets() succesfully finished');
+              })
+              .catch(error => {
+                console.log('RNFS.copyFileAssets() failed: ', error);
+              });
+          });
       });
     }
   }

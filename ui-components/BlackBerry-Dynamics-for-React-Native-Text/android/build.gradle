@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:11.1.0.62'
-    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:11.1.0.62'
-    implementation "com.facebook.react:react-native:+"
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_platform:12.0.1.79'
+    implementation 'com.blackberry.blackberrydynamics:android_handheld_backup_support:12.0.1.79'
+   	implementation "com.facebook.react:react-native:+"
 }

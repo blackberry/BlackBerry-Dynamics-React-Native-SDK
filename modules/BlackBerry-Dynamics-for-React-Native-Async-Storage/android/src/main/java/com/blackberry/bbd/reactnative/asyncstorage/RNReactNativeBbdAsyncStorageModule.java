@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -19,6 +19,7 @@ import com.facebook.common.logging.FLog;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.GuardedAsyncTask;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -37,7 +38,7 @@ import java.util.concurrent.Executors;
 
 @ReactModule(name = RNReactNativeBbdAsyncStorageModule.NAME)
 public final class RNReactNativeBbdAsyncStorageModule
-        extends ReactContextBaseJavaModule implements ModuleDataCleaner.Cleanable {
+    extends ReactContextBaseJavaModule implements ModuleDataCleaner.Cleanable, LifecycleEventListener {
 
   // changed name to not conflict with AsyncStorage from RN repo
   public static final String NAME = "RNReactNativeBbdAsyncStorage";
@@ -48,37 +49,6 @@ public final class RNReactNativeBbdAsyncStorageModule
 
   private ReactDatabaseSupplier mReactDatabaseSupplier;
   private boolean mShuttingDown = false;
-
-  // Adapted from https://android.googlesource.com/platform/frameworks/base.git/+/1488a3a19d4681a41fb45570c15e14d99db1cb66/core/java/android/os/AsyncTask.java#237
-  private class SerialExecutor implements Executor {
-    private final ArrayDeque<Runnable> mTasks = new ArrayDeque<Runnable>();
-    private Runnable mActive;
-    private final Executor executor;
-
-    SerialExecutor(Executor executor) {
-      this.executor = executor;
-    }
-
-    public synchronized void execute(final Runnable r) {
-      mTasks.offer(new Runnable() {
-        public void run() {
-          try {
-            r.run();
-          } finally {
-            scheduleNext();
-          }
-        }
-      });
-      if (mActive == null) {
-        scheduleNext();
-      }
-    }
-    synchronized void scheduleNext() {
-      if ((mActive = mTasks.poll()) != null) {
-        executor.execute(mActive);
-      }
-    }
-  }
 
   private final SerialExecutor executor;
 
@@ -95,6 +65,8 @@ public final class RNReactNativeBbdAsyncStorageModule
   RNReactNativeBbdAsyncStorageModule(ReactApplicationContext reactContext, Executor executor) {
     super(reactContext);
     this.executor = new SerialExecutor(executor);
+    reactContext.addLifecycleEventListener(this);
+    // Creating the database MUST happen after the migration.
     mReactDatabaseSupplier = ReactDatabaseSupplier.getInstance(reactContext);
   }
 
@@ -122,6 +94,18 @@ public final class RNReactNativeBbdAsyncStorageModule
     mReactDatabaseSupplier.clearAndCloseDatabase();
   }
 
+  @Override
+  public void onHostResume() {}
+
+  @Override
+  public void onHostPause() {}
+
+  @Override
+  public void onHostDestroy() {
+    // ensure we close database when activity is destroyed
+    mReactDatabaseSupplier.closeDatabase();
+  }
+
   /**
    * Given an array of keys, this returns a map of (key, value) pairs for the keys found, and
    * (key, null) for the keys that haven't been found.
@@ -147,13 +131,13 @@ public final class RNReactNativeBbdAsyncStorageModule
         for (int keyStart = 0; keyStart < keys.size(); keyStart += MAX_SQL_KEYS) {
           int keyCount = Math.min(keys.size() - keyStart, MAX_SQL_KEYS);
           Cursor cursor = mReactDatabaseSupplier.get().query(
-                  ReactDatabaseSupplier.TABLE_CATALYST,
-                  columns,
-                  AsyncLocalStorageUtil.buildKeySelection(keyCount),
-                  AsyncLocalStorageUtil.buildKeySelectionArgs(keys, keyStart, keyCount),
-                  null,
-                  null,
-                  null);
+              ReactDatabaseSupplier.TABLE_CATALYST,
+              columns,
+              AsyncLocalStorageUtil.buildKeySelection(keyCount),
+              AsyncLocalStorageUtil.buildKeySelectionArgs(keys, keyStart, keyCount),
+              null,
+              null,
+              null);
           keysRemaining.clear();
           try {
             if (cursor.getCount() != keys.size()) {
@@ -286,8 +270,8 @@ public final class RNReactNativeBbdAsyncStorageModule
             int keyCount = Math.min(keys.size() - keyStart, MAX_SQL_KEYS);
             mReactDatabaseSupplier.get().delete(
                     ReactDatabaseSupplier.TABLE_CATALYST,
-                    AsyncLocalStorageUtil.buildKeySelection(keyCount),
-                    AsyncLocalStorageUtil.buildKeySelectionArgs(keys, keyStart, keyCount));
+                AsyncLocalStorageUtil.buildKeySelection(keyCount),
+                AsyncLocalStorageUtil.buildKeySelectionArgs(keys, keyStart, keyCount));
           }
           mReactDatabaseSupplier.get().setTransactionSuccessful();
         } catch (Exception e) {
@@ -295,7 +279,7 @@ public final class RNReactNativeBbdAsyncStorageModule
           error = AsyncStorageErrorUtil.getError(null, e.getMessage());
         } finally {
           try {
-            mReactDatabaseSupplier.get().endTransaction();
+          mReactDatabaseSupplier.get().endTransaction();
           } catch (Exception e) {
             FLog.w(ReactConstants.TAG, e.getMessage(), e);
             if (error == null) {
@@ -345,9 +329,9 @@ public final class RNReactNativeBbdAsyncStorageModule
             }
 
             if (!AsyncLocalStorageUtil.mergeImpl(
-                    mReactDatabaseSupplier.get(),
-                    keyValueArray.getArray(idx).getString(0),
-                    keyValueArray.getArray(idx).getString(1))) {
+                mReactDatabaseSupplier.get(),
+                keyValueArray.getArray(idx).getString(0),
+                keyValueArray.getArray(idx).getString(1))) {
               error = AsyncStorageErrorUtil.getDBError(null);
               return;
             }
@@ -413,7 +397,7 @@ public final class RNReactNativeBbdAsyncStorageModule
         WritableArray data = Arguments.createArray();
         String[] columns = {ReactDatabaseSupplier.KEY_COLUMN};
         Cursor cursor = mReactDatabaseSupplier.get()
-                .query(ReactDatabaseSupplier.TABLE_CATALYST, columns, null, null, null, null, null);
+            .query(ReactDatabaseSupplier.TABLE_CATALYST, columns, null, null, null, null, null);
         try {
           if (cursor.moveToFirst()) {
             do {

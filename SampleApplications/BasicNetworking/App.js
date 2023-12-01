@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,11 +46,26 @@ export default class App extends Component {
     if(Platform.OS === 'android') {
       async function requestReadExternalStoragePermission() {
         try {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-          )
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            alert("Permission denied, add READ_EXTERNAL_STORAGE permission in AndroidManifest.xml and re-build the app.");
+          if(Platform.Version < 33) {
+            const granted = await PermissionsAndroid.request(
+              PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            )
+            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+              alert("Permission denied, add READ_EXTERNAL_STORAGE permission in AndroidManifest.xml and re-build the app.");
+            }
+          }
+          else {
+            const granted = await PermissionsAndroid.requestMultiple(
+              [ PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+                PermissionsAndroid.PERMISSIONS.READ_MEDIA_VIDEO,
+                PermissionsAndroid.PERMISSIONS.READ_MEDIA_AUDIO,
+              ]
+            );
+            if (granted["android.permission.READ_MEDIA_IMAGES"] !== "granted" || 
+              granted["android.permission.READ_MEDIA_VIDEO"] !== "granted"||
+              granted["android.permission.READ_MEDIA_VIDEO"] !== "granted") {
+              alert("Permission denied, add READ_MEDIA_* permissions in AndroidManifest.xml and re-build the app.");
+            }
           }
         }
         catch (err) {

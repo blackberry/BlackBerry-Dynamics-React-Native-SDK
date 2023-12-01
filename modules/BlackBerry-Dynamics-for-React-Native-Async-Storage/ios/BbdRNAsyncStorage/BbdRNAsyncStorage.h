@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -9,11 +9,10 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#if __has_include("RCTBridgeModule.h")
-#import "RCTBridgeModule.h"
-#else
+#import <Foundation/Foundation.h>
+
 #import <React/RCTBridgeModule.h>
-#endif
+
 
 #import <React/RCTInvalidating.h>
 #import "BbdRNAsyncStorageDelegate.h"
@@ -43,10 +42,15 @@
 // For clearing data when the bridge may not exist, e.g. when logging out.
 + (void)clearAllData;
 
-// Grab data from the cache. ResponseBlock result array will have an error at position 0, and an array of arrays at position 1.
+// Grab data from the cache. ResponseBlock result array will have an error at position 0, and an
+// array of arrays at position 1.
 - (void)multiGet:(NSArray<NSString *> *)keys callback:(RCTResponseSenderBlock)callback;
 
 // Add multiple key value pairs to the cache.
-- (void)multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs callback:(RCTResponseSenderBlock)callback;
+- (void)multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs
+        callback:(RCTResponseSenderBlock)callback;
+
+// Interface for natively fetching all the keys from the storage data.
+- (void)getAllKeys:(RCTResponseSenderBlock)callback;
 
 @end

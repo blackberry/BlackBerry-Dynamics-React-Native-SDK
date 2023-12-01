@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,10 @@
       var androidManifestContent = fs.readFileSync(projectTemplateAndroidManifest, 'utf-8');
       if (androidManifestContent.indexOf('android.permission.READ_EXTERNAL_STORAGE') < 0) {
 
-        var permissionStrings = `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+        var permissionStrings = `<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name=`;
 
         // Add "android.permission.READ_EXTERNAL_STORAGE"

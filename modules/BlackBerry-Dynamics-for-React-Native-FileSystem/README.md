@@ -1,15 +1,21 @@
 # BlackBerry-Dynamics-for-React-Native-FileSystem
 
-`BlackBerry-Dynamics-for-React-Native-FileSystem` secures API for [react-native-fs](https://github.com/itinance/react-native-fs) 3rd party module for React Native.
+`BlackBerry-Dynamics-for-React-Native-FileSystem` secures API for [react-native-fs](https://github.com/itinance/react-native-fs) (`v2.20.0`) 3rd party module for React Native.
 The JavaScript API of this module remains the same but files/directories are stored and managed within Dynamics secure container.
 
 ## Supportability
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
+
+#### Platforms
+ - iOS
+ - Android
 
 ## Preconditions
 
@@ -23,9 +29,9 @@ The JavaScript API of this module remains the same but files/directories are sto
     $ cd ios  
     $ pod install  
     $ cd ..  
-    $ react-native run-ios
+    $ npx react-native run-ios
 ###### Android
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## Usage
 

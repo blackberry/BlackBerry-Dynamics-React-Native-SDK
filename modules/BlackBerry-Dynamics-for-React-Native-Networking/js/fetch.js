@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original fetch API from Networking of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/fetch.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Network/fetch.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,7 +11,7 @@
  * @format
  */
 
-/* globals Headers, Request, Response, fetch */
+/* globals Headers, Request, Response , fetch */
 
 'use strict';
 
@@ -20,12 +20,17 @@ const XMLHttpRequest = require('./XMLHttpRequest');
 const Blob = require('./Blob');
 const FileReader = require('./FileReader');
 
+var global =
+  (typeof globalThis !== 'undefined' && globalThis) ||
+  (typeof self !== 'undefined' && self) ||
+  (typeof global !== 'undefined' && global)
+
 var support = {
-  searchParams: 'URLSearchParams' in self,
-  iterable: 'Symbol' in self && 'iterator' in Symbol,
+  searchParams: 'URLSearchParams' in global,
+  iterable: 'Symbol' in global && 'iterator' in Symbol,
   blob:
-    'FileReader' in self &&
-    'Blob' in self &&
+    'FileReader' in global &&
+    'Blob' in global &&
     (function() {
       try {
         new Blob()
@@ -34,8 +39,8 @@ var support = {
         return false
       }
     })(),
-  formData: 'FormData' in self,
-  arrayBuffer: 'ArrayBuffer' in self
+  formData: 'FormData' in global,
+  arrayBuffer: 'ArrayBuffer' in global
 }
 
 function isDataView(obj) {
@@ -66,8 +71,8 @@ function normalizeName(name) {
   if (typeof name !== 'string') {
     name = String(name)
   }
-  if (/[^a-z0-9\-#$%&'*+.^_`|~]/i.test(name)) {
-    throw new TypeError('Invalid character in header field name')
+  if (/[^a-z0-9\-#$%&'*+.^_`|~!]/i.test(name) || name === '') {
+    throw new TypeError('Invalid character in header field name: "' + name + '"')
   }
   return name.toLowerCase()
 }
@@ -231,6 +236,17 @@ function Body() {
   this.bodyUsed = false
 
   this._initBody = function(body) {
+    /*
+      fetch-mock wraps the Response object in an ES6 Proxy to
+      provide useful test harness features such as flush. However, on
+      ES5 browsers without fetch or Proxy support pollyfills must be used;
+      the proxy-pollyfill is unable to proxy an attribute unless it exists
+      on the object before the Proxy is created. This change ensures
+      Response.bodyUsed exists on the instance, while maintaining the
+      semantic of setting Request.bodyUsed in the constructor before
+      _initBody is called.
+    */
+    this.bodyUsed = this.bodyUsed
     this._bodyInit = body
     if (!body) {
       this._bodyText = ''
@@ -283,7 +299,20 @@ function Body() {
 
     this.arrayBuffer = function() {
       if (this._bodyArrayBuffer) {
-        return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+        var isConsumed = consumed(this)
+        if (isConsumed) {
+          return isConsumed
+        }
+        if (ArrayBuffer.isView(this._bodyArrayBuffer)) {
+          return Promise.resolve(
+            this._bodyArrayBuffer.buffer.slice(
+              this._bodyArrayBuffer.byteOffset,
+              this._bodyArrayBuffer.byteOffset + this._bodyArrayBuffer.byteLength
+            )
+          )
+        } else {
+          return Promise.resolve(this._bodyArrayBuffer)
+        }
       } else {
         return this.blob().then(readBlobAsArrayBuffer)
       }
@@ -329,6 +358,10 @@ function normalizeMethod(method) {
 }
 
 export function Request(input, options) {
+  if (!(this instanceof Request)) {
+    throw new TypeError('Please use the "new" operator, this DOM object constructor cannot be called as a function.')
+  }
+
   options = options || {}
   var body = options.body
 
@@ -365,6 +398,21 @@ export function Request(input, options) {
     throw new TypeError('Body not allowed for GET or HEAD requests')
   }
   this._initBody(body)
+
+  if (this.method === 'GET' || this.method === 'HEAD') {
+    if (options.cache === 'no-store' || options.cache === 'no-cache') {
+      // Search for a '_' parameter in the query string
+      var reParamSearch = /([?&])_=[^&]*/
+      if (reParamSearch.test(this.url)) {
+        // If it already exists then set the value with the current time
+        this.url = this.url.replace(reParamSearch, '$1_=' + new Date().getTime())
+      } else {
+        // Otherwise add a new '_' parameter to the end with the current time
+        var reQueryString = /\?/
+        this.url += (reQueryString.test(this.url) ? '&' : '?') + '_=' + new Date().getTime()
+      }
+    }
+  }
 }
 
 Request.prototype.clone = function() {
@@ -392,7 +440,15 @@ function parseHeaders(rawHeaders) {
   // Replace instances of \r\n and \n followed by at least one space or horizontal tab with a space
   // https://tools.ietf.org/html/rfc7230#section-3.2
   var preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ')
-  preProcessedHeaders.split(/\r?\n/).forEach(function(line) {
+  // Avoiding split via regex to work around a common IE11 bug with the core-js 3.6.0 regex polyfill
+  // https://github.com/github/fetch/issues/748
+  // https://github.com/zloirock/core-js/issues/751
+  preProcessedHeaders
+    .split('\r')
+    .map(function(header) {
+      return header.indexOf('\n') === 0 ? header.substr(1, header.length) : header
+    })
+    .forEach(function(line) {
     var parts = line.split(':')
     var key = parts.shift().trim()
     if (key) {
@@ -406,6 +462,9 @@ function parseHeaders(rawHeaders) {
 Body.call(Request.prototype)
 
 export function Response(bodyInit, options) {
+  if (!(this instanceof Response)) {
+    throw new TypeError('Please use the "new" operator, this DOM object constructor cannot be called as a function.')
+  }
   if (!options) {
     options = {}
   }
@@ -413,7 +472,7 @@ export function Response(bodyInit, options) {
   this.type = 'default'
   this.status = options.status === undefined ? 200 : options.status
   this.ok = this.status >= 200 && this.status < 300
-  this.statusText = 'statusText' in options ? options.statusText : 'OK'
+  this.statusText = options.statusText === undefined ? '' : '' + options.statusText
   this.headers = new Headers(options.headers)
   this.url = options.url || ''
   this._initBody(bodyInit)
@@ -446,7 +505,7 @@ Response.redirect = function(url, status) {
   return new Response(null, {status: status, headers: {location: url}})
 }
 
-export var DOMException = self.DOMException
+export var DOMException = global.DOMException
 try {
   new DOMException()
 } catch (err) {
@@ -482,22 +541,38 @@ export function fetch(input, init) {
       }
       options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
       var body = 'response' in xhr ? xhr.response : xhr.responseText
+      setTimeout(function() {
       resolve(new Response(body, options))
+      }, 0)
     }
 
     xhr.onerror = function() {
+      setTimeout(function() {
       reject(new TypeError('Network request failed'))
+      }, 0)
     }
 
     xhr.ontimeout = function() {
+      setTimeout(function() {
       reject(new TypeError('Network request failed'))
+      }, 0)
     }
 
     xhr.onabort = function() {
+      setTimeout(function() {
       reject(new DOMException('Aborted', 'AbortError'))
+      }, 0)
     }
 
-    xhr.open(request.method, request.url, true)
+    function fixUrl(url) {
+      try {
+        return url === '' && global.location.href ? global.location.href : url
+      } catch (e) {
+        return url
+      }
+    }
+
+    xhr.open(request.method, fixUrl(request.url), true)
 
     if (request.credentials === 'include') {
       xhr.withCredentials = true
@@ -505,13 +580,27 @@ export function fetch(input, init) {
       xhr.withCredentials = false
     }
 
-    if ('responseType' in xhr && support.blob) {
+    if ('responseType' in xhr) {
+      if (support.blob) {
       xhr.responseType = 'blob'
+      } else if (
+        support.arrayBuffer &&
+        request.headers.get('Content-Type') &&
+        request.headers.get('Content-Type').indexOf('application/octet-stream') !== -1
+      ) {
+        xhr.responseType = 'arraybuffer'
+      }
     }
 
+    if (init && typeof init.headers === 'object' && !(init.headers instanceof Headers)) {
+      Object.getOwnPropertyNames(init.headers).forEach(function(name) {
+        xhr.setRequestHeader(name, normalizeValue(init.headers[name]))
+      })
+    } else {
     request.headers.forEach(function(value, name) {
       xhr.setRequestHeader(name, value)
     })
+    }
 
     if (request.signal) {
       request.signal.addEventListener('abort', abortXhr)
@@ -530,9 +619,9 @@ export function fetch(input, init) {
 
 fetch.polyfill = true
 
-if (!self.fetch) {
-  self.fetch = fetch
-  self.Headers = Headers
-  self.Request = Request
-  self.Response = Response
+if (!global.fetch) {
+  global.fetch = fetch
+  global.Headers = Headers
+  global.Request = Request
+  global.Response = Response
 }

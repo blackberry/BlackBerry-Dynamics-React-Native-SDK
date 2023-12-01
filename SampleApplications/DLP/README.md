@@ -8,15 +8,20 @@ Open the sample app directory in Terminal window:
 Install dependencies:
 `$ yarn`
 
-> NOTE: DLP sample is based on `0.66.4` version of React Native. There is a possibility to upgrade to `0.67.x` or `0.68.x` versions (`0.67.0` - `0.67.4`, `0.68.0` - `0.68.2`) by running one of following commands:
-`$ react-native upgrade 0.6x.x`
+> NOTE: DLP sample is based on `0.70.0` version of React Native. There is a possibility to upgrade to `0.70.x`, `0.71.x`, `0.72.x` versions (`0.70.1` - `0.70.10`, `0.71.0` - `0.71.13`, `0.72.0` - `0.72.4`) by running one of following commands:
+`$ npx react-native upgrade 0.70.x`
 for example:
-`$ react-native upgrade 0.67.4`
+`$ npx react-native upgrade 0.70.10`
 or
-`$ react-native upgrade 0.68.2`
+`$ npx react-native upgrade 0.71.13`
+or
+`$ npx react-native upgrade 0.72.4`
 
 Generate ios and android directories:
-`$ react-native eject`
+`$ npx react-native eject`
+
+> There is a known issue with loading Metro server on `0.72.0` and `0.72.1` versions when the error message is displayed during app load in Metro server: "Cannot read properties of undefined (reading 'addHelper')". The issue can be fixed by adding the following devDependency to the project:
+`$ yarn add @babel/traverse@7.22.8 --dev`  
 
 ## Dynamics modules
 #### Prerequisites
@@ -39,6 +44,19 @@ There are some dependencies that need to be installed before using `BlackBerry-D
 	$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-TextInput
 
 ##### iOS
+Different `ruby` versions might be install on the machine. Especially it is related to React Native v`0.70.x` projects.
+Depending on your Mac configuration following error can occur when running `pod install` command:
+```
+Traceback (most recent call last):
+	4: from /Users/vtaliar/.rvm/gems/ruby-2.7.5/bin/ruby_executable_hooks:22:in `<main>'
+	3: from /Users/vtaliar/.rvm/gems/ruby-2.7.5/bin/ruby_executable_hooks:22:in `eval'
+	2: from /Users/vtaliar/.rvm/gems/ruby-2.7.5/bin/pod:23:in `<main>'
+	1: from /Users/vtaliar/.rvm/rubies/ruby-2.7.5/lib/ruby/2.7.0/rubygems.rb:296:in `activate_bin_path'
+/Users/vtaliar/.rvm/rubies/ruby-2.7.5/lib/ruby/2.7.0/rubygems.rb:277:in `find_spec_for_exe': can't find gem cocoapods (>= 0.a) with executable pod (Gem::GemNotFoundException)
+```
+More details can be found [here](https://medium.com/@pk60905/bundle-install-and-bundle-update-80f3d6f52214).
+
+`$ bundle install` - needed on some `0.70.x` versions to fix the issue above  
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`
@@ -60,16 +78,36 @@ import TextInput from 'BlackBerry-Dynamics-for-React-Native-TextInput';
 
 #### How to run application
 ##### iOS
-`$ react-native run-ios`
+`$ npx react-native run-ios`
 
 ##### Android
-`$ react-native run-android`
+`$ npx react-native run-android`
 
 #### Examples of usage
-##### 0.66.4
+##### 0.70.0
 `$ cd <path>/SampleApplications/DLP`  
 `$ yarn`  
-`$ react-native eject`  
+`$ git init`  
+`$ npx react-native eject`  
+`$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
+`$ yarn set-bundle-id`  
+`$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text`  
+`$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-TextInput`  
+`$ yarn set-text-config`  
+For iOS:  
+`$ bundle install`  
+`$ cd ios`  
+`$ pod install`  
+`$ cd ..`  
+`$ npx react-native run-ios`  
+For Android:  
+`$ npx react-native run-android`  
+##### 0.70.10
+`$ cd <path>/SampleApplications/DLP`  
+`$ yarn`  
+`$ git init`  
+`$ npx react-native upgrade 0.70.10`  
+`$ npx react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
 `$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text`  
@@ -79,15 +117,16 @@ For iOS:
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`  
-`$ react-native run-ios`  
+`$ npx react-native run-ios`  
 For Android:  
-`$ react-native run-android`  
-##### 0.68.2
+`$ npx react-native run-android`
+##### 0.72.0
 `$ cd <path>/SampleApplications/DLP`  
 `$ yarn`  
-`$ cd .. ; git init ; cd DLP`  
-`$ react-native upgrade 0.68.2`  
-`$ react-native eject`  
+`$ yarn add @babel/traverse@7.22.8 --dev` - OPTIONAL: needed on `0.72.0`, `0.72.1` versions to fix the error mentioned above in Metro server  
+`$ git init`  
+`$ npx react-native upgrade 0.72.0`  
+`$ npx react-native eject`  
 `$ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base`  
 `$ yarn set-bundle-id`  
 `$ yarn add <path>/ui-components/BlackBerry-Dynamics-for-React-Native-Text`  
@@ -97,9 +136,9 @@ For iOS:
 `$ cd ios`  
 `$ pod install`  
 `$ cd ..`  
-`$ react-native run-ios`  
+`$ npx react-native run-ios`  
 For Android:  
-`$ react-native run-android`
+`$ npx react-native run-android`
 
 ## Known issues
 #### Unrecognized font family 'Material Icons'

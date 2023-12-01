@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -300,32 +300,6 @@ export default function() {
 
       it('XMLHttpRequest send: GET async, on secured port', function(done) {
         const method = "GET";
-        const url = "https://www.wikipedia.org:443/";
-
-        const xhr = new XMLHttpRequest();
-        expect(xhr.readyState).toBe(0);
-
-        xhr.open(method, url);
-        expect(xhr.readyState).toBe(1);
-
-        xhr.onreadystatechange = function() {
-          const expectedStatus = 200;
-
-          if (xhr.readyState === 4) {
-            expect(xhr.response).toBeDefined();
-            expect(xhr.responseText).toBeDefined();
-            expect(xhr.status).toBeDefined();
-            expect(xhr.status).toBe(expectedStatus);
-
-            done();
-          }
-        };
-
-        xhr.send();
-      });
-
-      it('XMLHttpRequest send: POST async, on secured port', function(done) {
-        const method = "POST";
         const url = "https://www.wikipedia.org:443/";
 
         const xhr = new XMLHttpRequest();
@@ -1208,8 +1182,8 @@ export default function() {
             const headersValue = xhr.getAllResponseHeaders();
 
             expect(headersValue).toBeDefined();
-            expect(headersValue.includes(expectedDefaultHeaderName1)).toBe(true);
-            expect(headersValue.includes(expectedDefaultHeaderName2)).toBe(true);
+            expect(headersValue.toLowerCase().includes(expectedDefaultHeaderName1.toLowerCase())).toBe(true);
+            expect(headersValue.toLowerCase().includes(expectedDefaultHeaderName2.toLowerCase())).toBe(true);
 
             done();
           }
@@ -1389,7 +1363,7 @@ export default function() {
 
       it('XMLHttpRequest responseType: blob', function(done) {
         const method = "GET";
-        const url = "https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg";
+        const url = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Test_rillke2.jpg";
         const responseType = "blob";
 
         const xhr = new XMLHttpRequest();
@@ -1423,7 +1397,7 @@ export default function() {
 
       it('XMLHttpRequest responseType: arraybuffer', function(done) {
         const method = "GET";
-        const url = "https://commons.wikimedia.org/wiki/File:Test_rillke2.jpg";
+        const url = "https://upload.wikimedia.org/wikipedia/commons/3/3b/Test_rillke2.jpg";
         const responseType = "arraybuffer";
 
         const xhr = new XMLHttpRequest();

@@ -21,11 +21,13 @@ The JavaScript API remains unchanged.
 
 ## Supportability
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 
 ## Preconditions
 `BlackBerry-Dynamics-for-React-Native-Networking` is dependent on `BlackBerry-Dynamics-for-React-Native-Base` module.
@@ -39,9 +41,9 @@ Please install `BlackBerry-Dynamics-for-React-Native-Base` first.
     $ cd ios
     $ pod install
     $ cd ..
-    $ react-native run-ios
+    $ npx react-native run-ios
 ##### Android
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## Usage
 #### XMLHttpRequest

@@ -1,7 +1,7 @@
 {
   "name": "BlackBerry-Dynamics-for-React-Native-Base",
   "version": "1.0.0",
-  "dynamicsPodSpec":"https://software.download.blackberry.com/repository/framework/dynamics/ios/11.1.0.62/BlackBerryDynamics-11.1.0.62.podspec",
+  "dynamicsPodSpec":"https://software.download.blackberry.com/repository/framework/dynamics/ios/12.0.1.79/BlackBerryDynamics-12.0.1.79.podspec",
   "description": "This is a BlackBerry Dynamics Base module for React Native that automatically integrates the BlackBerry Dynamics SDK for iOS and Android into a React Native application",
   "main": "index.js",
   "bin": {
@@ -18,7 +18,7 @@
   ],
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "react-native-rename": "2.4.1",
+    "react-native-rename": "3.2.13",
     "shelljs": "^0.7.0",
     "fs-extra": "^2.0.0",
     "findit": "^2.0.0"

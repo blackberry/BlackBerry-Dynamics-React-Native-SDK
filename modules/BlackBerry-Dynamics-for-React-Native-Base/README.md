@@ -9,11 +9,13 @@ Please setup your environment as described in the [React Native documentation](h
 ## Supportability
 
 #### React Native
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 
 ## Preconditions
 
@@ -29,21 +31,23 @@ Dynamics SDK for iOS and Android are now installed as part of the Base module us
 Supported Dynamics SDK for iOS versions:
 - 11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_1)
 - 11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/11_2)
+- 12.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-ios/12_0)
 
 Supported Dynamics SDK for Android versions:
 - 11.1, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_1)
 - 11.2, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/11_2)
+- 12.0, check environment requirements [here](https://docs.blackberry.com/en/development-tools/blackberry-dynamics-sdk-android/12_0)
 
 ##### BlackBerry Dynamics SDK for iOS integration
-###### Using default (11.1) released version - default
-By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for iOS using following podspec: `https://software.download.blackberry.com/repository/framework/dynamics/ios/11.1.0.62/BlackBerryDynamics-11.1.0.62.podspec`.
+###### Using default (12.0) released version - default
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **12.0** (12.0.1.79) version of BlackBerry Dynamics SDK for iOS using following podspec: `https://software.download.blackberry.com/repository/framework/dynamics/ios/12.0.1.79/BlackBerryDynamics-12.0.1.79.podspec`.
 > NOTE: If one of the below integration methods was used there is an option to reset **default** configuration by running following command:
 `$ yarn set-dynamics-podspec --default`
 `$ cd ios && pod install && cd ..`
 
 ###### Using other released version
 There is possibility to integrate other released build of BlackBerry Dynamics SDK for iOS.
-Currently, the **latest** supported versions is 11.2.  
+Currently, the **other** supported versions are 11.1 and 11.2.  
 Following command should be run to use BlackBerry Dynamics SDK for iOS v11.2:
 ```
 $ yarn set-dynamics-podspec --url "https://software.download.blackberry.com/repository/framework/dynamics/ios/11.2.0.26/BlackBerryDynamics-11.2.0.26.podspec"
@@ -58,10 +62,10 @@ $ cd ios && pod install && cd ..
 ```
 
 ##### BlackBerry Dynamics SDK for Android integration
-By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **11.1** (11.1.0.62) version of BlackBerry Dynamics SDK for Android.
+By default, `BlackBerry-Dynamics-for-React-Native-Base` module will integrate **12.0** (12.0.1.79) version of BlackBerry Dynamics SDK for Android.
 ###### Using other released version
 There is possibility to integrate other released build of BlackBerry Dynamics SDK for Android.  
-Currently, the **latest** supported versions is 11.2.  
+Currently, the **other** supported versions are 11.1 and 11.2.  
 Following steps should be done to use BlackBerry Dynamics SDK for Android v11.2:
 - update versions of Dynamics dependencies in all modules from `<path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/modules/` and ui-components from `<path>/BlackBerry_Dynamics_SDK_for_React_Native_vX.X.X.X/ui-components/`:
     ```
@@ -92,7 +96,7 @@ $ cd ..
 
 #### react-native
 
-    $ react-native init <appFolder> --version 0.66.0
+    $ npx react-native init <appFolder> --version 0.70.0
     $ cd <appFolder>
     $ yarn add <path>/modules/BlackBerry-Dynamics-for-React-Native-Base
 
@@ -107,11 +111,11 @@ $ cd ..
     $ cd ios  
     $ pod install  
     $ cd ..  
-    $ react-native run-ios  
+    $ npx react-native run-ios  
 
 ##### Android
 
-    $ react-native run-android
+    $ npx react-native run-android
 
 ## Activation
 

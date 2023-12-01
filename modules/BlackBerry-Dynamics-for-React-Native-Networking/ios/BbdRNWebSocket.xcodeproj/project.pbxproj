@@ -7,14 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		36C09C50261210590051143D /* BbdRCTNetworkTask.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C40261210590051143D /* BbdRCTNetworkTask.m */; };
-		36C09C51261210590051143D /* BbdRCTBlobManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C41261210590051143D /* BbdRCTBlobManager.mm */; };
-		36C09C52261210590051143D /* BbdRCTNetInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C43261210590051143D /* BbdRCTNetInfo.m */; };
-		36C09C53261210590051143D /* BbdRCTNetworking.mm in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C47261210590051143D /* BbdRCTNetworking.mm */; };
-		36C09C54261210590051143D /* BbdRCTDataRequestHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C48261210590051143D /* BbdRCTDataRequestHandler.m */; };
-		36C09C55261210590051143D /* BbdRNWebSocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C49261210590051143D /* BbdRNWebSocket.m */; };
-		36C09C56261210590051143D /* BbdRCTBlobCollector.mm in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C4A261210590051143D /* BbdRCTBlobCollector.mm */; };
-		36C09C57261210590051143D /* BbdRCTFileReaderModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 36C09C4E261210590051143D /* BbdRCTFileReaderModule.m */; };
+		364AB0572A83CF4200BAA32D /* BbdRCTNetworkPlugins.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0462A83CF2E00BAA32D /* BbdRCTNetworkPlugins.mm */; };
+		364AB0582A83CF4200BAA32D /* BbdRCTNetworkTask.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0472A83CF2E00BAA32D /* BbdRCTNetworkTask.mm */; };
+		364AB0592A83CF4200BAA32D /* BbdRCTBlobManager.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0482A83CF2E00BAA32D /* BbdRCTBlobManager.mm */; };
+		364AB05A2A83CF4200BAA32D /* BbdRCTNetInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 364AB04A2A83CF2E00BAA32D /* BbdRCTNetInfo.m */; };
+		364AB05B2A83CF4200BAA32D /* BbdRCTFileReaderModule.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB04B2A83CF2E00BAA32D /* BbdRCTFileReaderModule.mm */; };
+		364AB05C2A83CF4200BAA32D /* BbdRCTNetworking.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB04E2A83CF2E00BAA32D /* BbdRCTNetworking.mm */; };
+		364AB05D2A83CF4200BAA32D /* BbdRCTBlobCollector.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB04F2A83CF2E00BAA32D /* BbdRCTBlobCollector.mm */; };
+		364AB05E2A83CF4200BAA32D /* BbdRCTDataRequestHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0532A83CF2E00BAA32D /* BbdRCTDataRequestHandler.mm */; };
+		364AB05F2A83CF4200BAA32D /* BbdRCTBlobPlugins.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0542A83CF2E00BAA32D /* BbdRCTBlobPlugins.mm */; };
+		364AB0602A83CF4200BAA32D /* BbdRNWebSocket.mm in Sources */ = {isa = PBXBuildFile; fileRef = 364AB0562A83CF2E00BAA32D /* BbdRNWebSocket.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -31,22 +33,26 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libBbdRNWebSocket.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libBbdRNWebSocket.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		36C09C3E261210590051143D /* BbdRNWebSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRNWebSocket.h; sourceTree = "<group>"; };
-		36C09C3F261210590051143D /* BbdRCTDataRequestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTDataRequestHandler.h; sourceTree = "<group>"; };
-		36C09C40261210590051143D /* BbdRCTNetworkTask.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BbdRCTNetworkTask.m; sourceTree = "<group>"; };
-		36C09C41261210590051143D /* BbdRCTBlobManager.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTBlobManager.mm; sourceTree = "<group>"; };
-		36C09C42261210590051143D /* BbdRCTFileReaderModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTFileReaderModule.h; sourceTree = "<group>"; };
-		36C09C43261210590051143D /* BbdRCTNetInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BbdRCTNetInfo.m; sourceTree = "<group>"; };
-		36C09C45261210590051143D /* BbdRCTBlobCollector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTBlobCollector.h; sourceTree = "<group>"; };
-		36C09C46261210590051143D /* BbdRCTNetworking.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetworking.h; sourceTree = "<group>"; };
-		36C09C47261210590051143D /* BbdRCTNetworking.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTNetworking.mm; sourceTree = "<group>"; };
-		36C09C48261210590051143D /* BbdRCTDataRequestHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BbdRCTDataRequestHandler.m; sourceTree = "<group>"; };
-		36C09C49261210590051143D /* BbdRNWebSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BbdRNWebSocket.m; sourceTree = "<group>"; };
-		36C09C4A261210590051143D /* BbdRCTBlobCollector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTBlobCollector.mm; sourceTree = "<group>"; };
-		36C09C4B261210590051143D /* BbdRCTBlobManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTBlobManager.h; sourceTree = "<group>"; };
-		36C09C4C261210590051143D /* BbdRCTNetworkTask.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetworkTask.h; sourceTree = "<group>"; };
-		36C09C4D261210590051143D /* BbdRCTNetInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetInfo.h; sourceTree = "<group>"; };
-		36C09C4E261210590051143D /* BbdRCTFileReaderModule.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BbdRCTFileReaderModule.m; sourceTree = "<group>"; };
+		364AB0432A83CF2E00BAA32D /* BbdRNWebSocket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRNWebSocket.h; sourceTree = "<group>"; };
+		364AB0442A83CF2E00BAA32D /* BbdRCTBlobPlugins.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTBlobPlugins.h; sourceTree = "<group>"; };
+		364AB0452A83CF2E00BAA32D /* BbdRCTDataRequestHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTDataRequestHandler.h; sourceTree = "<group>"; };
+		364AB0462A83CF2E00BAA32D /* BbdRCTNetworkPlugins.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTNetworkPlugins.mm; sourceTree = "<group>"; };
+		364AB0472A83CF2E00BAA32D /* BbdRCTNetworkTask.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTNetworkTask.mm; sourceTree = "<group>"; };
+		364AB0482A83CF2E00BAA32D /* BbdRCTBlobManager.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTBlobManager.mm; sourceTree = "<group>"; };
+		364AB0492A83CF2E00BAA32D /* BbdRCTFileReaderModule.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTFileReaderModule.h; sourceTree = "<group>"; };
+		364AB04A2A83CF2E00BAA32D /* BbdRCTNetInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BbdRCTNetInfo.m; sourceTree = "<group>"; };
+		364AB04B2A83CF2E00BAA32D /* BbdRCTFileReaderModule.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTFileReaderModule.mm; sourceTree = "<group>"; };
+		364AB04C2A83CF2E00BAA32D /* BbdRCTBlobCollector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTBlobCollector.h; sourceTree = "<group>"; };
+		364AB04D2A83CF2E00BAA32D /* BbdRCTNetworking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetworking.h; sourceTree = "<group>"; };
+		364AB04E2A83CF2E00BAA32D /* BbdRCTNetworking.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTNetworking.mm; sourceTree = "<group>"; };
+		364AB04F2A83CF2E00BAA32D /* BbdRCTBlobCollector.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTBlobCollector.mm; sourceTree = "<group>"; };
+		364AB0502A83CF2E00BAA32D /* BbdRCTBlobManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTBlobManager.h; sourceTree = "<group>"; };
+		364AB0512A83CF2E00BAA32D /* BbdRCTNetworkTask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetworkTask.h; sourceTree = "<group>"; };
+		364AB0522A83CF2E00BAA32D /* BbdRCTNetInfo.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetInfo.h; sourceTree = "<group>"; };
+		364AB0532A83CF2E00BAA32D /* BbdRCTDataRequestHandler.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTDataRequestHandler.mm; sourceTree = "<group>"; };
+		364AB0542A83CF2E00BAA32D /* BbdRCTBlobPlugins.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRCTBlobPlugins.mm; sourceTree = "<group>"; };
+		364AB0552A83CF2E00BAA32D /* BbdRCTNetworkPlugins.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BbdRCTNetworkPlugins.h; sourceTree = "<group>"; };
+		364AB0562A83CF2E00BAA32D /* BbdRNWebSocket.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = BbdRNWebSocket.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,25 +74,29 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		36C09C3D261210590051143D /* BbdRNWebSocket */ = {
+		364AB0422A83CF2E00BAA32D /* BbdRNWebSocket */ = {
 			isa = PBXGroup;
 			children = (
-				36C09C3E261210590051143D /* BbdRNWebSocket.h */,
-				36C09C3F261210590051143D /* BbdRCTDataRequestHandler.h */,
-				36C09C40261210590051143D /* BbdRCTNetworkTask.m */,
-				36C09C41261210590051143D /* BbdRCTBlobManager.mm */,
-				36C09C42261210590051143D /* BbdRCTFileReaderModule.h */,
-				36C09C43261210590051143D /* BbdRCTNetInfo.m */,
-				36C09C45261210590051143D /* BbdRCTBlobCollector.h */,
-				36C09C46261210590051143D /* BbdRCTNetworking.h */,
-				36C09C47261210590051143D /* BbdRCTNetworking.mm */,
-				36C09C48261210590051143D /* BbdRCTDataRequestHandler.m */,
-				36C09C49261210590051143D /* BbdRNWebSocket.m */,
-				36C09C4A261210590051143D /* BbdRCTBlobCollector.mm */,
-				36C09C4B261210590051143D /* BbdRCTBlobManager.h */,
-				36C09C4C261210590051143D /* BbdRCTNetworkTask.h */,
-				36C09C4D261210590051143D /* BbdRCTNetInfo.h */,
-				36C09C4E261210590051143D /* BbdRCTFileReaderModule.m */,
+				364AB0432A83CF2E00BAA32D /* BbdRNWebSocket.h */,
+				364AB0442A83CF2E00BAA32D /* BbdRCTBlobPlugins.h */,
+				364AB0452A83CF2E00BAA32D /* BbdRCTDataRequestHandler.h */,
+				364AB0462A83CF2E00BAA32D /* BbdRCTNetworkPlugins.mm */,
+				364AB0472A83CF2E00BAA32D /* BbdRCTNetworkTask.mm */,
+				364AB0482A83CF2E00BAA32D /* BbdRCTBlobManager.mm */,
+				364AB0492A83CF2E00BAA32D /* BbdRCTFileReaderModule.h */,
+				364AB04A2A83CF2E00BAA32D /* BbdRCTNetInfo.m */,
+				364AB04B2A83CF2E00BAA32D /* BbdRCTFileReaderModule.mm */,
+				364AB04C2A83CF2E00BAA32D /* BbdRCTBlobCollector.h */,
+				364AB04D2A83CF2E00BAA32D /* BbdRCTNetworking.h */,
+				364AB04E2A83CF2E00BAA32D /* BbdRCTNetworking.mm */,
+				364AB04F2A83CF2E00BAA32D /* BbdRCTBlobCollector.mm */,
+				364AB0502A83CF2E00BAA32D /* BbdRCTBlobManager.h */,
+				364AB0512A83CF2E00BAA32D /* BbdRCTNetworkTask.h */,
+				364AB0522A83CF2E00BAA32D /* BbdRCTNetInfo.h */,
+				364AB0532A83CF2E00BAA32D /* BbdRCTDataRequestHandler.mm */,
+				364AB0542A83CF2E00BAA32D /* BbdRCTBlobPlugins.mm */,
+				364AB0552A83CF2E00BAA32D /* BbdRCTNetworkPlugins.h */,
+				364AB0562A83CF2E00BAA32D /* BbdRNWebSocket.mm */,
 			);
 			path = BbdRNWebSocket;
 			sourceTree = "<group>";
@@ -94,7 +104,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				36C09C3D261210590051143D /* BbdRNWebSocket */,
+				364AB0422A83CF2E00BAA32D /* BbdRNWebSocket */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -156,14 +166,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36C09C55261210590051143D /* BbdRNWebSocket.m in Sources */,
-				36C09C54261210590051143D /* BbdRCTDataRequestHandler.m in Sources */,
-				36C09C53261210590051143D /* BbdRCTNetworking.mm in Sources */,
-				36C09C52261210590051143D /* BbdRCTNetInfo.m in Sources */,
-				36C09C50261210590051143D /* BbdRCTNetworkTask.m in Sources */,
-				36C09C57261210590051143D /* BbdRCTFileReaderModule.m in Sources */,
-				36C09C51261210590051143D /* BbdRCTBlobManager.mm in Sources */,
-				36C09C56261210590051143D /* BbdRCTBlobCollector.mm in Sources */,
+				364AB0572A83CF4200BAA32D /* BbdRCTNetworkPlugins.mm in Sources */,
+				364AB0582A83CF4200BAA32D /* BbdRCTNetworkTask.mm in Sources */,
+				364AB0592A83CF4200BAA32D /* BbdRCTBlobManager.mm in Sources */,
+				364AB05A2A83CF4200BAA32D /* BbdRCTNetInfo.m in Sources */,
+				364AB05B2A83CF4200BAA32D /* BbdRCTFileReaderModule.mm in Sources */,
+				364AB05C2A83CF4200BAA32D /* BbdRCTNetworking.mm in Sources */,
+				364AB05D2A83CF4200BAA32D /* BbdRCTBlobCollector.mm in Sources */,
+				364AB05E2A83CF4200BAA32D /* BbdRCTDataRequestHandler.mm in Sources */,
+				364AB05F2A83CF4200BAA32D /* BbdRCTBlobPlugins.mm in Sources */,
+				364AB0602A83CF4200BAA32D /* BbdRNWebSocket.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,17 @@
 
 package com.blackberry.bbd.reactnative.helpers;
 
+import static com.blackberry.bbd.reactnative.helpers.RNBbdServiceHelper.convertJsonToMap;
+
 import android.util.Log;
 
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.good.gd.GDAndroid;
 import com.good.gd.GDStateListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,11 +42,25 @@ public class RNBbdServiceSpoolHelper implements GDStateListener {
 
     private volatile boolean authorized = false;
 
+
+    private static final String APP_KINETICS_APPLICATION_NAME_KEY = "applicationId";
+    private static final String APP_KINETICS_SERVICE_NAME_KEY = "serviceId";
+    private static final String APP_KINETICS_VERSION_KEY = "serviceVersion";
+    private static final String APP_KINETICS_METHOD_KEY = "serviceMethod";
+    private static final String APP_KINETICS_PARAMETERS_KEY = "parameters";
+    private static final String APP_KINETICS_ATTACHMENT_KEY = "attachments";
+
     // files that will be notified after App is prepared
     ArrayList<ReceivedOneFile> spoolingFilesToNotify = new ArrayList<ReceivedOneFile>();
 
+    // services that will be notified after App is prepared
+    ArrayList<ReceivedOneService> spoolingServicesToNotify = new ArrayList<ReceivedOneService>();
+
     // used for locking of spoolingFilesToNotify
     Object spoolingFilesToNotifyLock = new Object();
+
+    // used for locking of spoolingServicesToNotify
+    Object spoolingServicesToNotifyLock = new Object();
 
     public static RNBbdServiceSpoolHelper getInstance() {
         if (instance == null) {
@@ -89,6 +108,18 @@ public class RNBbdServiceSpoolHelper implements GDStateListener {
         checkForFlushSpool();
     }
 
+    public boolean provideServicesWhenReady(String application, String service, String version, String method, Object params, final String[] attachments) {
+        synchronized (spoolingServicesToNotifyLock) {
+            for (String attachment: attachments) {
+                spoolingServicesToNotify.add(new ReceivedOneService(application, service, version, method, params, attachment));
+            }
+        }
+
+        checkForFlushSpool();
+
+        return true;
+    }
+
     // Add files to the collection of files that will be notified after App is prepared
     public boolean proceedSimpleReceive(String service, String version, final String[] files) {
         synchronized (spoolingFilesToNotifyLock) {
@@ -116,6 +147,38 @@ public class RNBbdServiceSpoolHelper implements GDStateListener {
                         reactContext
                                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                                 .emit("onReceivedFile", file);
+                    }
+                }
+
+                ArrayList<ReceivedOneService> servicesToNotify;
+                synchronized (spoolingServicesToNotifyLock) {
+                    servicesToNotify = new ArrayList<ReceivedOneService>(spoolingServicesToNotify);
+                    spoolingServicesToNotify.clear();
+                }
+                for (ReceivedOneService oneService: servicesToNotify) {
+                    final JSONObject resultObject = new JSONObject();
+
+                    try {
+                        resultObject.put(APP_KINETICS_APPLICATION_NAME_KEY, oneService.application);
+                        resultObject.put(APP_KINETICS_SERVICE_NAME_KEY, oneService.service);
+                        resultObject.put(APP_KINETICS_VERSION_KEY, oneService.version);
+                        resultObject.put(APP_KINETICS_METHOD_KEY, oneService.method);
+
+                        if (oneService.attachment != null) {
+                            resultObject.put(APP_KINETICS_ATTACHMENT_KEY, oneService.attachment);
+                        }
+
+                        if (oneService.params != null) {
+                            resultObject.put(APP_KINETICS_PARAMETERS_KEY, oneService.params);
+                        }
+
+                        if (reactContext != null) {
+                            reactContext
+                                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit("onReceivedMessage", convertJsonToMap(resultObject));
+                        }
+                    } catch (final JSONException exception) {
+                        // Should not get here
                     }
                 }
             }
@@ -186,6 +249,24 @@ public class RNBbdServiceSpoolHelper implements GDStateListener {
                 return(file);
             }
             return(null);
+        }
+    }
+
+    private class ReceivedOneService {
+        String application;
+        String service;
+        String version;
+        String method;
+        Object params;
+        String attachment;
+
+        ReceivedOneService(String application, String service, String version, String method, Object params, String attachment) {
+            this.application = application;
+            this.service = service;
+            this.version = version;
+            this.method = method;
+            this.params = params;
+            this.attachment = attachment;
         }
     }
 }

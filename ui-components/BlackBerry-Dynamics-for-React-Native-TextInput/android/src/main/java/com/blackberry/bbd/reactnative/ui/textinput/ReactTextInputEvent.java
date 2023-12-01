@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original TextInput UI component for react-native
- * from https://github.com/facebook/react-native
+ * from https://github.com/facebook/react-native/tree/0.70-stable/ReactAndroid/src/main/java/com/facebook/react/views/textinput
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -11,10 +11,10 @@
 
 package com.blackberry.bbd.reactnative.ui.textinput;
 
+import androidx.annotation.Nullable;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.events.Event;
-import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 /**
  * Event emitted by EditText native view when text changes. VisibleForTesting from {@link
@@ -29,9 +29,15 @@ public class ReactTextInputEvent extends Event<ReactTextInputEvent> {
   private int mRangeStart;
   private int mRangeEnd;
 
+  @Deprecated
   public ReactTextInputEvent(
       int viewId, String text, String previousText, int rangeStart, int rangeEnd) {
-    super(viewId);
+    this(-1, viewId, text, previousText, rangeStart, rangeEnd);
+  }
+
+  public ReactTextInputEvent(
+      int surfaceId, int viewId, String text, String previousText, int rangeStart, int rangeEnd) {
+    super(surfaceId, viewId);
     mText = text;
     mPreviousText = previousText;
     mRangeStart = rangeStart;
@@ -49,12 +55,9 @@ public class ReactTextInputEvent extends Event<ReactTextInputEvent> {
     return false;
   }
 
+  @Nullable
   @Override
-  public void dispatch(RCTEventEmitter rctEventEmitter) {
-    rctEventEmitter.receiveEvent(getViewTag(), getEventName(), serializeEventData());
-  }
-
-  private WritableMap serializeEventData() {
+  protected WritableMap getEventData() {
     WritableMap eventData = Arguments.createMap();
     WritableMap range = Arguments.createMap();
     range.putDouble("start", mRangeStart);

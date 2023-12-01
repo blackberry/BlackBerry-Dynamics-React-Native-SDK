@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -11,28 +11,34 @@
 
 package com.blackberry.bbd.reactnative.asyncstorage;
 
-import java.util.Arrays;
+import android.util.Log;
+import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.JavaScriptModule;
+import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.uimanager.ViewManager;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.NativeModule;
-import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ViewManager;
-import com.facebook.react.bridge.JavaScriptModule;
 public class RNReactNativeBbdAsyncStoragePackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-      return Arrays.<NativeModule>asList(new RNReactNativeBbdAsyncStorageModule(reactContext));
+
+        List<NativeModule> moduleList = new ArrayList<>(1);
+        moduleList.add(new RNReactNativeBbdAsyncStorageModule(reactContext));
+        return moduleList;
     }
 
-    // Deprecated from RN 0.47
+    // Deprecated in RN 0.47 
     public List<Class<? extends JavaScriptModule>> createJSModules() {
-      return Collections.emptyList();
+        return Collections.emptyList();
     }
 
     @Override
+    @SuppressWarnings("rawtypes")
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-      return Collections.emptyList();
+        return Collections.emptyList();
     }
 }

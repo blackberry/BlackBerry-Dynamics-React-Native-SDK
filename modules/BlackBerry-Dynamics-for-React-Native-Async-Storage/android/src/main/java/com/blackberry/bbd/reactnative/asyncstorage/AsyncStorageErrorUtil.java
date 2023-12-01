@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.

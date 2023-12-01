@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,6 +76,7 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
   private static final String RNFSFileTypeDirectory = "RNFSFileTypeDirectory";
 
   private static final String BBD_INBOX = "/Inbox";
+  private static final String BBD_DOWNLOAD = "/BBDownloads";
 
   private SparseArray<Downloader> downloaders = new SparseArray<>();
   private SparseArray<Uploader> uploaders = new SparseArray<>();
@@ -199,6 +200,7 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
       if (
         path.startsWith(context.getFilesDir().getAbsolutePath()) ||
         path.startsWith(context.getCacheDir().getAbsolutePath()) ||
+        path.startsWith(BBD_DOWNLOAD) ||
         path.startsWith(BBD_INBOX)
       ) {
         secure = true;
@@ -1117,6 +1119,17 @@ public class BbdRNFileSystemModule extends ReactContextBaseJavaModule {
         }
       }
     );
+  }
+
+  // Required for rn built in EventEmitter Calls.
+  @ReactMethod
+  public void addListener(String eventName) {
+
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+
   }
 
   private void reject(Promise promise, String filepath, Exception ex) {

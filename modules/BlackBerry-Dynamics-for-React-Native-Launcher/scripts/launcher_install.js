@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@
     addLauncherScriptPath = path.join(
       projectRoot, 'node_modules', 'BlackBerry-Dynamics-for-React-Native-Launcher',
       'scripts', 'ios', 'addLauncherFramework.rb'
-    );
+    ),
+    {
+      dependenciesString,
+      applyLauncherString,
+    } = require('./constants');
 
   try {
     execSync(`node "${scriptPath}"`);
@@ -45,13 +49,14 @@
 
   if (fs.existsSync(androidProjectRoot)) {
     // Update project root build.gradle
-    const projectBuildGradlePath = path.join(androidProjectRoot, 'app', 'build.gradle'),
-      gradleLauncherString = `apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Launcher/android/launcher.gradle"
-    implementation fileTree`;
+    const projectBuildGradlePath = path.join(androidProjectRoot, 'app', 'build.gradle');
 
     let projectBuildGradleContent = fs.readFileSync(projectBuildGradlePath, 'utf-8');
-    if (projectBuildGradleContent.indexOf(gradleLauncherString) < 0) {
-      projectBuildGradleContent = projectBuildGradleContent.replace('implementation fileTree', gradleLauncherString);
+    if (projectBuildGradleContent.indexOf(applyLauncherString) < 0) {
+      projectBuildGradleContent = projectBuildGradleContent.replace(
+        dependenciesString,
+        `${dependenciesString}${applyLauncherString}`
+      );
 
       fs.writeFileSync(projectBuildGradlePath, projectBuildGradleContent, 'utf-8');
     }

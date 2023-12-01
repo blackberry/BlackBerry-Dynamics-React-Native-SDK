@@ -1,11 +1,13 @@
 # Sample Applications
 
 ## Supportability
- - 0.64.x (deprecated)
- - 0.65.x (deprecated)
- - 0.66.x
- - 0.67.x
- - 0.68.x (0.68.2 is latest supported)
+ - 0.66.x (deprecated)
+ - 0.67.x (deprecated)
+ - 0.68.x (deprecated)
+ - 0.69.x (deprecated)
+ - 0.70.x
+ - 0.71.x
+ - 0.72.x
 
 ## General tips
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,18 @@
     projectRoot = process.env.INIT_CWD,
     androidProjectRoot = path.join(projectRoot, 'android'),
     iosProjectRoot = path.join(projectRoot, 'ios'),
-    isWindows = process.platform === 'win32';
+    isWindows = process.platform === 'win32',
+    {
+      applyLauncherString,
+    } = require('./constants');
 
   if (fs.existsSync(androidProjectRoot)) {
     // Cleanup root build.gradle
-    const projectBuildGradlePath = path.join(androidProjectRoot, 'app', 'build.gradle'),
-      gradleLauncherString = `apply from: "$rootDir/../node_modules/BlackBerry-Dynamics-for-React-Native-Launcher/android/launcher.gradle"
-    implementation fileTree`;
+    const projectBuildGradlePath = path.join(androidProjectRoot, 'app', 'build.gradle');
 
     let projectBuildGradleContent = fs.readFileSync(projectBuildGradlePath, 'utf-8');
-    projectBuildGradleContent = projectBuildGradleContent.replace(gradleLauncherString, 'implementation fileTree');
+    projectBuildGradleContent = projectBuildGradleContent.replace(applyLauncherString, '');
+
     fs.writeFileSync(projectBuildGradlePath, projectBuildGradleContent, 'utf-8');
 
     // Remove launcherlib.aar from "project_root/android/app/libs"

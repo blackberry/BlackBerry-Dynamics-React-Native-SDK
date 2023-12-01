@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,8 @@ export default class RequestForm extends Component {
 
   async addDocument() {
     try {
-      const document = await DocumentPicker.pick();
+      const documents = await DocumentPicker.pick();
+      const document = documents[0];
       console.log('document:', document);
       console.log('document uri:', document.uri);
       console.log('document name:', document.name);

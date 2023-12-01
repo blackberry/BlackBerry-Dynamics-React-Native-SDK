@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -10,8 +10,6 @@
  */
 
 #import "BbdRNAsyncStorage.h"
-
-#import <Foundation/Foundation.h>
 
 #import <CommonCrypto/CommonCryptor.h>
 #import <CommonCrypto/CommonDigest.h>
@@ -24,6 +22,7 @@
 
 static NSString *const RCTStorageDirectory = @"RCTAsyncLocalStorage_V1";
 static NSString *const RCTOldStorageDirectory = @"RNCAsyncLocalStorage_V1";
+static NSString *const RCTExpoStorageDirectory = @"RCTAsyncLocalStorage";
 static NSString *const RCTManifestFileName = @"manifest.json";
 static const NSUInteger RCTInlineValueThreshold = 1024;
 
@@ -38,6 +37,28 @@ static NSDictionary *RCTErrorForKey(NSString *key)
     } else {
         return nil;
     }
+}
+
+static BOOL RCTAsyncStorageSetExcludedFromBackup(NSString *path, NSNumber *isExcluded)
+{
+    NSFileManager *fileManager = [[NSFileManager alloc] init];
+
+    BOOL isDir;
+    BOOL exists = [fileManager fileExistsAtPath:path isDirectory:&isDir];
+    BOOL success = false;
+
+    if (isDir && exists) {
+        NSURL *pathUrl = [NSURL fileURLWithPath:path];
+        NSError *error = nil;
+        success = [pathUrl setResourceValue:isExcluded
+                                     forKey:NSURLIsExcludedFromBackupKey
+                                      error:&error];
+
+        if (!success) {
+            NSLog(@"Could not exclude AsyncStorage dir from backup %@", error);
+        }
+    }
+    return success;
 }
 
 static void RCTAppendError(NSDictionary *error, NSMutableArray<NSDictionary *> **errors)
@@ -166,10 +187,12 @@ static NSCache *RCTGetCache()
         cache = [NSCache new];
         cache.totalCostLimit = 2 * 1024 * 1024; // 2MB
 
+#if !TARGET_OS_OSX
         // Clear cache in the event of a memory warning
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidReceiveMemoryWarningNotification object:nil queue:nil usingBlock:^(__unused NSNotification *note) {
             [cache removeAllObjects];
         }];
+#endif  // !TARGET_OS_OSX
     });
     return cache;
 }
@@ -347,6 +370,18 @@ RCT_EXPORT_MODULE(RNReactNativeBbdAsyncStorage)
         RCTHasCreatedStorageDirectory = YES;
     }
     if (!_haveSetup) {
+		// iCloud backup exclusion feature is not included in BBD as data is already secured in secure container and which is not a public directory 
+        // iCloud backup exclusion
+		/*
+        NSNumber *isExcludedFromBackup =
+            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"RCTAsyncStorageExcludeFromBackup"];
+        if (isExcludedFromBackup == nil) {
+            // by default, we want to exclude AsyncStorage data from backup
+            isExcludedFromBackup = @YES;
+        }
+        RCTAsyncStorageSetExcludedFromBackup(RCTCreateStorageDirectoryPath(RCTStorageDirectory),
+                                             isExcludedFromBackup);
+        */
         NSDictionary *errorOut;
         NSString *serialized = RCTReadFile(RCTGetManifestFilePath(), RCTManifestFileName, &errorOut);
         _manifest = serialized ? RCTJSONParseMutable(serialized, &error) : [NSMutableDictionary new];
@@ -528,8 +563,10 @@ RCT_EXPORT_METHOD(multiGet:(NSArray<NSString *> *)keys
              }];
 }
 
+// clang-format off
 RCT_EXPORT_METHOD(multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs
                   callback:(RCTResponseSenderBlock)callback)
+// clang-format on
 {
     if (self.delegate != nil) {
         NSMutableArray<NSString *> *keys = [NSMutableArray arrayWithCapacity:kvPairs.count];
@@ -565,8 +602,10 @@ RCT_EXPORT_METHOD(multiSet:(NSArray<NSArray<NSString *> *> *)kvPairs
     callback(@[RCTNullIfNil(errors)]);
 }
 
+// clang-format off
 RCT_EXPORT_METHOD(multiMerge:(NSArray<NSArray<NSString *> *> *)kvPairs
                   callback:(RCTResponseSenderBlock)callback)
+// clang-format on
 {
     if (self.delegate != nil) {
         NSMutableArray<NSString *> *keys = [NSMutableArray arrayWithCapacity:kvPairs.count];
@@ -618,8 +657,10 @@ RCT_EXPORT_METHOD(multiMerge:(NSArray<NSArray<NSString *> *> *)kvPairs
     callback(@[RCTNullIfNil(errors)]);
 }
 
+// clang-format off
 RCT_EXPORT_METHOD(multiRemove:(NSArray<NSString *> *)keys
                   callback:(RCTResponseSenderBlock)callback)
+// clang-format on
 {
     if (self.delegate != nil) {
         [self.delegate removeValuesForKeys:keys completion:^(NSArray<id<NSObject>> *results) {
@@ -660,6 +701,7 @@ RCT_EXPORT_METHOD(multiRemove:(NSArray<NSString *> *)keys
     callback(@[RCTNullIfNil(errors)]);
 }
 
+// clang-format off
 RCT_EXPORT_METHOD(clear:(RCTResponseSenderBlock)callback)
 {
     if (self.delegate != nil) {
@@ -679,7 +721,9 @@ RCT_EXPORT_METHOD(clear:(RCTResponseSenderBlock)callback)
     callback(@[RCTNullIfNil(error)]);
 }
 
+// clang-format off
 RCT_EXPORT_METHOD(getAllKeys:(RCTResponseSenderBlock)callback)
+// clang-format on
 {
     if (self.delegate != nil) {
         [self.delegate allKeys:^(NSArray<id<NSObject>> *keys) {

@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Networking API of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Network/convertRequestBody.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Network/convertRequestBody.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -23,7 +23,7 @@ export type RequestBody =
   | string
   | Blob
   | FormData
-  | {uri: string}
+  | {uri: string, ...}
   | ArrayBuffer
   | $ArrayBufferView;
 
@@ -38,7 +38,8 @@ function convertRequestBody(body: RequestBody): Object {
     return {formData: body.getParts()};
   }
   if (body instanceof ArrayBuffer || ArrayBuffer.isView(body)) {
-    // $FlowFixMe: no way to assert that 'body' is indeed an ArrayBufferView
+    /* $FlowFixMe[incompatible-call] : no way to assert that 'body' is indeed
+     * an ArrayBufferView */
     return {base64: binaryToBase64(body)};
   }
   return body;

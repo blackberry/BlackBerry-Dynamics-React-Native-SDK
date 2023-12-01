@@ -1,20 +1,20 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Blob API of react-native
- * from https://github.com/facebook/react-native/blob/0.61-stable/Libraries/Blob/Blob.js
+ * from https://github.com/facebook/react-native/blob/0.70-stable/Libraries/Blob/Blob.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
+ * @flow strict-local
  * @format
  */
 
 'use strict';
 
-import type {BlobData, BlobOptions} from 'react-native/Libraries/Blob/BlobTypes';
+import type {BlobData, BlobOptions} from './BlobTypes';
 
 /**
  * Opaque JS representation of some binary data in native.
@@ -71,10 +71,12 @@ class Blob {
    * the data in the specified range of bytes of the source Blob.
    * Reference: https://developer.mozilla.org/en-US/docs/Web/API/Blob/slice
    */
+  // $FlowFixMe[unsafe-getters-setters]
   set data(data: ?BlobData) {
     this._data = data;
   }
 
+  // $FlowFixMe[unsafe-getters-setters]
   get data(): BlobData {
     if (!this._data) {
       throw new Error('Blob has been closed and is no longer available');
@@ -89,6 +91,7 @@ class Blob {
 
     if (typeof start === 'number') {
       if (start > size) {
+        // $FlowFixMe[reassign-const]
         start = size;
       }
       offset += start;
@@ -96,6 +99,7 @@ class Blob {
 
       if (typeof end === 'number') {
         if (end < 0) {
+          // $FlowFixMe[reassign-const]
           end = this.size + end;
         }
         size = end - start;
@@ -105,6 +109,12 @@ class Blob {
       blobId: this.data.blobId,
       offset,
       size,
+      /* Since `blob.slice()` creates a new view onto the same binary
+       * data as the original blob, we should re-use the same collector
+       * object so that the underlying resource gets deallocated when
+       * the last view into the data is released, not the first.
+       */
+      __collector: this.data.__collector,
     });
   }
 
@@ -129,6 +139,7 @@ class Blob {
   /**
    * Size of the data contained in the Blob object, in bytes.
    */
+  // $FlowFixMe[unsafe-getters-setters]
   get size(): number {
     return this.data.size;
   }
@@ -137,6 +148,7 @@ class Blob {
    * String indicating the MIME type of the data contained in the Blob.
    * If the type is unknown, this string is empty.
    */
+  // $FlowFixMe[unsafe-getters-setters]
   get type(): string {
     return this.data.type || '';
   }

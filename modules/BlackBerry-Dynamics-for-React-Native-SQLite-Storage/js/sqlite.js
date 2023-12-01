@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original react-native-sqlite-storage module for react-native
  * from https://github.com/andpor/react-native-sqlite-storage/
  *
@@ -51,7 +51,7 @@ function createCallbackRuntime() {
     let [returnValueExpected,prototype,fn,argsNeedPadding,reverseCallbacks,rejectOnError]= entry;
     plugin[prototype].prototype[fn] = originalFns[prototype + "." + fn];
   });
-  console.log("Callback based runtime ready");
+  plugin.log("Callback based runtime ready");
 }
 function createPromiseRuntime() {
   config.forEach(entry => {
@@ -68,7 +68,7 @@ function createPromiseRuntime() {
           }
         };
         let error = function(err){
-          console.log('error: ',fn,...args,arguments);
+          plugin.log('error: ',fn,...args,arguments);
           if (rejectOnError) {
             reject(err);
           }
@@ -83,7 +83,7 @@ function createPromiseRuntime() {
       return promise;
     }
   });
-  console.log("Promise based runtime ready");
+  plugin.log("Promise based runtime ready");
 }
 SQLiteFactory.prototype.enablePromise = enablePromiseRuntime;
 

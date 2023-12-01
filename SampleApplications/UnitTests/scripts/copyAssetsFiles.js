@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,15 @@
     packageManager = process.env.npm_execpath && process.env.npm_execpath.includes('yarn.js') ? 'yarn' : 'npm',
     // copyAndReplace.js command line tool that is used by react-native-eject
     // @react-native-community/cli – the one used directly by react-native
+    //copyAndReplace.js does not exist in v0.70 in @react-native-community/cli but now exists in react-native-eject v2.0
+    /*
     projectCliCopyAndReplace = packageManager === 'npm' ?
       path.join(projectRoot, 'node_modules', 'react-native', 'node_modules', '@react-native-community',
         'cli', 'build', 'tools', 'copyAndReplace.js')
       :
-      path.join(projectRoot, 'node_modules', '@react-native-community', 'cli', 'build', 'tools', 'copyAndReplace.js');
+      path.join(projectRoot, 'node_modules', '@react-native-community', 'cli', 'build', 'tools', 'copyAndReplace.js'); 
+    */
+    projectCliCopyAndReplace = path.join(projectRoot, 'node_modules', 'react-native-eject', 'dist', 'copyAndReplace.js');
 
     if (fs.existsSync(projectCliCopyAndReplace)) {
       // Read react-native cli tool copyAndReplace.js

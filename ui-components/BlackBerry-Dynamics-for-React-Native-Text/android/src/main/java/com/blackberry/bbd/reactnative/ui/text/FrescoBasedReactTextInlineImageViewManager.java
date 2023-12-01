@@ -1,9 +1,9 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  * Some modifications to the original Text UI component for react-native
- * from https://github.com/facebook/react-native/tree/0.61-stable/ReactAndroid/src/main/java/com/facebook/react/views/text
+ * from https://github.com/facebook/react-native/tree/0.70-stable/ReactAndroid/src/main/java/com/facebook/react/views/text
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and its affiliates.
  *
  * <p>This source code is licensed under the MIT license found in the LICENSE file in the root
  * directory of this source tree.
@@ -11,15 +11,16 @@
 
 package com.blackberry.bbd.reactnative.ui.text;
 
-import javax.annotation.Nullable;
+
 
 import android.view.View;
-
+import androidx.annotation.Nullable;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.controller.AbstractDraweeControllerBuilder;
 import com.facebook.react.module.annotations.ReactModule;
+import com.facebook.react.uimanager.BaseViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
-import com.facebook.react.uimanager.ViewManager;
+import com.facebook.react.views.text.frescosupport.FrescoBasedReactTextInlineImageShadowNode;
 
 /**
  * Manages Images embedded in Text nodes using Fresco. Since they are used only as a virtual nodes
@@ -27,7 +28,7 @@ import com.facebook.react.uimanager.ViewManager;
  */
 @ReactModule(name = FrescoBasedReactTextInlineImageViewManager.REACT_CLASS)
 public class FrescoBasedReactTextInlineImageViewManager
-        extends ViewManager<View, FrescoBasedReactTextInlineImageShadowNode> {
+    extends BaseViewManager<View, FrescoBasedReactTextInlineImageShadowNode> {
 
     public static final String REACT_CLASS = "RCTTextInlineImage";
 
@@ -55,22 +56,22 @@ public class FrescoBasedReactTextInlineImageViewManager
         throw new IllegalStateException("RCTTextInlineImage doesn't map into a native view");
     }
 
-    @Override
-    public FrescoBasedReactTextInlineImageShadowNode createShadowNodeInstance() {
-        return new FrescoBasedReactTextInlineImageShadowNode(
+  @Override
+  public FrescoBasedReactTextInlineImageShadowNode createShadowNodeInstance() {
+    return new FrescoBasedReactTextInlineImageShadowNode(
                 (mDraweeControllerBuilder != null) ?
                         mDraweeControllerBuilder :
                         Fresco.newDraweeControllerBuilder(),
                 mCallerContext
         );
-    }
+  }
 
     @Override
     public Class<FrescoBasedReactTextInlineImageShadowNode> getShadowNodeClass() {
         return FrescoBasedReactTextInlineImageShadowNode.class;
     }
 
-    @Override
+  @Override
     public void updateExtraData(View root, Object extraData) {
     }
 }

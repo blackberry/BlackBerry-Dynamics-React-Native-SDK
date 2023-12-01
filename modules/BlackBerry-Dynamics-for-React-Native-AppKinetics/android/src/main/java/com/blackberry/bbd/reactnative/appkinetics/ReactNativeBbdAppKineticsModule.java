@@ -59,6 +59,9 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
   private WritableArray entriesInSecureStorageDataDir = new WritableNativeArray();
   private WritableArray entriesCopiedFromAssetsData = new WritableNativeArray();
 
+  private static final long ACTIVITY_WAIT_INTERVAL = 100L;
+  private static final int ACTIVITY_WAIT_TRIES = 20;
+
   public ReactNativeBbdAppKineticsModule(ReactApplicationContext reactContext) {
     super(reactContext);
     serviceHelper.setRNContext(reactContext);
@@ -127,6 +130,9 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
     try {
       WritableMap entries = new WritableNativeMap();
 
+      // Fix issue - getCurrentActivity() returns null sometimes and is available little late
+      waitForActivity();
+
       copyBundledFilesToSecureFilesystemRecursive(ASSETS_DATA_FOLDER_PATH);
 
       getEntriesInSecureStorageForPath(File.separator + BBD_DATA_FOLDER_PATH);
@@ -173,7 +179,6 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
     final String serviceId = arguments.getString("serviceId");
     final String version = arguments.getString("version");
 
-    serviceHelper.setService(serviceId, version);
     serviceHelper.setServiceId(serviceId);
     serviceHelper.setServiceVersion(version);
 
@@ -322,5 +327,22 @@ public class ReactNativeBbdAppKineticsModule extends ReactContextBaseJavaModule 
     }
 
     return map;
+  }
+
+  private void waitForActivity() {
+    for (int tries = 0; tries < ACTIVITY_WAIT_TRIES && !isActivityReady(); tries++) {
+        sleep(ACTIVITY_WAIT_INTERVAL);
+    }
+  }
+
+  private boolean isActivityReady() {
+    return getReactApplicationContext().hasCurrentActivity();
+  }
+
+  private static void sleep(long ms) {
+    try {
+        Thread.sleep(ms);
+    } catch (InterruptedException e) {
+    }
   }
 }

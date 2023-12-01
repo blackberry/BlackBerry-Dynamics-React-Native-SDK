@@ -1,6 +1,6 @@
 /*
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original react-native-sqlite-storage module for react-native
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original react-native-sqlite-storage module (version 6.0.1) for react-native
  * from https://github.com/andpor/react-native-sqlite-storage/
  *
  * SQLite.h

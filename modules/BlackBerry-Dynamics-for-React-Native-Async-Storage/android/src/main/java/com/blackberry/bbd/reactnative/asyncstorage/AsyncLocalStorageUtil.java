@@ -1,6 +1,6 @@
 /**
- * Copyright (c) 2020 BlackBerry Limited. All Rights Reserved.
- * Some modifications to the original @react-native-community/async-storage
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
+ * Some modifications to the original @react-native-community/async-storage package version 1.18.0
  * from https://github.com/react-native-community/async-storage/
  *
  * Copyright (c) Facebook, Inc. and its affiliates.
@@ -12,20 +12,20 @@
 package com.blackberry.bbd.reactnative.asyncstorage;
 
 import javax.annotation.Nullable;
-
+import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import com.good.gd.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.text.TextUtils;
-
+import android.util.Log;
 import com.facebook.react.bridge.ReadableArray;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import static com.blackberry.bbd.reactnative.asyncstorage.ReactDatabaseSupplier.KEY_COLUMN;
 import static com.blackberry.bbd.reactnative.asyncstorage.ReactDatabaseSupplier.TABLE_CATALYST;
 import static com.blackberry.bbd.reactnative.asyncstorage.ReactDatabaseSupplier.VALUE_COLUMN;
@@ -144,6 +144,40 @@ public class AsyncLocalStorageUtil {
       } else {
         oldJSON.put(key, newJSON.get(key));
       }
+    }
+  }
+  /**
+   * From Pie and up, Android started to use Write-ahead logging (WAL), instead of journal rollback
+   * for atomic commits and rollbacks.
+   * Basically, WAL does not write directly to the database file, rather to the supporting WAL file.
+   * Because of that, migration to the next storage might not be successful, because the content of
+   * RKStorage might be still in WAL file instead. Committing all data from WAL to db file is called
+   * a "checkpoint" and is done automatically (by default) when the WAL file reaches a threshold
+   * size of 1000 pages.
+   * More here: https://sqlite.org/wal.html
+   *
+   * This helper will force checkpoint on RKStorage, if Next storage file does not exists yet.
+   */
+  public static void verifyAndForceSqliteCheckpoint(Context ctx) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+        Log.i("AsyncStorage_Next", "SQLite checkpoint not required on this API version.");
+    }
+
+    File nextStorageFile = ctx.getDatabasePath("AsyncStorage");
+    File currentStorageFile = ctx.getDatabasePath(ReactDatabaseSupplier.DATABASE_NAME);
+    boolean isCheckpointRequired = !nextStorageFile.exists() && currentStorageFile.exists();
+    if (!isCheckpointRequired) {
+      Log.i("AsyncStorage_Next", "SQLite checkpoint not required.");
+      return;
+    }
+
+    try {
+      ReactDatabaseSupplier supplier = ReactDatabaseSupplier.getInstance(ctx);
+      supplier.get().rawQuery("PRAGMA wal_checkpoint", null).close();
+      supplier.closeDatabase();
+      Log.i("AsyncStorage_Next", "Forcing SQLite checkpoint successful.");
+    } catch (Exception e) {
+      Log.w("AsyncStorage_Next", "Could not force checkpoint on RKStorage, the Next storage might not migrate the data properly: " + e.getMessage());
     }
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 BlackBerry Limited. All Rights Reserved.
+ * Copyright (c) 2023 BlackBerry Limited. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,8 @@ public class GDFileUtils {
                 return cursor.getString(column_index);
             }
         } catch (Exception e) {
-            Log.e(LOG_TAG, "Cannot get value of the data column for uri: " + uri.toString(), e);
+            String uriString = (uri == null) ? "" : uri.toString();
+            Log.e(LOG_TAG, "Cannot get value of the data column for uri: " + uriString, e);
         } finally {
             if (cursor != null)
                 cursor.close();
