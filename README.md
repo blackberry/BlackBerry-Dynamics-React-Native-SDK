@@ -1,4 +1,10 @@
 # BlackBerry Dynamics SDK for React Native
+
+*******************************************************************************************************************
+# This repository is now archived.
+# The latest BlackBerry Dynamics React Native SDK is now available to all clients and partners via https://developers.blackberry.com/us/en/resources/downloads by clicking on the SDK for React Native tab.
+*******************************************************************************************************************
+
 This page provides an overview on how to use the BlackBerry Dynamics SDK for React Native. For details on BlackBerry Dynamics please see https://docs.blackberry.com/en/endpoint-management/blackberry-dynamics
 
 # Supportability
